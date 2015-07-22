@@ -1,0 +1,26 @@
+{
+  "name": "music-feed",
+  "version": "0.0.0",
+  "description": "Simple music feed aggregator",
+  "main": "index.js",
+  "dependencies": {
+    "browserify": "^11.0.0",
+    "co-request": "^0.2.1",
+    "envify": "^3.4.0",
+    "jade": "^1.11.0",
+    "koa": "^0.21.0",
+    "koa-route": "^2.4.2",
+    "koa-views": "^3.1.0",
+    "node-jsx": "^0.13.3",
+    "nuclear-js": "^1.0.5",
+    "react": "^0.13.3",
+    "reactify": "^1.1.1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kimlai",
+  "license": "ISC"
+}
