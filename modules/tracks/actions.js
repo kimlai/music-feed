@@ -1,5 +1,5 @@
-var Player = require('./client/soundcloud/Player')(process.env.SOUNDCLOUD_CLIENT_ID);
-var reactor = require('./reactor');
+var Player = require('../../soundcloud/Player')(process.env.SOUNDCLOUD_CLIENT_ID);
+var reactor = require('../../reactor');
 var actionTypes = require('./actionTypes');
 var getters = require('./getters');
 
