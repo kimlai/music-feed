@@ -1,5 +1,5 @@
 var React = require('react');
-var actions = require('../actions');
+var actions = require('../modules/tracks').actions;
 
 module.exports = React.createClass({
     getInitialState: function () {

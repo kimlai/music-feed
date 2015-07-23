@@ -1,9 +1,11 @@
 var React = require('react');
 var Track = require('./Track.react');
+var TracksModule = require('../modules/tracks');
 
 var reactor = require('../reactor');
-var getters = require('../getters');
-var actions = require('../actions');
+
+var getters = TracksModule.getters;
+var actions = TracksModule.actions;
 
 module.exports = React.createClass({
     mixins: [reactor.ReactMixin],
