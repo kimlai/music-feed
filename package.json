@@ -21,8 +21,15 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --harmony index.js"
+    "start": "node --harmony server.js",
+    "build": "browserify client.js > public/build.js"
   },
   "author": "kimlai",
-  "license": "ISC"
+  "license": "ISC",
+  "browserify": {
+    "transform": [
+      "reactify",
+      "envify"
+    ]
+  }
 }
