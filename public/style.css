@@ -1,0 +1,10 @@
+.progress-bar.outer {
+    background-color: black;
+    width: 500px;
+    height: 5px;
+}
+
+.progress-bar .inner {
+    background-color: red;
+    height: 100%;
+}
