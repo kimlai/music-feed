@@ -15,17 +15,19 @@ function playTrack(trackId, streamUrl) {
     if (null !== currentTrackId) {
         pauseTrack(currentTrackId);
     }
+    reactor.dispatch(actionTypes.PLAY_TRACK_REQUEST, { trackId: trackId });
     Player.play(trackId, streamUrl, function (e) {
         var currentTime = e.target.currentTime;
         var duration = e.target.duration;
         trackProgress(trackId, parseFloat(currentTime/duration*100).toFixed(2));
     });
-    reactor.dispatch(actionTypes.PLAY_TRACK, { trackId: trackId });
+    reactor.dispatch(actionTypes.PLAY_TRACK_SUCCESS, { trackId: trackId });
 }
 
 function pauseTrack(trackId) {
+    reactor.dispatch(actionTypes.PAUSE_TRACK_REQUEST, { trackId: trackId });
     Player.pause(trackId);
-    reactor.dispatch(actionTypes.PAUSE_TRACK, { trackId: trackId });
+    reactor.dispatch(actionTypes.PAUSE_TRACK_SUCCESS, { trackId: trackId });
 }
 
 function trackProgress(trackId, progress) {

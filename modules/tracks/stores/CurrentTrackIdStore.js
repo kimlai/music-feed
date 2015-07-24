@@ -1,5 +1,5 @@
 var Store = require('nuclear-js').Store;
-var PLAY_TRACK = require('../actionTypes').PLAY_TRACK;
+var PLAY_TRACK_REQUEST = require('../actionTypes').PLAY_TRACK_REQUEST;
 
 module.exports = new Store({
     getInitialState: function () {
@@ -7,7 +7,7 @@ module.exports = new Store({
     },
 
     initialize: function () {
-        this.on(PLAY_TRACK, setCurrentTrackId);
+        this.on(PLAY_TRACK_REQUEST, setCurrentTrackId);
     }
 });
 

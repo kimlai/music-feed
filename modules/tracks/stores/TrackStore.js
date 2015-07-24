@@ -2,8 +2,8 @@ var toImmutable = require('nuclear-js').toImmutable;
 var Store = require('nuclear-js').Store;
 var RECEIVE_TRACKS = require('../actionTypes').RECEIVE_TRACKS;
 var TRACK_PROGRESS = require('../actionTypes').TRACK_PROGRESS;
-var PLAY_TRACK = require('../actionTypes').PLAY_TRACK;
-var PAUSE_TRACK = require('../actionTypes').PAUSE_TRACK;
+var PLAY_TRACK_SUCCESS = require('../actionTypes').PLAY_TRACK_SUCCESS;
+var PAUSE_TRACK_SUCCESS = require('../actionTypes').PAUSE_TRACK_SUCCESS;
 
 module.exports = new Store({
     getInitialState: function () {
@@ -13,8 +13,8 @@ module.exports = new Store({
     initialize: function () {
         this.on(RECEIVE_TRACKS, receiveTracks);
         this.on(TRACK_PROGRESS, trackProgress);
-        this.on(PLAY_TRACK, playTrack);
-        this.on(PAUSE_TRACK, pauseTrack);
+        this.on(PLAY_TRACK_SUCCESS, playTrackSuccess);
+        this.on(PAUSE_TRACK_SUCCESS, pauseTrackSuccess);
     }
 });
 
@@ -37,13 +37,13 @@ function trackProgress(state, payload) {
     });
 }
 
-function playTrack(state, payload) {
+function playTrackSuccess(state, payload) {
     return state.update(payload.trackId, function (track) {
         return track.set('isPlaying', true);
     });
 }
 
-function pauseTrack(state, payload) {
+function pauseTrackSuccess(state, payload) {
     return state.update(payload.trackId, function (track) {
         return track.set('isPlaying', false);
     });
