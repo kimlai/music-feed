@@ -7,8 +7,8 @@ module.exports = React.createClass({
     },
 
     togglePlayback: function () {
-        var isPlaying = this.props.track.isPlaying;
-        if (isPlaying) {
+        var playbackStatus = this.props.track.playbackStatus;
+        if (playbackStatus === 'playing') {
             actions.pauseTrack(this.props.track.id);
         } else {
             actions.playTrack(this.props.track.id, this.props.track.stream_url);
@@ -16,7 +16,7 @@ module.exports = React.createClass({
     },
 
     render: function () {
-        var text = this.props.track.isPlaying ? 'Pause' : 'Play';
+        var text = this.props.track.playbackStatus === 'playing' ? 'Pause' : 'Play';
         return (
             <div className="playback-button" onClick={this.togglePlayback}>{text}</div>
         );

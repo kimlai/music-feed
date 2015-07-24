@@ -1,11 +1,12 @@
-var Player = require('../../soundcloud/Player')(process.env.SOUNDCLOUD_CLIENT_ID);
 var reactor = require('../../reactor');
 var actionTypes = require('./actionTypes');
 var getters = require('./getters');
 
 module.exports = {
     playTrack: playTrack,
+    playTrackSuccess: playTrackSuccess,
     pauseTrack: pauseTrack,
+    pauseTrackSuccess: pauseTrackSuccess,
     trackProgress: trackProgress,
     fetchTracks: fetchTracks,
 };
@@ -16,17 +17,17 @@ function playTrack(trackId, streamUrl) {
         pauseTrack(currentTrackId);
     }
     reactor.dispatch(actionTypes.PLAY_TRACK_REQUEST, { trackId: trackId });
-    Player.play(trackId, streamUrl, function (e) {
-        var currentTime = e.target.currentTime;
-        var duration = e.target.duration;
-        trackProgress(trackId, parseFloat(currentTime/duration*100).toFixed(2));
-    });
+}
+
+function playTrackSuccess(trackId) {
     reactor.dispatch(actionTypes.PLAY_TRACK_SUCCESS, { trackId: trackId });
 }
 
 function pauseTrack(trackId) {
     reactor.dispatch(actionTypes.PAUSE_TRACK_REQUEST, { trackId: trackId });
-    Player.pause(trackId);
+}
+
+function pauseTrackSuccess(trackId) {
     reactor.dispatch(actionTypes.PAUSE_TRACK_SUCCESS, { trackId: trackId });
 }
 
