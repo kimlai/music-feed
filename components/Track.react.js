@@ -6,9 +6,9 @@ module.exports = React.createClass({
     render: function () {
         return (
             <div className="track">
-                <div>{this.props.track.title} - {this.props.track.id}</div>
-                <PlaybackButton track={this.props.track}  />
-                <ProgressBar progress={this.props.track.progress} />
+                <div>{this.props.track.get('title')} - {this.props.track.get('id')}</div>
+                <PlaybackButton track={this.props.track.toJS()}  />
+                <ProgressBar progress={this.props.track.get('progress')} />
             </div>
         );
     }

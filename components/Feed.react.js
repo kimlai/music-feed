@@ -21,7 +21,7 @@ module.exports = React.createClass({
             <div className="feed">
                 {this.state.tracks.map(function (track) {
                     return (
-                        <Track key={track.get('id')} track={track.toJS()} />
+                        <Track key={track.get('id')} track={track} />
                     );
                 }).toList()}
             </div>
