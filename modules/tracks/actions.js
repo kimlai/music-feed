@@ -31,8 +31,8 @@ function pauseTrackSuccess(trackId) {
     reactor.dispatch(actionTypes.PAUSE_TRACK_SUCCESS, { trackId: trackId });
 }
 
-function trackProgress(trackId, progress) {
-    reactor.dispatch(actionTypes.TRACK_PROGRESS, { trackId: trackId, progress: progress });
+function trackProgress(trackId, currentTime) {
+    reactor.dispatch(actionTypes.TRACK_PROGRESS, { trackId: trackId, currentTime: currentTime });
 }
 
 function fetchTracks(tracks) {

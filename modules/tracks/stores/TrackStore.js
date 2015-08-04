@@ -29,7 +29,7 @@ function receiveTracks(state, tracks) {
             return v.get('id');
         }).map(function (track, trackId) {
             return track
-                .set('progress', 0)
+                .set('currentTime', 0)
                 .set('playbackStatus', 'stopped');
         });
     return newTracks.merge(state);
@@ -37,7 +37,7 @@ function receiveTracks(state, tracks) {
 
 function trackProgress(state, payload) {
     return state.update(payload.trackId, function (track) {
-        return track.set('progress', payload.progress);
+        return track.set('currentTime', payload.currentTime);
     });
 }
 
