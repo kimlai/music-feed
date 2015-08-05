@@ -17,6 +17,9 @@ module.exports = function(clientId) {
                 audio.addEventListener('timeupdate', function (e) {
                     actions.trackProgress(trackId, e.target.currentTime*1000);
                 });
+                audio.addEventListener('pause', function (e) {
+                    actions.pauseTrackSuccess(trackId);
+                });
                 _tracks[trackId] = audio;
             }
             _tracks[trackId].play();
@@ -25,9 +28,6 @@ module.exports = function(clientId) {
         pause: function (trackId) {
             audio = _tracks[trackId];
             audio.pause();
-            audio.addEventListener('pause', function (e) {
-                actions.pauseTrackSuccess(trackId);
-            });
         }
     };
 };
