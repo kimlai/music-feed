@@ -6,5 +6,6 @@ module.exports = keyMirror({
     PLAY_TRACK_SUCCESS: null,
     PAUSE_TRACK_REQUEST: null,
     PAUSE_TRACK_SUCCESS: null,
+    NEXT: null,
     RECEIVE_TRACKS: null,
 });

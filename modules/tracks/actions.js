@@ -5,6 +5,7 @@ var getters = require('./getters');
 module.exports = {
     playTrack: playTrack,
     playTrackSuccess: playTrackSuccess,
+    next: next,
     pauseTrack: pauseTrack,
     pauseTrackSuccess: pauseTrackSuccess,
     trackProgress: trackProgress,
@@ -17,6 +18,17 @@ function playTrack(trackId, streamUrl) {
         pauseTrack(currentTrackId);
     }
     reactor.dispatch(actionTypes.PLAY_TRACK_REQUEST, { trackId: trackId });
+}
+
+function next() {
+    var currentTrackId = reactor.evaluate(getters.currentTrackId);
+    if (null === currentTrackId) {
+        return;
+    }
+    tracks = reactor.evaluate(getters.tracks);
+    var keys = tracks.keySeq().toArray();
+    var nextTrack = tracks.get(keys[keys.indexOf(currentTrackId) + 1]);
+    playTrack(nextTrack.get('id'), nextTrack.get('stream_url'));
 }
 
 function playTrackSuccess(trackId) {

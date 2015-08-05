@@ -11,6 +11,9 @@ module.exports = function(clientId) {
                 audio.addEventListener('playing', function (e) {
                     actions.playTrackSuccess(trackId);
                 });
+                audio.addEventListener('ended', function (e) {
+                    actions.next();
+                });
                 audio.addEventListener('timeupdate', function (e) {
                     actions.trackProgress(trackId, e.target.currentTime*1000);
                 });
