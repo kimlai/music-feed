@@ -8,19 +8,23 @@ module.exports = function(clientId) {
             if (typeof _tracks[trackId] === "undefined") {
                 var audio = document.createElement('audio');
                 audio.src = streamUrl + '?client_id=' + clientId;
+                audio.addEventListener('playing', function (e) {
+                    actions.playTrackSuccess(trackId);
+                });
                 audio.addEventListener('timeupdate', function (e) {
                     actions.trackProgress(trackId, e.target.currentTime*1000);
                 });
                 _tracks[trackId] = audio;
             }
             _tracks[trackId].play();
-            actions.playTrackSuccess(trackId);
         },
 
         pause: function (trackId) {
-            _tracks[trackId].pause();
-            actions.pauseTrackSuccess(trackId);
+            audio = _tracks[trackId];
+            audio.pause();
+            audio.addEventListener('pause', function (e) {
+                actions.pauseTrackSuccess(trackId);
+            });
         }
     };
 };
-
