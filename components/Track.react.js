@@ -11,6 +11,7 @@ module.exports = React.createClass({
                 <ProgressBar
                     currentTime={this.props.track.get('currentTime')}
                     duration={this.props.track.get('duration')}
+                    trackId={this.props.track.get('id')}
                 />
             </div>
         );

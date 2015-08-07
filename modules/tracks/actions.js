@@ -9,6 +9,8 @@ module.exports = {
     pauseTrack: pauseTrack,
     pauseTrackSuccess: pauseTrackSuccess,
     trackProgress: trackProgress,
+    seekTrack: seekTrack,
+    seekTrackSuccess: seekTrackSuccess,
     fetchTracks: fetchTracks,
 };
 
@@ -45,6 +47,18 @@ function pauseTrackSuccess(trackId) {
 
 function trackProgress(trackId, currentTime) {
     reactor.dispatch(actionTypes.TRACK_PROGRESS, { trackId: trackId, currentTime: currentTime });
+}
+
+function seekTrack(trackId, seekedTime) {
+    var currentTrackId = reactor.evaluate(getters.currentTrackId);
+    if (trackId !== currentTrackId) {
+        return;
+    }
+    reactor.dispatch(actionTypes.SEEK_TRACK_REQUEST, { trackId: trackId, seekedTime: seekedTime });
+}
+
+function seekTrackSuccess(trackId) {
+    reactor.dispatch(actionTypes.SEEK_TRACK_SUCCESS, { trackId: trackId });
 }
 
 function fetchTracks(tracks) {

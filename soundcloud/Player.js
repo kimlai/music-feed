@@ -20,6 +20,9 @@ module.exports = function(clientId) {
                 audio.addEventListener('pause', function (e) {
                     actions.pauseTrackSuccess(trackId);
                 });
+                audio.addEventListener('seeked', function (e) {
+                    actions.seekTrackSuccess(trackId);
+                });
                 _tracks[trackId] = audio;
             }
             _tracks[trackId].play();
@@ -28,6 +31,11 @@ module.exports = function(clientId) {
         pause: function (trackId) {
             audio = _tracks[trackId];
             audio.pause();
+        },
+
+        seek: function (trackId, time) {
+            audio = _tracks[trackId];
+            audio.currentTime = time/1000;
         }
     };
 };

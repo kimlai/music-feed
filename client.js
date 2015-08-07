@@ -24,6 +24,8 @@ reactor.observe(
                     return Player.play(track.get('id'), track.get('stream_url'));
                 case 'pause_requested':
                     return Player.pause(track.get('id'), track.get('stream_url'));
+                case 'seek_requested':
+                    return Player.seek(track.get('id'), track.get('currentTime'));
             }
         });
     }
