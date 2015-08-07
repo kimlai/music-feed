@@ -28,7 +28,7 @@ module.exports = new Store({
 
 function receiveTracks(state, tracks) {
     var newTracks = toImmutable(tracks)
-        .toMap()
+        .toOrderedMap()
         .mapKeys(function (k, v) {
             return v.get('id');
         }).map(function (track, trackId) {
