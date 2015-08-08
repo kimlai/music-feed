@@ -1,3 +1,5 @@
+var toImmutable = require('nuclear-js').toImmutable;
+
 exports.feed = ['feed'];
 exports.savedTracks = ['savedTracks'];
 exports.tracks = ['tracks'];
@@ -35,5 +37,20 @@ exports.nextTrackId = [
             case 'savedTracks':
                 return savedTracks.get('nextTrack');
         }
+    }
+];
+
+exports.currentTrack = [
+    ['tracks'],
+    ['currentTrackId'],
+    function (tracks, currentTrackId) {
+        if (!tracks.has(currentTrackId)) {
+            return toImmutable({
+                title: '',
+                currentTime: 0,
+                duration: 1,
+            });
+        }
+        return tracks.get(currentTrackId);
     }
 ];
