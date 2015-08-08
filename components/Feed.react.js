@@ -12,8 +12,12 @@ module.exports = React.createClass({
 
     getDataBindings: function () {
         return {
-            tracks: getters.tracks
+            tracks: getters.feedTracks
         };
+    },
+
+    fetchFeed: function () {
+        actions.fetchFeed();
     },
 
     render: function () {
@@ -24,6 +28,7 @@ module.exports = React.createClass({
                         <Track key={track.get('id')} track={track} />
                     );
                 }).toList()}
+                <div onClick={this.fetchFeed}>More</div>
             </div>
         );
     }

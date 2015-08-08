@@ -1,6 +1,7 @@
 var reactor = require('../../reactor');
 var actionTypes = require('./actionTypes');
 var getters = require('./getters');
+var request = require('superagent');
 
 module.exports = {
     playTrack: playTrack,
@@ -11,7 +12,8 @@ module.exports = {
     trackProgress: trackProgress,
     seekTrack: seekTrack,
     seekTrackSuccess: seekTrackSuccess,
-    fetchTracks: fetchTracks,
+    fetchFeed: fetchFeed,
+    initializeFeed: initializeFeed,
 };
 
 function playTrack(trackId, streamUrl) {
@@ -28,8 +30,10 @@ function next() {
         return;
     }
     tracks = reactor.evaluate(getters.tracks);
-    var keys = tracks.keySeq().toArray();
-    var nextTrack = tracks.get(keys[keys.indexOf(currentTrackId) + 1]);
+    feedTracksIds = reactor.evaluate(getters.feed).get('tracks');
+    var nextTrack = tracks.get(
+        feedTracksIds.get(feedTracksIds.indexOf(currentTrackId) + 1)
+    );
     playTrack(nextTrack.get('id'), nextTrack.get('stream_url'));
 }
 
@@ -61,6 +65,16 @@ function seekTrackSuccess(trackId) {
     reactor.dispatch(actionTypes.SEEK_TRACK_SUCCESS, { trackId: trackId });
 }
 
-function fetchTracks(tracks) {
-    reactor.dispatch(actionTypes.RECEIVE_TRACKS, tracks);
+function initializeFeed(feed) {
+    reactor.dispatch(actionTypes.RECEIVE_FEED, feed);
+}
+
+function fetchFeed() {
+    var nextLink = reactor.evaluate(getters.feed).get('nextLink');
+    request
+        .get('http://localhost:3000/feed')
+        .query({ nextLink: nextLink})
+        .end(function (error, response) {
+            reactor.dispatch(actionTypes.RECEIVE_FEED, response.body);
+        });
 }

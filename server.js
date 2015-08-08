@@ -17,27 +17,39 @@ app.use(views('views', {
     }
 }));
 
-app.use(router.get('/', feed));
+app.use(router.get('/', index));
+app.use(router.get('/feed', feed));
 app.use(router.get('/connect', connect));
 app.use(router.get('/callback', callback));
 
-function *feed() {
+function *index() {
     var token = this.cookies.get('access_token');
     var response = yield request('https://api.soundcloud.com/me/activities/tracks/affiliated?oauth_token='+token);
     if (response.statusCode === 401) {
         return this.redirect('/connect');
     }
-    var tracks = JSON.parse(response.body).collection.map(function (activity) {
+    var result = parseSoundcloudActivities(JSON.parse(response.body));
+    yield this.render('feed', {context: JSON.stringify(result)});
+}
+
+function *feed() {
+    var token = this.cookies.get('access_token');
+    var response = yield request(this.request.query.nextLink+'&oauth_token='+token);
+    if (response.statusCode === 401) {
+        return this.redirect('/connect');
+    }
+    this.body = parseSoundcloudActivities(JSON.parse(response.body));
+}
+
+function parseSoundcloudActivities(activities) {
+    var tracks = activities.collection.map(function (activity) {
         return activity.origin;
     });
-    var feedHtml = '';
-//    var feedHtml = React.renderToString(
-//        React.createElement(Feed, {
-//            tracks: tracks
-//        })
-//    );
 
-    yield this.render('feed', {feedHtml: feedHtml, context: JSON.stringify(tracks)});
+    return {
+        tracks: tracks,
+        next_href: activities.next_href,
+    };
 }
 
 function *connect() {
