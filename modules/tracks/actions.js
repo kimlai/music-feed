@@ -72,7 +72,7 @@ function initializeFeed(feed) {
 function fetchFeed() {
     var nextLink = reactor.evaluate(getters.feed).get('nextLink');
     request
-        .get('http://localhost:3000/feed')
+        .get(process.env.MUSICFEED_API_ROOT+'/feed')
         .query({ nextLink: nextLink})
         .end(function (error, response) {
             reactor.dispatch(actionTypes.RECEIVE_FEED, response.body);

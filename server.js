@@ -55,7 +55,7 @@ function parseSoundcloudActivities(activities) {
 function *connect() {
     yield this.render('connect', {
         client_id: process.env.SOUNDCLOUD_CLIENT_ID,
-        redirect_uri: 'http://localhost:3000/callback',
+        redirect_uri: process.env.MUSICFEED_API_ROOT + '/callback',
         response_type: 'code'
     });
 }
@@ -68,7 +68,7 @@ function *callback() {
             client_id: process.env.SOUNDCLOUD_CLIENT_ID,
             client_secret: process.env.SOUNDCLOUD_SECRET,
             grant_type: 'authorization_code',
-            redirect_uri: 'http://localhost:3000/callback',
+            redirect_uri: process.env.MUSICFEED_API_ROOT + '/callback',
             code: code
         }
     });
@@ -76,4 +76,4 @@ function *callback() {
     this.redirect('/');
 }
 
-app.listen(3000);
+app.listen(process.env.PORT || 3000);

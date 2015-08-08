@@ -24,7 +24,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --harmony server.js",
-    "build": "browserify client.js > public/build.js"
+    "build": "browserify client.js > public/build.js",
+    "postinstall": "npm run build"
   },
   "author": "kimlai",
   "license": "ISC",
