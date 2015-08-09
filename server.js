@@ -3,6 +3,7 @@ var router = require('koa-route');
 var views = require('koa-views');
 var request = require('co-request');
 var serve = require('koa-static');
+var soundcloud = require('./soundcloud/api-client');
 
 var app = koa();
 
@@ -21,7 +22,7 @@ app.use(router.get('/callback', callback));
 
 function *index() {
     var token = this.cookies.get('access_token');
-    var response = yield request('https://api.soundcloud.com/me/activities/tracks/affiliated?oauth_token='+token);
+    var response = yield soundcloud.fetchActivities(token);
     if (response.statusCode === 401) {
         return this.redirect('/connect');
     }
@@ -59,16 +60,7 @@ function *connect() {
 
 function *callback() {
     var code = this.query.code;
-    var response = yield request.post({
-        uri: 'https://api.soundcloud.com/oauth2/token',
-        json: {
-            client_id: process.env.SOUNDCLOUD_CLIENT_ID,
-            client_secret: process.env.SOUNDCLOUD_SECRET,
-            grant_type: 'authorization_code',
-            redirect_uri: process.env.MUSICFEED_API_ROOT + '/callback',
-            code: code
-        }
-    });
+    var response = yield soundcloud.requestAccessToken(code);
     this.cookies.set('access_token', response.body.access_token, { httpOnly: false });
     this.redirect('/');
 }
