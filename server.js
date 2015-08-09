@@ -2,9 +2,6 @@ var koa = require('koa');
 var router = require('koa-route');
 var views = require('koa-views');
 var request = require('co-request');
-var JSX = require('node-jsx').install();
-var React = require('react');
-var Feed = require('./components/Feed.react');
 var serve = require('koa-static');
 
 var app = koa();
