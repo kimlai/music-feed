@@ -1,0 +1,15 @@
+web:
+  image: node:0.12
+  command: npm start
+  working_dir: /var/www
+  volumes:
+    - .:/var/www/
+  links:
+   - postgres
+  ports:
+   - "3000:3000"
+  env_file:
+    - ./envvars
+
+postgres:
+    image: postgres:9.4
