@@ -24,9 +24,12 @@ app.use(router.routes());
 
 function *requireAuthentication(next) {
     var token = this.cookies.get('access_token');
-    var response = yield soundcloud.me(token);
-    if (response.statusCode === 401) {
-        return this.redirect('/connect');
+    try {
+        var user = yield soundcloud.me(token);
+    } catch (error) {
+        if (error.status === 401) {
+            return this.redirect('/connect');
+        }
     }
     this.state.token = token;
     yield next;
@@ -34,9 +37,11 @@ function *requireAuthentication(next) {
 
 function *index() {
     var token = this.state.token;
-    var response = yield soundcloud.fetchActivities(token);
-    var result = parseSoundcloudActivities(JSON.parse(response.body));
-    yield this.render('feed', {context: JSON.stringify(result)});
+    var feed = yield soundcloud
+        .fetchActivities(token)
+        .then(parseSoundcloudActivities);
+
+    yield this.render('feed', {context: JSON.stringify(feed)});
 }
 
 function *feed() {
@@ -66,8 +71,8 @@ function *connect() {
 
 function *callback() {
     var code = this.query.code;
-    var response = yield soundcloud.requestAccessToken(code);
-    this.cookies.set('access_token', response.body.access_token, { httpOnly: false });
+    var tokens = yield soundcloud.requestAccessToken(code);
+    this.cookies.set('access_token', tokens.access_token, { httpOnly: false });
     this.redirect('/');
 }
 
