@@ -1,9 +1,11 @@
 var request = require('superagent-bluebird-promise');
 
 module.exports = {
-    fetchActivities: function (token) {
+    fetchActivities: function (token, nextHref) {
+        var link = nextHref ? nextHref + '&' : 'https://api.soundcloud.com/me/activities/tracks/affiliated?';
         return request
-            .get('https://api.soundcloud.com/me/activities/tracks/affiliated?oauth_token='+token)
+            .get(link+'oauth_token='+token)
+            .accept('json')
             .then(function (response) {
                 return response.body;
             });
@@ -27,6 +29,7 @@ module.exports = {
     me: function (token) {
         return request
             .get('https://api.soundcloud.com/me?oauth_token='+token)
+            .accept('json')
             .then(function (response) {
                 return response.body;
             });
