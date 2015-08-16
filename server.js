@@ -1,5 +1,5 @@
 var koa = require('koa');
-var router = require('koa-route');
+var router = require('koa-router')();
 var views = require('koa-views');
 var request = require('co-request');
 var serve = require('koa-static');
@@ -15,27 +15,33 @@ app.use(views('views', {
     }
 }));
 
-app.use(router.get('/', index));
-app.use(router.get('/feed', feed));
-app.use(router.get('/connect', connect));
-app.use(router.get('/callback', callback));
+router.get('/connect', connect);
+router.get('/callback', callback);
+router.get('/', requireAuthentication, index);
+router.get('/feed', requireAuthentication, feed);
 
-function *index() {
+app.use(router.routes());
+
+function *requireAuthentication(next) {
     var token = this.cookies.get('access_token');
-    var response = yield soundcloud.fetchActivities(token);
+    var response = yield soundcloud.me(token);
     if (response.statusCode === 401) {
         return this.redirect('/connect');
     }
+    this.state.token = token;
+    yield next;
+}
+
+function *index() {
+    var token = this.state.token;
+    var response = yield soundcloud.fetchActivities(token);
     var result = parseSoundcloudActivities(JSON.parse(response.body));
     yield this.render('feed', {context: JSON.stringify(result)});
 }
 
 function *feed() {
-    var token = this.cookies.get('access_token');
+    var token = this.state.token;
     var response = yield request(this.request.query.nextLink+'&oauth_token='+token);
-    if (response.statusCode === 401) {
-        return this.redirect('/connect');
-    }
     this.body = parseSoundcloudActivities(JSON.parse(response.body));
 }
 

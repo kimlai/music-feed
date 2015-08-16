@@ -16,5 +16,9 @@ module.exports = {
                 code: code
             }
         });
+    },
+
+    me: function (token) {
+        return request.get('https://api.soundcloud.com/me?oauth_token='+token);
     }
 };
