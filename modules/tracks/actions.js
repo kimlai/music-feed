@@ -1,7 +1,7 @@
 var reactor = require('../../reactor');
 var actionTypes = require('./actionTypes');
 var getters = require('./getters');
-var request = require('superagent');
+var request = require('superagent-bluebird-promise');
 
 module.exports = {
     playTrack: playTrack,
@@ -75,8 +75,14 @@ function blacklistTrack(trackId) {
     request
         .post(process.env.MUSICFEED_API_ROOT+'/blacklist')
         .send({ soundcloudTrackId: trackId})
-        .end(function (error, response) {
-        });
+        .then(
+            function (response) {
+                reactor.dispatch(actionTypes.BLACKLIST_TRACK_SUCCESS, { trackId: trackId });
+            },
+            function (error) {
+                reactor.dispatch(actionTypes.BLACKLIST_TRACK_FAILURE, { trackId: trackId });
+            }
+        );
 }
 
 function initializeFeed(feed) {
@@ -88,7 +94,7 @@ function fetchFeed() {
     request
         .get(process.env.MUSICFEED_API_ROOT+'/feed')
         .query({ nextLink: nextLink})
-        .end(function (error, response) {
+        .then(function (response) {
             reactor.dispatch(actionTypes.RECEIVE_FEED, response.body);
         });
 }

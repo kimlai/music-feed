@@ -10,5 +10,7 @@ module.exports = keyMirror({
     SEEK_TRACK_REQUEST: null,
     SEEK_TRACK_SUCCESS: null,
     BLACKLIST_TRACK_REQUEST: null,
+    BLACKLIST_TRACK_SUCCESS: null,
+    BLACKLIST_TRACK_FAILURE: null,
     RECEIVE_FEED: null,
 });
