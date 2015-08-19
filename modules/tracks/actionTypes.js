@@ -9,5 +9,6 @@ module.exports = keyMirror({
     NEXT: null,
     SEEK_TRACK_REQUEST: null,
     SEEK_TRACK_SUCCESS: null,
+    BLACKLIST_TRACK_REQUEST: null,
     RECEIVE_FEED: null,
 });

@@ -12,6 +12,7 @@ module.exports = {
     trackProgress: trackProgress,
     seekTrack: seekTrack,
     seekTrackSuccess: seekTrackSuccess,
+    blacklistTrack: blacklistTrack,
     fetchFeed: fetchFeed,
     initializeFeed: initializeFeed,
 };
@@ -63,6 +64,19 @@ function seekTrack(trackId, seekedTime) {
 
 function seekTrackSuccess(trackId) {
     reactor.dispatch(actionTypes.SEEK_TRACK_SUCCESS, { trackId: trackId });
+}
+
+function blacklistTrack(trackId) {
+    var currentTrackId = reactor.evaluate(getters.currentTrackId);
+    if (trackId === currentTrackId) {
+        next();
+    }
+    reactor.dispatch(actionTypes.BLACKLIST_TRACK_REQUEST, { trackId: trackId });
+    request
+        .post(process.env.MUSICFEED_API_ROOT+'/blacklist')
+        .send({ soundcloudTrackId: trackId})
+        .end(function (error, response) {
+        });
 }
 
 function initializeFeed(feed) {
