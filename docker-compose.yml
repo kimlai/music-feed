@@ -10,6 +10,8 @@ web:
    - "3000:3000"
   env_file:
     - ./envvars
+  environment:
+    DATABASE_URL: postgres://postgres:@postgres:5432/postgres
 
 postgres:
     image: postgres:9.4
