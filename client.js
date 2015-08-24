@@ -7,8 +7,9 @@ TracksModule.register(reactor);
 var App = require('./components/App.react');
 var Player = require('./soundcloud/Player')(process.env.SOUNDCLOUD_CLIENT_ID);
 
-var feed = JSON.parse(document.getElementById('context').textContent);
-TracksModule.actions.initializeFeed(feed);
+var context = JSON.parse(document.getElementById('context').textContent);
+TracksModule.actions.initializeFeed(context.feed);
+TracksModule.actions.initializeSavedTracks(context.savedTracks);
 
 React.render(
     React.createElement(App, null),

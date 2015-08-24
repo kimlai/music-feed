@@ -1,6 +1,7 @@
 var toImmutable = require('nuclear-js').toImmutable;
 var Store = require('nuclear-js').Store;
 var RECEIVE_FEED = require('../actionTypes').RECEIVE_FEED;
+var RECEIVE_SAVED_TRACKS = require('../actionTypes').RECEIVE_SAVED_TRACKS;
 var TRACK_PROGRESS = require('../actionTypes').TRACK_PROGRESS;
 var PLAY_TRACK_REQUEST = require('../actionTypes').PLAY_TRACK_REQUEST;
 var PLAY_TRACK_SUCCESS = require('../actionTypes').PLAY_TRACK_SUCCESS;
@@ -16,6 +17,7 @@ module.exports = new Store({
 
     initialize: function () {
         this.on(RECEIVE_FEED, receiveFeed);
+        this.on(RECEIVE_SAVED_TRACKS, receiveSavedTracks);
         this.on(TRACK_PROGRESS, trackProgress);
         this.on(PLAY_TRACK_REQUEST, playTrackRequest);
         this.on(PLAY_TRACK_SUCCESS, playTrackSuccess);
@@ -28,6 +30,20 @@ module.exports = new Store({
 
 function receiveFeed(state, feed) {
     var newTracks = toImmutable(feed.tracks)
+        .toMap()
+        .mapKeys(function (k, v) {
+            return v.get('id');
+        }).map(function (track, trackId) {
+            return track
+                .set('currentTime', 0)
+                .set('playbackStatus', 'stopped');
+        });
+
+    return newTracks.merge(state);
+}
+
+function receiveSavedTracks(state, tracks) {
+    var newTracks = toImmutable(tracks)
         .toMap()
         .mapKeys(function (k, v) {
             return v.get('id');

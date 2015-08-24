@@ -13,4 +13,5 @@ module.exports = keyMirror({
     BLACKLIST_TRACK_SUCCESS: null,
     BLACKLIST_TRACK_FAILURE: null,
     RECEIVE_FEED: null,
+    RECEIVE_SAVED_TRACKS: null,
 });

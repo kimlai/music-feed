@@ -8,6 +8,7 @@ var knexfile = require('./knexfile');
 var knex = require('knex')(knexfile);
 var bodyParser = require('koa-bodyparser');
 var feedApi = require('./server/feed');
+var _ = require('lodash');
 
 var app = koa();
 
@@ -26,6 +27,7 @@ router.get('/callback', callback);
 router.get('/', requireAuthentication, index);
 router.get('/feed', requireAuthentication, feed);
 router.post('/blacklist', requireAuthentication, blacklist);
+router.post('/save_track', requireAuthentication, saveTrack);
 
 app.use(router.routes());
 
@@ -45,9 +47,26 @@ function *requireAuthentication(next) {
 function *index() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;
-    var feed = yield feedApi(soundcloudUserId, token);
+    var feeds = yield Promise.all([
+        feedApi(soundcloudUserId, token),
+        knex.select('track')
+            .where({soundcloudUserId: soundcloudUserId})
+            .orderBy('savedAt', 'DESC')
+            .limit(10)
+            .from('saved_tracks')
+            .then(function (rows) {
+                return _.map(rows, function (row) {
+                    return row.track;
+                });
+            })
+    ]).then(function (results) {
+        return {
+            feed: results[0],
+            savedTracks: results[1],
+        };
+    });
 
-    yield this.render('feed', { context: JSON.stringify(feed) });
+    yield this.render('feed', { context: JSON.stringify(feeds) });
 }
 
 function *feed() {
@@ -74,10 +93,36 @@ function *callback() {
 function *blacklist() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;
-    yield knex.insert({
-        soundcloudUserId: soundcloudUserId,
-        soundcloudTrackId: this.request.body.soundcloudTrackId,
-    }).into('blacklist');
+    var soundcloudTrackId = this.request.body.soundcloudTrackId;
+    yield Promise.all([
+        knex.insert({
+            soundcloudUserId: soundcloudUserId,
+            soundcloudTrackId: soundcloudTrackId,
+        }).into('blacklist'),
+        knex.del()
+            .where({
+                soundcloudUserId: soundcloudUserId,
+                soundcloudTrackId: soundcloudTrackId,
+            })
+            .from('saved_tracks')
+    ]);
+    this.status = 201;
+    this.body = "OK";
+}
+
+function *saveTrack() {
+    var token = this.state.token;
+    var soundcloudUserId = this.state.user.id;
+    var soundcloudTrackId = this.request.body.soundcloudTrackId;
+    yield soundcloud.track(soundcloudTrackId)
+        .then(function (track) {
+            return knex.insert({
+                soundcloudUserId: soundcloudUserId,
+                soundcloudTrackId: soundcloudTrackId,
+                track : track,
+                savedAt: new Date(),
+            }).into('saved_tracks');
+        });
     this.status = 201;
     this.body = "OK";
 }

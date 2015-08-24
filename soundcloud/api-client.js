@@ -33,5 +33,14 @@ module.exports = {
             .then(function (response) {
                 return response.body;
             });
+    },
+
+    track: function (trackId) {
+        return request
+            .get('https://api.soundcloud.com/tracks/' + trackId +'?client_id=' + process.env.SOUNDCLOUD_CLIENT_ID)
+            .accept('json')
+            .then(function (response) {
+                return response.body;
+            });
     }
 };

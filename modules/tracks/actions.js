@@ -15,6 +15,7 @@ module.exports = {
     blacklistTrack: blacklistTrack,
     fetchFeed: fetchFeed,
     initializeFeed: initializeFeed,
+    initializeSavedTracks: initializeSavedTracks,
 };
 
 function playTrack(trackId) {
@@ -85,6 +86,10 @@ function blacklistTrack(trackId) {
 
 function initializeFeed(feed) {
     reactor.dispatch(actionTypes.RECEIVE_FEED, feed);
+}
+
+function initializeSavedTracks(tracks) {
+    reactor.dispatch(actionTypes.RECEIVE_SAVED_TRACKS, tracks);
 }
 
 function fetchFeed() {
