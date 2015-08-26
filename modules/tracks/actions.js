@@ -13,6 +13,7 @@ module.exports = {
     seekTrack: seekTrack,
     seekTrackSuccess: seekTrackSuccess,
     blacklistTrack: blacklistTrack,
+    saveTrack: saveTrack,
     fetchFeed: fetchFeed,
     initializeFeed: initializeFeed,
     initializeSavedTracks: initializeSavedTracks,
@@ -80,6 +81,21 @@ function blacklistTrack(trackId) {
             },
             function (error) {
                 reactor.dispatch(actionTypes.BLACKLIST_TRACK_FAILURE, { trackId: trackId });
+            }
+        );
+}
+
+function saveTrack(trackId) {
+    reactor.dispatch(actionTypes.SAVE_TRACK_REQUEST, { trackId: trackId });
+    request
+        .post(process.env.MUSICFEED_API_ROOT+'/save_track')
+        .send({ soundcloudTrackId: trackId})
+        .then(
+            function (response) {
+                reactor.dispatch(actionTypes.SAVE_TRACK_SUCCESS, { trackId: trackId });
+            },
+            function (error) {
+                reactor.dispatch(actionTypes.SAVE_TRACK_FAILURE, { trackId: trackId });
             }
         );
 }
