@@ -12,7 +12,7 @@ module.exports = React.createClass({
 
     getDataBindings: function () {
         return {
-            tracks: getters.savedTracks
+            tracks: getters.savedTracksWithTrackInfo
         };
     },
 
@@ -22,7 +22,7 @@ module.exports = React.createClass({
                 <h1>Saved Tracks</h1>
                 {this.state.tracks.map(function (track) {
                     return (
-                        <Track key={track.get('id')} track={track} />
+                        <Track key={track.get('id')} track={track} playlistId={'savedTracks'} />
                     );
                 }).toList()}
             </div>

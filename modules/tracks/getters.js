@@ -2,6 +2,8 @@ exports.feed = ['feed'];
 exports.savedTracks = ['savedTracks'];
 exports.tracks = ['tracks'];
 exports.currentTrackId = ['currentTrackId'];
+exports.nextTrackId = ['nextTrackId'];
+exports.currentPlaylistId = ['currentPlaylistId'];
 
 exports.feedTracks = [
     ['tracks'],
@@ -13,7 +15,7 @@ exports.feedTracks = [
     }
 ];
 
-exports.savedTracks = [
+exports.savedTracksWithTrackInfo = [
     ['tracks'],
     ['savedTracks', 'tracks'],
     function (tracks, savedTracks) {

@@ -18,7 +18,7 @@ module.exports = React.createClass({
                 <div>{this.props.track.get('title')} - {this.props.track.get('id')}</div>
                 <div onClick={this.blacklistTrack}>Blacklist</div>
                 <div onClick={this.saveTrack}>Save</div>
-                <PlaybackButton track={this.props.track.toJS()}  />
+                <PlaybackButton track={this.props.track.toJS()} playlistId={this.props.playlistId}  />
                 <ProgressBar
                     currentTime={this.props.track.get('currentTime')}
                     duration={this.props.track.get('duration')}

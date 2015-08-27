@@ -26,7 +26,7 @@ module.exports = React.createClass({
                 <h1>Feed</h1>
                 {this.state.tracks.map(function (track) {
                     return (
-                        <Track key={track.get('id')} track={track} />
+                        <Track key={track.get('id')} track={track} playlistId={'feed'} />
                     );
                 }).toList()}
                 <div onClick={this.fetchFeed}>More</div>

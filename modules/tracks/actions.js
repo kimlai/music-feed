@@ -17,6 +17,7 @@ module.exports = {
     fetchFeed: fetchFeed,
     initializeFeed: initializeFeed,
     initializeSavedTracks: initializeSavedTracks,
+    setCurrentPlaylistId: setCurrentPlaylistId,
 };
 
 function playTrack(trackId) {
@@ -25,16 +26,21 @@ function playTrack(trackId) {
         pauseTrack(currentTrackId);
     }
     reactor.dispatch(actionTypes.PLAY_TRACK_REQUEST, { trackId: trackId });
+    var currentPlaylistId = reactor.evaluate(getters.currentPlaylistId);
+    var currentPlaylistTrackIds = reactor.evaluate(getters[currentPlaylistId]).get('tracks');
+    var nextTrackId = currentPlaylistTrackIds.get(currentPlaylistTrackIds.indexOf(trackId) + 1);
+    reactor.dispatch(actionTypes.SET_NEXT_TRACK_ID, { trackId: nextTrackId });
+}
+
+function setCurrentPlaylistId(playlistId) {
+    reactor.dispatch(actionTypes.SET_CURRENT_PLAYLIST_ID, { playlistId: playlistId });
 }
 
 function next() {
-    var currentTrackId = reactor.evaluate(getters.currentTrackId);
-    if (null === currentTrackId) {
+    var nextTrackId = reactor.evaluate(getters.nextTrackId);
+    if (null === nextTrackId) {
         return;
     }
-    tracks = reactor.evaluate(getters.tracks);
-    feedTracksIds = reactor.evaluate(getters.feed).get('tracks');
-    var nextTrackId = feedTracksIds.get(feedTracksIds.indexOf(currentTrackId) + 1);
     playTrack(nextTrackId);
 }
 

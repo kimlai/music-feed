@@ -5,6 +5,8 @@ var FeedStore = require('./stores/FeedStore');
 var SavedTracksStore = require('./stores/SavedTracksStore');
 var TrackStore = require('./stores/TrackStore');
 var CurrentTrackIdStore = require('./stores/CurrentTrackIdStore');
+var NextTrackIdStore = require('./stores/NextTrackIdStore');
+var CurrentPlaylistIdStore = require('./stores/CurrentPlaylistIdStore');
 
 module.exports = {
     actions: actions,
@@ -15,6 +17,8 @@ module.exports = {
             'savedTracks': SavedTracksStore,
             'tracks': TrackStore,
             'currentTrackId': CurrentTrackIdStore,
+            'nextTrackId': NextTrackIdStore,
+            'currentPlaylistId': CurrentPlaylistIdStore,
         });
     }
 };
