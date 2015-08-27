@@ -1,3 +1,12 @@
+.playlists-container {
+    display: flex;
+}
+
+.feed,
+.saved-tracks {
+    padding: 10px;
+}
+
 .progress-bar.outer {
     background-color: black;
     width: 500px;

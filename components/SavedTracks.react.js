@@ -19,6 +19,7 @@ module.exports = React.createClass({
     render: function () {
         return (
             <div className="saved-tracks">
+                <h1>Saved Tracks</h1>
                 {this.state.tracks.map(function (track) {
                     return (
                         <Track key={track.get('id')} track={track} />

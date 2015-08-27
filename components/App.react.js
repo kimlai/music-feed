@@ -5,10 +5,8 @@ var SavedTracks = require('./SavedTracks.react');
 module.exports = React.createClass({
     render: function () {
         return (
-            <div>
-                <h1>Feed</h1>
+            <div className="playlists-container">
                 <Feed />
-                <h1>Saved Tracks</h1>
                 <SavedTracks />
             </div>
         );
