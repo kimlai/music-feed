@@ -2,7 +2,6 @@ exports.feed = ['feed'];
 exports.savedTracks = ['savedTracks'];
 exports.tracks = ['tracks'];
 exports.currentTrackId = ['currentTrackId'];
-exports.nextTrackId = ['nextTrackId'];
 exports.currentPlaylistId = ['currentPlaylistId'];
 
 exports.feedTracks = [
@@ -22,5 +21,19 @@ exports.savedTracksWithTrackInfo = [
         return savedTracks.map(function (trackId) {
             return tracks.get(trackId);
         });
+    }
+];
+
+exports.nextTrackId = [
+    ['currentPlaylistId'],
+    ['feed'],
+    ['savedTracks'],
+    function (currentPlaylistId, feed, savedTracks) {
+        switch (currentPlaylistId) {
+            case 'feed':
+                return feed.get('nextTrack');
+            case 'savedTracks':
+                return feed.get('nextTrack');
+        }
     }
 ];

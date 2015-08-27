@@ -18,5 +18,4 @@ module.exports = keyMirror({
     RECEIVE_FEED: null,
     RECEIVE_SAVED_TRACKS: null,
     SET_CURRENT_PLAYLIST_ID: null,
-    SET_NEXT_TRACK_ID: null,
 });

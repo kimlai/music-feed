@@ -26,10 +26,6 @@ function playTrack(trackId) {
         pauseTrack(currentTrackId);
     }
     reactor.dispatch(actionTypes.PLAY_TRACK_REQUEST, { trackId: trackId });
-    var currentPlaylistId = reactor.evaluate(getters.currentPlaylistId);
-    var currentPlaylistTrackIds = reactor.evaluate(getters[currentPlaylistId]).get('tracks');
-    var nextTrackId = currentPlaylistTrackIds.get(currentPlaylistTrackIds.indexOf(trackId) + 1);
-    reactor.dispatch(actionTypes.SET_NEXT_TRACK_ID, { trackId: nextTrackId });
 }
 
 function setCurrentPlaylistId(playlistId) {
