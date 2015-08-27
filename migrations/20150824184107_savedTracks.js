@@ -5,6 +5,7 @@ exports.up = function(knex, Promise) {
             table.string('soundcloudTrackId');
             table.json('track', true); // true means jsonb instead of json
             table.dateTime('savedAt');
+            table.primary(['soundcloudUserId', 'soundcloudTrackId']);
         })
         .then(function () {
             console.log('the "saved_tracks" table has been created');
