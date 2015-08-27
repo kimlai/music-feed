@@ -17,7 +17,7 @@ module.exports = {
     initializeFeed: initializeFeed,
 };
 
-function playTrack(trackId, streamUrl) {
+function playTrack(trackId) {
     var currentTrackId = reactor.evaluate(getters.currentTrackId);
     if (null !== currentTrackId) {
         pauseTrack(currentTrackId);
@@ -32,10 +32,8 @@ function next() {
     }
     tracks = reactor.evaluate(getters.tracks);
     feedTracksIds = reactor.evaluate(getters.feed).get('tracks');
-    var nextTrack = tracks.get(
-        feedTracksIds.get(feedTracksIds.indexOf(currentTrackId) + 1)
-    );
-    playTrack(nextTrack.get('id'), nextTrack.get('stream_url'));
+    var nextTrackId = feedTracksIds.get(feedTracksIds.indexOf(currentTrackId) + 1);
+    playTrack(nextTrackId);
 }
 
 function playTrackSuccess(trackId) {

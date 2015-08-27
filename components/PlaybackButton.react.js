@@ -11,7 +11,7 @@ module.exports = React.createClass({
         if (playbackStatus === 'playing') {
             actions.pauseTrack(this.props.track.id);
         } else {
-            actions.playTrack(this.props.track.id, this.props.track.stream_url);
+            actions.playTrack(this.props.track.id);
         }
     },
 
