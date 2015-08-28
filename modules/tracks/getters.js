@@ -33,7 +33,7 @@ exports.nextTrackId = [
             case 'feed':
                 return feed.get('nextTrack');
             case 'savedTracks':
-                return feed.get('nextTrack');
+                return savedTracks.get('nextTrack');
         }
     }
 ];
