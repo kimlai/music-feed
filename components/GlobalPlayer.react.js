@@ -22,6 +22,7 @@ module.exports = React.createClass({
     render: function () {
         return (
             <div className="global-player">
+                <img src={this.state.track.get('artwork_url')} />
                 <Track track={this.state.track} />
                 <div className="next-button" onClick={this.next}>Next</div>
             </div>

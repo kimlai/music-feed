@@ -13,11 +13,15 @@ module.exports = React.createClass({
     },
 
     render: function () {
+        var artist = '';
+        if (this.props.track.has('user')) {
+            artist = this.props.track.get('user').get('username');
+        }
         return (
             <div className="track">
-                <div>{this.props.track.get('title')} - {this.props.track.get('id')}</div>
-                <div onClick={this.blacklistTrack}>Blacklist</div>
-                <div onClick={this.saveTrack}>Save</div>
+                <div>{artist} - {this.props.track.get('title')}</div>
+                <div className="blacklist-button" onClick={this.blacklistTrack}>Blacklist</div>
+                <div className="save-button" onClick={this.saveTrack}>Save</div>
                 <PlaybackButton track={this.props.track.toJS()} playlistId={this.props.playlistId}  />
                 <ProgressBar
                     currentTime={this.props.track.get('currentTime')}

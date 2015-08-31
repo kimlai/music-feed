@@ -1,19 +1,54 @@
+* {
+    font-family: "proxima-nova";
+    color: #4D4D4D;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 400;
+    font-size: 18px;
+    margin: 0;
+}
+
+h1 {
+    font-family: "freight-sans-pro";
+    color: #000000;
+    font-size: 43px;
+    line-height: 44px;
+    margin-bottom: 20px;
+}
+
+.global-player {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 30px;
+}
+
 .playlists-container {
     display: flex;
 }
 
 .feed,
 .saved-tracks {
-    padding: 10px;
+    padding: 35px;
+    width: 50%;
+}
+
+.feed {
+    border-right: 1px solid #f0f0f0;
 }
 
 .progress-bar.outer {
     background-color: black;
-    width: 500px;
+    width: 100%;
     height: 5px;
+    cursor: pointer;
 }
 
 .progress-bar .inner {
-    background-color: red;
+    background-color: #02779E;
     height: 100%;
+}
+
+.blacklist-button,
+.next-button,
+.playback-button,
+.save-button {
+    cursor: pointer;
 }
