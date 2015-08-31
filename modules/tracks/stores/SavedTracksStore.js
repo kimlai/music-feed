@@ -52,7 +52,6 @@ function blacklistTrack(state, payload) {
     var nextTrack = state.get('nextTrack');
 
     if (state.get('nextTrack') === payload.trackId) {
-        console.log('coucou');
         nextTrack = tracks.get(tracks.indexOf(payload.trackId) + 1);
     }
     return state.updateIn(['tracks'], function (tracks) {

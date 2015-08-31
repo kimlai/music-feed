@@ -24,6 +24,10 @@ h1 {
     display: flex;
 }
 
+.playlists-container .track {
+    cursor: pointer;
+}
+
 .feed,
 .saved-tracks {
     padding: 35px;

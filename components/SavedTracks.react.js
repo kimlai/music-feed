@@ -1,5 +1,5 @@
 var React = require('react');
-var Track = require('./Track.react');
+var PlaylistTrack = require('./PlaylistTrack.react');
 var TracksModule = require('../modules/tracks');
 
 var reactor = require('../reactor');
@@ -22,7 +22,7 @@ module.exports = React.createClass({
                 <h1>Saved Tracks</h1>
                 {this.state.tracks.map(function (track) {
                     return (
-                        <Track key={track.get('id')} track={track} playlistId={'savedTracks'} />
+                        <PlaylistTrack key={track.get('id')} track={track} playlistId={'savedTracks'} />
                     );
                 }).toList()}
             </div>

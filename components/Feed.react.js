@@ -1,5 +1,5 @@
 var React = require('react');
-var Track = require('./Track.react');
+var PlaylistTrack = require('./PlaylistTrack.react');
 var TracksModule = require('../modules/tracks');
 
 var reactor = require('../reactor');
@@ -26,7 +26,7 @@ module.exports = React.createClass({
                 <h1>Feed</h1>
                 {this.state.tracks.map(function (track) {
                     return (
-                        <Track key={track.get('id')} track={track} playlistId={'feed'} />
+                        <PlaylistTrack key={track.get('id')} track={track} playlistId={'feed'} />
                     );
                 }).toList()}
                 <div onClick={this.fetchFeed}>More</div>
