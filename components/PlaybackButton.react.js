@@ -11,7 +11,9 @@ module.exports = React.createClass({
         if (playbackStatus === 'playing') {
             actions.pauseTrack(this.props.track.id);
         } else {
-            actions.setCurrentPlaylistId(this.props.playlistId);
+            if (this.props.playlistId) {
+                actions.setCurrentPlaylistId(this.props.playlistId);
+            }
             actions.playTrack(this.props.track.id);
         }
     },
