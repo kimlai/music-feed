@@ -17,16 +17,16 @@ React.render(
 );
 
 reactor.observe(
-    TracksModule.getters.tracks,
+    TracksModule.getters.playbackStatus,
     function (tracks) {
-        tracks.forEach(function (track) {
+        tracks.forEach(function (track, trackId) {
             switch (track.get('playbackStatus')) {
                 case 'play_requested':
-                    return Player.play(track.get('id'), track.get('stream_url'));
+                    return Player.play(trackId, track.get('stream_url'));
                 case 'pause_requested':
-                    return Player.pause(track.get('id'), track.get('stream_url'));
+                    return Player.pause(trackId);
                 case 'seek_requested':
-                    return Player.seek(track.get('id'), track.get('currentTime'));
+                    return Player.seek(trackId, track.get('seekedTime'));
             }
         });
     }
