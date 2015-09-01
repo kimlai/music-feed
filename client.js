@@ -31,3 +31,10 @@ reactor.observe(
         });
     }
 );
+
+window.addEventListener('keypress', function (e) {
+    e.preventDefault();
+    if (e.keyCode === 32) {
+        TracksModule.actions.toggleCurrentTrackPlayback();
+    }
+});

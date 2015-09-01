@@ -9,6 +9,7 @@ module.exports = {
     next: next,
     pauseTrack: pauseTrack,
     pauseTrackSuccess: pauseTrackSuccess,
+    toggleCurrentTrackPlayback: toggleCurrentTrackPlayback,
     trackProgress: trackProgress,
     seekTrack: seekTrack,
     seekTrackSuccess: seekTrackSuccess,
@@ -50,6 +51,18 @@ function pauseTrack(trackId) {
 
 function pauseTrackSuccess(trackId) {
     reactor.dispatch(actionTypes.PAUSE_TRACK_SUCCESS, { trackId: trackId });
+}
+
+function toggleCurrentTrackPlayback() {
+    var currentTrack = reactor.evaluate(getters.currentTrack);
+    switch (currentTrack.get('playbackStatus')) {
+        case 'playing':
+            pauseTrack(currentTrack.get('id'));
+            break;
+        case 'paused':
+            playTrack(currentTrack.get('id'));
+            break;
+    }
 }
 
 function trackProgress(trackId, currentTime) {
