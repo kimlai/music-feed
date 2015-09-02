@@ -16,10 +16,12 @@ module.exports = React.createClass({
     render: function () {
         return (
             <div className="track">
-                <div className="trackInfo" onClick={this.togglePlayback}>
+                <div className="track-info-container" onClick={this.togglePlayback}>
                     <img src={this.props.track.get('artwork_url')} />
-                    <div>{this.props.track.get('user').get('username')}</div>
-                    <div>{this.props.track.get('title')}</div>
+                    <div className="track-info">
+                        <div>{this.props.track.get('user').get('username')}</div>
+                        <div>{this.props.track.get('title')}</div>
+                    </div>
                 </div>
                 <ProgressBar
                     currentTime={this.props.track.get('currentTime')}

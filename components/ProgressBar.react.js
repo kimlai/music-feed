@@ -22,7 +22,7 @@ module.exports = React.createClass({
                 <div className="progress-bar outer" onClick={this.seek}>
                     <div className="inner" style={innerStyle} />
                 </div>
-                <div>
+                <div className="timer">
                     {millisecondsToTime(this.props.currentTime)}
                     /
                     {millisecondsToTime(this.props.duration)}

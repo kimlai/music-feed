@@ -46,12 +46,19 @@ module.exports = React.createClass({
         var text = this.state.track.get('playbackStatus') === 'playing' ? 'Pause' : 'Play';
         return (
             <div className="global-player">
-                <img src={this.state.track.get('artwork_url')} />
-                <div>{artist} - {this.state.track.get('title')}</div>
-                <div className="blacklist-button" onClick={this.blacklistTrack}>Blacklist</div>
-                <div className="save-button" onClick={this.saveTrack}>Save</div>
-                <div className="playback-button" onClick={this.togglePlayback}>{text}</div>
-                <div className="next-button" onClick={this.next}>Next</div>
+                <div className="track">
+                    <img src={this.state.track.get('artwork_url')} />
+                    <div className="track-info">
+                        <div className="artist">{artist}</div>
+                        <div className="title">{this.state.track.get('title')}</div>
+                    </div>
+                    <div className="actions">
+                        <div onClick={this.blacklistTrack}>Blacklist</div>
+                        <div onClick={this.saveTrack}>Save</div>
+                        <div onClick={this.togglePlayback}>{text}</div>
+                        <div onClick={this.next}>Next</div>
+                    </div>
+                </div>
                 <ProgressBar
                     currentTime={this.state.track.get('currentTime')}
                     duration={this.state.track.get('duration')}
