@@ -15,6 +15,7 @@
     "koa-static": "^1.4.9",
     "koa-views": "^3.1.0",
     "lodash": "^3.10.1",
+    "minifyify": "^7.0.5",
     "moment": "^2.10.6",
     "node-jsx": "^0.13.3",
     "nuclear-js": "^1.1.1",
@@ -32,7 +33,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --harmony server.js",
-    "build": "browserify client.js > public/build.js",
+    "build": "browserify client.js -d -p [minifyify --map build.map.json --output public/build.map.json] > public/build.js",
     "watch": "watchify client.js -o public/build.js",
     "postinstall": "npm run build"
   },
