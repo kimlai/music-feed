@@ -46,29 +46,31 @@ module.exports = React.createClass({
         if (this.state.track.has('user')) {
             artist = this.state.track.get('user').get('username');
         }
-        var text = this.state.track.get('playbackStatus') === 'playing' ? 'Pause' : 'Play';
+        var isPlaying = this.state.track.get('playbackStatus') === 'playing';
+        var text = isPlaying ? 'Pause' : 'Play';
+        var playbackClass = isPlaying ? 'playback-button playing' : 'playback-button';
         var coverUrl = this.state.track.get('artwork_url') || '/images/placeholder.jpg';
         return (
             <div className="global-player">
-                <div className="track">
-                    <img src={coverUrl} />
-                    <div className="track-info">
-                        <div className="artist">{artist}</div>
-                        <div className="title">{this.state.track.get('title')}</div>
-                    </div>
-                    <div className="actions">
-                        <div onClick={this.blacklistTrack}>Blacklist</div>
-                        <div onClick={this.saveTrack}>Save</div>
-                        <div onClick={this.publishTrack}>Publish</div>
-                        <div onClick={this.togglePlayback}>{text}</div>
-                        <div onClick={this.next}>Next</div>
-                    </div>
+                <div className="controls">
+                    <div className={playbackClass} onClick={this.togglePlayback}>{text}</div>
+                    <div className="next-button" onClick={this.next}>Next</div>
+                </div>
+                <img src={coverUrl} />
+                <div className="track-info">
+                    <div className="artist">{artist}</div>
+                    <div className="title">{this.state.track.get('title')}</div>
                 </div>
                 <ProgressBar
                     currentTime={this.state.track.get('currentTime')}
                     duration={this.state.track.get('duration')}
                     trackId={this.state.track.get('id')}
                 />
+                <div className="actions">
+                    <div onClick={this.blacklistTrack}>Blacklist</div>
+                    <div onClick={this.saveTrack}>Save</div>
+                    <div onClick={this.publishTrack}>Publish</div>
+                </div>
             </div>
         );
     }

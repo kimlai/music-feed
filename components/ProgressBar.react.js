@@ -18,14 +18,9 @@ module.exports = React.createClass({
         };
 
         return (
-            <div>
-                <div className="progress-bar outer" onClick={this.seek}>
+            <div className="progress-bar">
+                <div className="outer" onClick={this.seek}>
                     <div className="inner" style={innerStyle} />
-                </div>
-                <div className="timer">
-                    {millisecondsToTime(this.props.currentTime)}
-                    /
-                    {millisecondsToTime(this.props.duration)}
                 </div>
             </div>
         );
