@@ -64,7 +64,7 @@ function removeTrack(state, payload) {
         nextTrack = tracks.get(tracks.indexOf(payload.trackId) + 1);
     }
 
-   return  state.updateIn(['tracks'], function (tracks) {
+    return state.updateIn(['tracks'], function (tracks) {
         return tracks.filterNot(function (trackId) {
             return trackId === payload.trackId;
         });

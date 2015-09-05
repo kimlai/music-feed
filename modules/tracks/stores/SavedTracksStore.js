@@ -22,21 +22,21 @@ module.exports = new Store({
     },
 
     initialize: function () {
-        this.on(RECEIVE_SAVED_TRACKS, receiveSavedTracks);
+        this.on(RECEIVE_SAVED_TRACKS, receiveTracks);
         this.on(PLAY_TRACK_REQUEST, onPlayTrackRequest);
         this.on(BLACKLIST_TRACK_REQUEST, removeTrack);
         this.on(BLACKLIST_TRACK_FAILURE, removeTrackRollback);
         this.on(BLACKLIST_TRACK_SUCCESS, removeTrackSuccess);
-        this.on(PUBLISH_TRACK_REQUEST, removeTrack);
-        this.on(PUBLISH_TRACK_FAILURE, removeTrackRollback);
-        this.on(PUBLISH_TRACK_SUCCESS, removeTrackSuccess);
         this.on(SAVE_TRACK_REQUEST, addTrack);
         this.on(SAVE_TRACK_FAILURE, addTrackRollback);
         this.on(SAVE_TRACK_SUCCESS, addTrackSuccess);
+        this.on(PUBLISH_TRACK_REQUEST, removeTrack);
+        this.on(PUBLISH_TRACK_FAILURE, removeTrackRollback);
+        this.on(PUBLISH_TRACK_SUCCESS, removeTrackSuccess);
     }
 });
 
-function receiveSavedTracks(state, tracks) {
+function receiveTracks(state, tracks) {
     var newTracks = toImmutable(tracks)
         .map(function (track) {
             return track.get('id');
@@ -60,6 +60,7 @@ function removeTrack(state, payload) {
     if (state.get('nextTrack') === payload.trackId) {
         nextTrack = tracks.get(tracks.indexOf(payload.trackId) + 1);
     }
+
     return state.updateIn(['tracks'], function (tracks) {
         return tracks.filterNot(function (trackId) {
             return trackId === payload.trackId;

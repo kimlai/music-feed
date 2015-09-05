@@ -22,7 +22,7 @@ module.exports = new Store({
     },
 
     initialize: function () {
-        this.on(RECEIVE_PUBLISHED_TRACKS, receivePublishedTracks);
+        this.on(RECEIVE_PUBLISHED_TRACKS, receiveTracks);
         this.on(PLAY_TRACK_REQUEST, onPlayTrackRequest);
         this.on(BLACKLIST_TRACK_REQUEST, removeTrack);
         this.on(BLACKLIST_TRACK_FAILURE, removeTrackRollback);
@@ -36,7 +36,7 @@ module.exports = new Store({
     }
 });
 
-function receivePublishedTracks(state, tracks) {
+function receiveTracks(state, tracks) {
     var newTracks = toImmutable(tracks)
         .map(function (track) {
             return track.get('id');
@@ -61,7 +61,7 @@ function removeTrack(state, payload) {
         nextTrack = tracks.get(tracks.indexOf(payload.trackId) + 1);
     }
 
-   return  state.updateIn(['tracks'], function (tracks) {
+    return state.updateIn(['tracks'], function (tracks) {
         return tracks.filterNot(function (trackId) {
             return trackId === payload.trackId;
         });
