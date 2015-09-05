@@ -84,15 +84,14 @@ h1 {
         margin-bottom: 16px;
         .track-info-container {
             min-height: 100px;
+            display: flex;
             img {
                 width: 100px;
                 height: 100px;
                 background: #f0f0f0;
-                float: left;
             }
             .track-info {
                 padding: 10px;
-                float: left;
             }
         }
         .timer {

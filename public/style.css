@@ -68,15 +68,14 @@ h1 {
     cursor: pointer;
     margin-bottom: 16px; }
     .playlist-container .track .track-info-container {
-      min-height: 100px; }
+      min-height: 100px;
+      display: flex; }
       .playlist-container .track .track-info-container img {
         width: 100px;
         height: 100px;
-        background: #f0f0f0;
-        float: left; }
+        background: #f0f0f0; }
       .playlist-container .track .track-info-container .track-info {
-        padding: 10px;
-        float: left; }
+        padding: 10px; }
     .playlist-container .track .timer {
       display: none; }
 
