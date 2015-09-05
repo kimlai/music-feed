@@ -94,8 +94,14 @@ body {
         background: #f0f0f0; }
       .playlist-container .track .track-info-container .track-info {
         padding: 10px; }
-    .playlist-container .track .timer {
-      display: none; }
+      .playlist-container .track .track-info-container .actions {
+        z-index: 1;
+        padding: 10px; }
+        .playlist-container .track .track-info-container .actions div {
+          font-size: 14px;
+          color: #666;
+          float: left;
+          padding-right: 14px; }
 
 .progress-bar .outer {
   background: #e5e5e5;

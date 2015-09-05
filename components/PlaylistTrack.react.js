@@ -13,15 +13,34 @@ module.exports = React.createClass({
         }
     },
 
+    blacklistTrack: function () {
+        actions.blacklistTrack(this.props.track.get('id'));
+    },
+
+    saveTrack: function () {
+        actions.saveTrack(this.props.track.get('id'));
+    },
+
+    publishTrack: function () {
+        actions.publishTrack(this.props.track.get('id'));
+    },
+
     render: function () {
         var coverUrl = this.props.track.get('artwork_url') || '/images/placeholder.jpg';
         return (
             <div className="track">
-                <div className="track-info-container" onClick={this.togglePlayback}>
-                    <img src={coverUrl} />
-                    <div className="track-info">
-                        <div>{this.props.track.get('user').get('username')}</div>
-                        <div>{this.props.track.get('title')}</div>
+                <div className="track-info-container">
+                    <img src={coverUrl} onClick={this.togglePlayback}/>
+                    <div>
+                        <div className="track-info" onClick={this.togglePlayback}>
+                            <div>{this.props.track.get('user').get('username')}</div>
+                            <div>{this.props.track.get('title')}</div>
+                        </div>
+                        <div className="actions">
+                            <div onClick={this.blacklistTrack}>Blacklist</div>
+                            <div onClick={this.saveTrack}>Save</div>
+                            <div onClick={this.publishTrack}>Publish</div>
+                        </div>
                     </div>
                 </div>
                 <ProgressBar

@@ -115,9 +115,16 @@ body {
             .track-info {
                 padding: 10px;
             }
-        }
-        .timer {
-            display: none;
+            .actions {
+                z-index: 1;
+                padding: 10px;
+                div {
+                    font-size: 14px;
+                    color: #666;
+                    float: left;
+                    padding-right: 14px;
+                }
+            }
         }
     }
 }
