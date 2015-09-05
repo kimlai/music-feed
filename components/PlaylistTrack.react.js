@@ -14,10 +14,11 @@ module.exports = React.createClass({
     },
 
     render: function () {
+        var coverUrl = this.props.track.get('artwork_url') || '/images/placeholder.jpg';
         return (
             <div className="track">
                 <div className="track-info-container" onClick={this.togglePlayback}>
-                    <img src={this.props.track.get('artwork_url')} />
+                    <img src={coverUrl} />
                     <div className="track-info">
                         <div>{this.props.track.get('user').get('username')}</div>
                         <div>{this.props.track.get('title')}</div>

@@ -47,10 +47,11 @@ module.exports = React.createClass({
             artist = this.state.track.get('user').get('username');
         }
         var text = this.state.track.get('playbackStatus') === 'playing' ? 'Pause' : 'Play';
+        var coverUrl = this.state.track.get('artwork_url') || '/images/placeholder.jpg';
         return (
             <div className="global-player">
                 <div className="track">
-                    <img src={this.state.track.get('artwork_url')} />
+                    <img src={coverUrl} />
                     <div className="track-info">
                         <div className="artist">{artist}</div>
                         <div className="title">{this.state.track.get('title')}</div>
