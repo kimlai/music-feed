@@ -28,6 +28,7 @@ router.get('/', requireAuthentication, index);
 router.get('/feed', requireAuthentication, feed);
 router.post('/blacklist', requireAuthentication, blacklist);
 router.post('/save_track', requireAuthentication, saveTrack);
+router.post('/publish_track', requireAuthentication, publishTrack);
 
 app.use(router.routes());
 
@@ -104,7 +105,13 @@ function *blacklist() {
                 soundcloudUserId: soundcloudUserId,
                 soundcloudTrackId: soundcloudTrackId,
             })
-            .from('saved_tracks')
+            .from('saved_tracks'),
+        knex.del()
+            .where({
+                soundcloudUserId: soundcloudUserId,
+                soundcloudTrackId: soundcloudTrackId,
+            })
+            .from('published_tracks')
     ]);
     this.status = 201;
     this.body = "OK";
@@ -122,6 +129,23 @@ function *saveTrack() {
                 track : track,
                 savedAt: new Date(),
             }).into('saved_tracks');
+        });
+    this.status = 201;
+    this.body = "OK";
+}
+
+function *publishTrack() {
+    var token = this.state.token;
+    var soundcloudUserId = this.state.user.id;
+    var soundcloudTrackId = this.request.body.soundcloudTrackId;
+    yield soundcloud.track(soundcloudTrackId)
+        .then(function (track) {
+            return knex.insert({
+                soundcloudUserId: soundcloudUserId,
+                soundcloudTrackId: soundcloudTrackId,
+                track : track,
+                savedAt: new Date(),
+            }).into('published_tracks');
         });
     this.status = 201;
     this.body = "OK";
