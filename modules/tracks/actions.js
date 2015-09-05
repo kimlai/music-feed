@@ -18,6 +18,7 @@ module.exports = {
     fetchFeed: fetchFeed,
     initializeFeed: initializeFeed,
     initializeSavedTracks: initializeSavedTracks,
+    initializePublishedTracks: initializePublishedTracks,
     setCurrentPlaylistId: setCurrentPlaylistId,
 };
 
@@ -121,6 +122,10 @@ function initializeFeed(feed) {
 
 function initializeSavedTracks(tracks) {
     reactor.dispatch(actionTypes.RECEIVE_SAVED_TRACKS, tracks);
+}
+
+function initializePublishedTracks(tracks) {
+    reactor.dispatch(actionTypes.RECEIVE_PUBLISHED_TRACKS, tracks);
 }
 
 function fetchFeed() {

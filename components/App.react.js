@@ -1,16 +1,17 @@
 var React = require('react');
-var Feed = require('./Feed.react');
+var Router = require('react-router');
+var RouteHandler = Router.RouteHandler;
+var Navigation = require('./Navigation.react');
 var GlobalPlayer = require('./GlobalPlayer.react');
-var SavedTracks = require('./SavedTracks.react');
 
 module.exports = React.createClass({
     render: function () {
         return (
             <div>
                 <GlobalPlayer />
-                <div className="playlists-container">
-                    <Feed />
-                    <SavedTracks />
+                <Navigation />
+                <div className="playlist-container">
+                    <RouteHandler />
                 </div>
             </div>
         );

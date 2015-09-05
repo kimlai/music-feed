@@ -6,6 +6,9 @@
   font-size: 18px;
   margin: 0; }
 
+body {
+  overflow-y: scroll; }
+
 h1 {
   font-family: "freight-sans-pro";
   color: #000000;
@@ -40,33 +43,42 @@ h1 {
       float: right;
       cursor: pointer; }
 
-.playlists-container {
-  display: flex;
-  margin-top: 187px; }
-  .playlists-container .track {
+.navigation {
+  margin-top: 188px;
+  text-transform: uppercase; }
+  .navigation ul {
+    display: flex;
+    justify-content: center; }
+    .navigation ul li {
+      display: flex;
+      background: #333; }
+      .navigation ul li a {
+        padding: 9px 18px;
+        color: white;
+        text-decoration: none; }
+        .navigation ul li a.active {
+          color: black;
+          background: white; }
+
+.playlist-container {
+  max-width: 700px;
+  margin: 72px auto 36px auto; }
+  .playlist-container .track {
     font-size: 16px;
     cursor: pointer;
     margin-bottom: 16px; }
-    .playlists-container .track .track-info-container {
+    .playlist-container .track .track-info-container {
       min-height: 100px; }
-      .playlists-container .track .track-info-container img {
+      .playlist-container .track .track-info-container img {
         width: 100px;
         height: 100px;
         background: #f0f0f0;
         float: left; }
-      .playlists-container .track .track-info-container .track-info {
+      .playlist-container .track .track-info-container .track-info {
         padding: 10px;
         float: left; }
-    .playlists-container .track .timer {
+    .playlist-container .track .timer {
       display: none; }
-
-.feed,
-.saved-tracks {
-  padding: 35px;
-  width: 50%; }
-
-.feed {
-  border-right: 1px solid #f0f0f0; }
 
 .progress-bar.outer {
   background-color: black;

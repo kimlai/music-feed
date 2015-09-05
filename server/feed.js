@@ -62,7 +62,6 @@ function fetchPublishedTracks(soundcloudUserId) {
                 return parseInt(row.soundcloudTrackId, 10);
             });
         }).then(function (tracks) {
-            console.log(tracks);
             return tracks;
         });
 }

@@ -2,6 +2,7 @@ var toImmutable = require('nuclear-js').toImmutable;
 
 exports.feed = ['feed'];
 exports.savedTracks = ['savedTracks'];
+exports.publishedTracks = ['publishedTracks'];
 exports.tracks = ['tracks'];
 exports.playbackStatus = ['playbackStatus'];
 exports.currentTrackId = ['currentTrackId'];
@@ -33,16 +34,32 @@ exports.savedTracksWithTrackInfo = [
     }
 ];
 
+exports.publishedTracksWithTrackInfo = [
+    ['tracks'],
+    ['playbackStatus'],
+    ['publishedTracks', 'tracks'],
+    function (tracks, playbackStatus, publishedTracks) {
+        return publishedTracks.map(function (trackId) {
+            return tracks
+                .get(trackId)
+                .merge(playbackStatus.get(trackId));
+        });
+    }
+];
+
 exports.nextTrackId = [
     ['currentPlaylistId'],
     ['feed'],
     ['savedTracks'],
-    function (currentPlaylistId, feed, savedTracks) {
+    ['publishedTracks'],
+    function (currentPlaylistId, feed, savedTracks, publishedTracks) {
         switch (currentPlaylistId) {
             case 'feed':
                 return feed.get('nextTrack');
             case 'savedTracks':
                 return savedTracks.get('nextTrack');
+            case 'publishedTracks':
+                return publishedTracks.get('nextTrack');
         }
     }
 ];

@@ -59,11 +59,22 @@ function *index() {
                 return _.map(rows, function (row) {
                     return row.track;
                 });
+            }),
+        knex.select('track')
+            .where({soundcloudUserId: soundcloudUserId})
+            .orderBy('savedAt', 'DESC')
+            .limit(10)
+            .from('published_tracks')
+            .then(function (rows) {
+                return _.map(rows, function (row) {
+                    return row.track;
+                });
             })
     ]).then(function (results) {
         return {
             feed: results[0],
             savedTracks: results[1],
+            publishedTracks: results[2],
         };
     });
 

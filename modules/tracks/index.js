@@ -3,6 +3,7 @@ var actions = require('./actions');
 
 var FeedStore = require('./stores/FeedStore');
 var SavedTracksStore = require('./stores/SavedTracksStore');
+var PublishedTracksStore = require('./stores/PublishedTracksStore');
 var TrackStore = require('./stores/TrackStore');
 var PlaybackStatusStore = require('./stores/PlaybackStatusStore');
 var CurrentTrackIdStore = require('./stores/CurrentTrackIdStore');
@@ -15,6 +16,7 @@ module.exports = {
         reactor.registerStores({
             'feed': FeedStore,
             'savedTracks': SavedTracksStore,
+            'publishedTracks': PublishedTracksStore,
             'tracks': TrackStore,
             'playbackStatus': PlaybackStatusStore,
             'currentTrackId': CurrentTrackIdStore,

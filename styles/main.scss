@@ -7,6 +7,10 @@
     margin: 0;
 }
 
+body {
+    overflow-y: scroll;
+}
+
 h1 {
     font-family: "freight-sans-pro";
     color: #000000;
@@ -49,9 +53,31 @@ h1 {
     }
 }
 
-.playlists-container {
-    display: flex;
-    margin-top: 187px;
+.navigation {
+    margin-top: 188px;
+    text-transform: uppercase;
+    ul {
+        display: flex;
+        justify-content: center;
+        li {
+            display: flex;
+            background: #333;
+            a {
+                padding: 9px 18px;
+                color: white;
+                text-decoration: none;
+                &.active {
+                    color: black;
+                    background: white;
+                }
+            }
+        }
+    }
+}
+
+.playlist-container {
+    max-width: 700px;
+    margin: 72px auto 36px auto;
     .track {
         font-size: 16px;
         cursor: pointer;
@@ -73,16 +99,6 @@ h1 {
             display: none;
         }
     }
-}
-
-.feed,
-.saved-tracks {
-    padding: 35px;
-    width: 50%;
-}
-
-.feed {
-    border-right: 1px solid #f0f0f0;
 }
 
 .progress-bar.outer {
