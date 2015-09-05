@@ -8,6 +8,9 @@ var BLACKLIST_TRACK_FAILURE = require('../actionTypes').BLACKLIST_TRACK_FAILURE;
 var SAVE_TRACK_REQUEST = require('../actionTypes').SAVE_TRACK_REQUEST;
 var SAVE_TRACK_SUCCESS = require('../actionTypes').SAVE_TRACK_SUCCESS;
 var SAVE_TRACK_FAILURE = require('../actionTypes').SAVE_TRACK_FAILURE;
+var PUBLISH_TRACK_REQUEST = require('../actionTypes').PUBLISH_TRACK_REQUEST;
+var PUBLISH_TRACK_SUCCESS = require('../actionTypes').PUBLISH_TRACK_SUCCESS;
+var PUBLISH_TRACK_FAILURE = require('../actionTypes').PUBLISH_TRACK_FAILURE;
 
 module.exports = new Store({
     getInitialState: function () {
@@ -28,6 +31,9 @@ module.exports = new Store({
         this.on(SAVE_TRACK_REQUEST, removeTrack);
         this.on(SAVE_TRACK_FAILURE, removeTrackRollback);
         this.on(SAVE_TRACK_SUCCESS, removeTrackSuccess);
+        this.on(PUBLISH_TRACK_REQUEST, removeTrack);
+        this.on(PUBLISH_TRACK_FAILURE, removeTrackRollback);
+        this.on(PUBLISH_TRACK_SUCCESS, removeTrackSuccess);
     }
 });
 

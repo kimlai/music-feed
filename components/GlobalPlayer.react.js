@@ -37,6 +37,9 @@ module.exports = React.createClass({
         actions.saveTrack(this.state.track.get('id'));
     },
 
+    publishTrack: function () {
+        actions.publishTrack(this.state.track.get('id'));
+    },
 
     render: function () {
         var artist = '';
@@ -55,6 +58,7 @@ module.exports = React.createClass({
                     <div className="actions">
                         <div onClick={this.blacklistTrack}>Blacklist</div>
                         <div onClick={this.saveTrack}>Save</div>
+                        <div onClick={this.publishTrack}>Publish</div>
                         <div onClick={this.togglePlayback}>{text}</div>
                         <div onClick={this.next}>Next</div>
                     </div>
