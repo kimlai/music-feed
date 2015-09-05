@@ -149,7 +149,8 @@ function *publishTrack() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;
     var soundcloudTrackId = this.request.body.soundcloudTrackId;
-    yield soundcloud.track(soundcloudTrackId)
+    yield Promise.all([
+        soundcloud.track(soundcloudTrackId)
         .then(function (track) {
             return knex.insert({
                 soundcloudUserId: soundcloudUserId,
@@ -157,7 +158,14 @@ function *publishTrack() {
                 track : track,
                 savedAt: new Date(),
             }).into('published_tracks');
-        });
+        }),
+        knex.del()
+            .where({
+                soundcloudUserId: soundcloudUserId,
+                soundcloudTrackId: soundcloudTrackId,
+            })
+            .from('saved_tracks')
+    ]);
     this.status = 201;
     this.body = "OK";
 }
