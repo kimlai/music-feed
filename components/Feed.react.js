@@ -28,7 +28,7 @@ module.exports = React.createClass({
                         <PlaylistTrack key={track.get('id')} track={track} playlistId={'feed'} />
                     );
                 }).toList()}
-                <div onClick={this.fetchFeed}>More</div>
+                <div className="more-button" onClick={this.fetchFeed}>More</div>
             </div>
         );
     }
