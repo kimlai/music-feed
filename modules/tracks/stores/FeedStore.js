@@ -1,5 +1,7 @@
 var toImmutable = require('nuclear-js').toImmutable;
 var Store = require('nuclear-js').Store;
+var FETCH_FEED_REQUEST = require('../actionTypes').FETCH_FEED_REQUEST;
+var FETCH_FEED_FAILURE = require('../actionTypes').FETCH_FEED_FAILURE;
 var RECEIVE_FEED = require('../actionTypes').RECEIVE_FEED;
 var PLAY_TRACK_REQUEST = require('../actionTypes').PLAY_TRACK_REQUEST;
 var BLACKLIST_TRACK_REQUEST = require('../actionTypes').BLACKLIST_TRACK_REQUEST;
@@ -18,11 +20,14 @@ module.exports = new Store({
             tracks: [],
             nextLink: null,
             nextTrack: null,
-            pendingTracks: []
+            pendingTracks: [],
+            fetchingStatus: 'idle',
         });
     },
 
     initialize: function () {
+        this.on(FETCH_FEED_REQUEST, fetchFeedRequest);
+        this.on(FETCH_FEED_FAILURE, fetchFeedFailure);
         this.on(RECEIVE_FEED, receiveFeed);
         this.on(PLAY_TRACK_REQUEST, onPlayTrackRequest);
         this.on(BLACKLIST_TRACK_REQUEST, removeTrack);
@@ -37,6 +42,14 @@ module.exports = new Store({
     }
 });
 
+function fetchFeedRequest(state) {
+    return state.set('fetchingStatus', 'fetching');
+}
+
+function fetchFeedFailure(state) {
+    return state.set('fetchingStatus', 'failed');
+}
+
 function receiveFeed(state, feed) {
     var newTracks = toImmutable(feed.tracks)
         .map(function (track) {
@@ -45,6 +58,7 @@ function receiveFeed(state, feed) {
         .toList();
 
     return state
+        .set('fetchingStatus', 'idle')
         .set('nextLink', feed.next_href)
         .updateIn(['tracks'], function (tracks) {
             return tracks.concat(newTracks);

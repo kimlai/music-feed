@@ -8,15 +8,17 @@ exports.playbackStatus = ['playbackStatus'];
 exports.currentTrackId = ['currentTrackId'];
 exports.currentPlaylistId = ['currentPlaylistId'];
 
-exports.feedTracks = [
+exports.feedWithTrackInfo = [
     ['tracks'],
     ['playbackStatus'],
-    ['feed', 'tracks'],
-    function (tracks, playbackStatus, feedTracks) {
-        return feedTracks.map(function (trackId) {
-            return tracks
-                .get(trackId)
-                .merge(playbackStatus.get(trackId));
+    ['feed'],
+    function (tracks, playbackStatus, feed) {
+        return feed.update('tracks', function (trackIds) {
+            return trackIds.map(function (trackId) {
+                return tracks
+                    .get(trackId)
+                    .merge(playbackStatus.get(trackId));
+            });
         });
     }
 ];

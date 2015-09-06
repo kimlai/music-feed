@@ -146,10 +146,16 @@ function initializePublishedTracks(tracks) {
 
 function fetchFeed() {
     var nextLink = reactor.evaluate(getters.feed).get('nextLink');
+    reactor.dispatch(actionTypes.FETCH_FEED_REQUEST);
     request
         .get(process.env.MUSICFEED_API_ROOT+'/feed')
         .query({ nextLink: nextLink})
-        .then(function (response) {
-            reactor.dispatch(actionTypes.RECEIVE_FEED, response.body);
-        });
+        .then(
+            function (response) {
+                reactor.dispatch(actionTypes.RECEIVE_FEED, response.body);
+            },
+            function (error) {
+                reactor.dispatch(actionTypes.FETCH_FEED_FAILURE);
+            }
+        );
 }

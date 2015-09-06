@@ -98,7 +98,7 @@ body {
 
 .playlist-container {
     max-width: 700px;
-    margin: 112px auto 112px auto;
+    margin: 112px auto 224px auto;
     .track {
         font-size: 16px;
         cursor: pointer;
@@ -114,6 +114,10 @@ body {
             }
             .track-info {
                 padding: 10px;
+                line-height: 24px;
+                .reposter {
+                    padding-left: 10px;
+                }
             }
             .actions {
                 z-index: 1;
@@ -144,7 +148,6 @@ body {
 
 .more-button {
     text-align: center;
-    margin-top: 36px;
     cursor: pointer;
     line-height: 100px;
     border: 1px solid #f0f0f0;

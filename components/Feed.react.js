@@ -12,7 +12,7 @@ module.exports = React.createClass({
 
     getDataBindings: function () {
         return {
-            tracks: getters.feedTracks
+            feed: getters.feedWithTrackInfo
         };
     },
 
@@ -21,14 +21,54 @@ module.exports = React.createClass({
     },
 
     render: function () {
+        var moreButton;
+
+        switch (this.state.feed.get('fetchingStatus')) {
+            case 'fetching':
+                moreButton = <PlaylistLoader />;
+                break;
+            case 'failed':
+                moreButton =
+                    <div className="more-button" onClick={this.fetchFeed}>
+                        It looks like something went wrong. Retry ?
+                    </div>;
+                break;
+            default:
+                moreButton = <div className="more-button" onClick={this.fetchFeed}>More</div>;
+                break;
+        }
         return (
             <div className="feed">
-                {this.state.tracks.map(function (track) {
+                {this.state.feed.get('tracks').map(function (track) {
                     return (
                         <PlaylistTrack key={track.get('id')} track={track} playlistId={'feed'} />
                     );
                 }).toList()}
-                <div className="more-button" onClick={this.fetchFeed}>More</div>
+                {moreButton}
+            </div>
+        );
+    }
+});
+
+var PlaylistLoader = React.createClass({
+    render: function () {
+        var placeholders = [];
+        for (var i=0; i < 10; i++) {
+            placeholders.push(
+                <div className="track" key={i}>
+                    <div className="track-info-container">
+                        <img src="/images/placeholder.jpg" />
+                    </div>
+                    <div className="progress-bar">
+                        <div className="outer" />
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div>
+                {placeholders}
             </div>
         );
     }

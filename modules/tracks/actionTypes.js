@@ -18,6 +18,8 @@ module.exports = keyMirror({
     PUBLISH_TRACK_REQUEST: null,
     PUBLISH_TRACK_SUCCESS: null,
     PUBLISH_TRACK_FAILURE: null,
+    FETCH_FEED_REQUEST: null,
+    FETCH_FEED_FAILURE: null,
     RECEIVE_FEED: null,
     RECEIVE_SAVED_TRACKS: null,
     RECEIVE_PUBLISHED_TRACKS: null,

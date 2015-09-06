@@ -79,7 +79,7 @@ body {
 
 .playlist-container {
   max-width: 700px;
-  margin: 112px auto 112px auto; }
+  margin: 112px auto 224px auto; }
   .playlist-container .track {
     font-size: 16px;
     cursor: pointer;
@@ -93,7 +93,10 @@ body {
         height: 100px;
         background: #f0f0f0; }
       .playlist-container .track .track-info-container .track-info {
-        padding: 10px; }
+        padding: 10px;
+        line-height: 24px; }
+        .playlist-container .track .track-info-container .track-info .reposter {
+          padding-left: 10px; }
       .playlist-container .track .track-info-container .actions {
         z-index: 1;
         padding: 10px; }
@@ -114,7 +117,6 @@ body {
 
 .more-button {
   text-align: center;
-  margin-top: 36px;
   cursor: pointer;
   line-height: 100px;
   border: 1px solid #f0f0f0; }
