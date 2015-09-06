@@ -87,6 +87,7 @@ body {
     cursor: pointer;
     margin-bottom: 16px; }
     .playlist-container .track .track-info-container {
+      position: relative;
       min-height: 100px;
       display: flex; }
       .playlist-container .track .track-info-container img {
@@ -104,9 +105,16 @@ body {
         padding: 10px; }
         .playlist-container .track .track-info-container .actions div {
           font-size: 14px;
-          color: #666;
+          color: #777;
           float: left;
           padding-right: 14px; }
+      .playlist-container .track .track-info-container .time-ago {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 10px;
+        color: #777;
+        font-size: 14px; }
 
 .progress-bar .outer {
   background: #e5e5e5;

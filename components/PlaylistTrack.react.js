@@ -1,6 +1,7 @@
 var React = require('react');
 var ProgressBar = require('./ProgressBar.react');
 var actions = require('../modules/tracks').actions;
+var moment = require('moment');
 
 module.exports = React.createClass({
     togglePlayback: function () {
@@ -27,6 +28,7 @@ module.exports = React.createClass({
 
     render: function () {
         var coverUrl = this.props.track.get('artwork_url') || '/images/placeholder.jpg';
+        var timeStamp = moment(this.props.track.get('created_at'), 'YYYY/MM/DD HH:mm:ss Z');
         return (
             <div className="track">
                 <div className="track-info-container">
@@ -42,6 +44,7 @@ module.exports = React.createClass({
                             <div onClick={this.publishTrack}>Publish</div>
                         </div>
                     </div>
+                    <div className="time-ago">{timeStamp.fromNow(true)}</div>
                 </div>
                 <ProgressBar
                     currentTime={this.props.track.get('currentTime')}
