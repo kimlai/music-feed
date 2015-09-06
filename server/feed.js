@@ -16,7 +16,7 @@ module.exports = function fetchFeedApi(soundcloudUserId, token, nextLink) {
             var savedTracks =  results[2];
             var publishedTracks =  results[3];
             feed.tracks = _.filter(feed.tracks, function (track) {
-                return !_.includes(_.merge(blacklist, savedTracks, publishedTracks), track.id);
+                return !_.includes(blacklist.concat(savedTracks, publishedTracks), track.id);
             });
             return feed;
         });
