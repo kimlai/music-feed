@@ -3,7 +3,47 @@ var ProgressBar = require('./ProgressBar.react');
 var actions = require('../modules/tracks').actions;
 var moment = require('moment');
 
+moment.locale('en', {
+    relativeTime : {
+        future: "in %s",
+        past:   "%s ago",
+        s:  "a few seconds",
+        m:  "1 minute",
+        mm: "%d minutes",
+        h:  "1 hour",
+        hh: "%d hours",
+        d:  "1 day",
+        dd: "%d days",
+        M:  "1 month",
+        MM: "%d months",
+        y:  "1 year",
+        yy: "%d years"
+    }
+});
+
 module.exports = React.createClass({
+    getInitialState: function () {
+        return { timeAgo: '' };
+    },
+
+    componentDidMount: function () {
+        var timestamp;
+        if (this.props.track.has('saved_at')) {
+            timestamp = moment(this.props.track.get('saved_at'));
+        } else {
+            timestamp = moment(this.props.track.get('created_at'), 'YYYY/MM/DD HH:mm:ss Z');
+        }
+        this.setState({timeAgo: timestamp.fromNow(true)});
+        var _self = this;
+        this.timer = setInterval(function () {
+            _self.setState({timeAgo: timestamp.fromNow(true)});
+        }, 60000);
+    },
+
+    componentWillUnmount: function () {
+        clearInterval(this.timer);
+    },
+
     togglePlayback: function () {
         var playbackStatus = this.props.track.get('playbackStatus');
         if (playbackStatus === 'playing') {
@@ -28,7 +68,6 @@ module.exports = React.createClass({
 
     render: function () {
         var coverUrl = this.props.track.get('artwork_url') || '/images/placeholder.jpg';
-        var timeStamp = moment(this.props.track.get('created_at'), 'YYYY/MM/DD HH:mm:ss Z');
         return (
             <div className="track">
                 <div className="track-info-container">
@@ -44,7 +83,7 @@ module.exports = React.createClass({
                             <div onClick={this.publishTrack}>Publish</div>
                         </div>
                     </div>
-                    <div className="time-ago">{timeStamp.fromNow(true)}</div>
+                    <div className="time-ago">{this.state.timeAgo}</div>
                 </div>
                 <ProgressBar
                     currentTime={this.props.track.get('currentTime')}

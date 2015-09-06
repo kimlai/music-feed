@@ -50,24 +50,28 @@ function *index() {
     var soundcloudUserId = this.state.user.id;
     var feeds = yield Promise.all([
         feedApi(soundcloudUserId, token),
-        knex.select('track')
+        knex.select('track', 'savedAt')
             .where({soundcloudUserId: soundcloudUserId})
             .orderBy('savedAt', 'DESC')
             .limit(10)
             .from('saved_tracks')
             .then(function (rows) {
                 return _.map(rows, function (row) {
-                    return row.track;
+                    var track = row.track;
+                    track.saved_at = row.savedAt;
+                    return track;
                 });
             }),
-        knex.select('track')
+        knex.select('track', 'savedAt')
             .where({soundcloudUserId: soundcloudUserId})
             .orderBy('savedAt', 'DESC')
             .limit(10)
             .from('published_tracks')
             .then(function (rows) {
                 return _.map(rows, function (row) {
-                    return row.track;
+                    var track = row.track;
+                    track.saved_at = row.savedAt;
+                    return track;
                 });
             })
     ]).then(function (results) {

@@ -68,7 +68,12 @@ function fetchPublishedTracks(soundcloudUserId) {
 
 function parseSoundcloudActivities(activities) {
     var tracks = activities.collection.map(function (activity) {
-        return activity.origin;
+        var track = activity.origin;
+        if (activity.type === 'track-repost') {
+            track.created_at = activity.created_at;
+        }
+
+        return track;
     });
 
     return {
