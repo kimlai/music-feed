@@ -15,6 +15,7 @@ body {
     border-top: 1px solid #f0f0f0;
     padding: 12px;
     position: fixed;
+    z-index: 999;
     bottom: 0;
     left: 0;
     right: 0;
@@ -74,6 +75,7 @@ body {
 
 .navigation {
     position: fixed;
+    z-index: 999;
     top: 0;
     left: 0;
     right: 0;
