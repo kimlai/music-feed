@@ -88,10 +88,24 @@ body {
         li {
             display: flex;
             a {
-                padding: 9px 18px;
+                padding: 9px 36px;
                 text-decoration: none;
+                position: relative;
                 &.active {
                     background: #f0f0f0;
+                }
+                &.playing:before {
+                    content: "playing";
+                    display: inline-block;
+                    position: absolute;
+                    background: url("/images/play.svg") no-repeat center;
+                    width: 18px;
+                    height: 18px;
+                    color: transparent;
+                    background-size: 18px 18px;
+                    left: 12px;
+                    top: 10px;
+                    opacity: 0.2;
                 }
             }
         }

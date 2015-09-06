@@ -74,10 +74,23 @@ body {
     .navigation ul li {
       display: flex; }
       .navigation ul li a {
-        padding: 9px 18px;
-        text-decoration: none; }
+        padding: 9px 36px;
+        text-decoration: none;
+        position: relative; }
         .navigation ul li a.active {
           background: #f0f0f0; }
+        .navigation ul li a.playing:before {
+          content: "playing";
+          display: inline-block;
+          position: absolute;
+          background: url("/images/play.svg") no-repeat center;
+          width: 18px;
+          height: 18px;
+          color: transparent;
+          background-size: 18px 18px;
+          left: 12px;
+          top: 10px;
+          opacity: 0.2; }
 
 .playlist-container {
   max-width: 700px;
