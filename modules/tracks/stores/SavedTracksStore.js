@@ -1,5 +1,7 @@
 var toImmutable = require('nuclear-js').toImmutable;
 var Store = require('nuclear-js').Store;
+var FETCH_SAVED_TRACKS_REQUEST = require('../actionTypes').FETCH_SAVED_TRACKS_REQUEST;
+var FETCH_SAVED_TRACKS_FAILURE = require('../actionTypes').FETCH_SAVED_TRACKS_FAILURE;
 var RECEIVE_SAVED_TRACKS = require('../actionTypes').RECEIVE_SAVED_TRACKS;
 var PLAY_TRACK_REQUEST = require('../actionTypes').PLAY_TRACK_REQUEST;
 var BLACKLIST_TRACK_REQUEST = require('../actionTypes').BLACKLIST_TRACK_REQUEST;
@@ -17,11 +19,14 @@ module.exports = new Store({
         return toImmutable({
             tracks: [],
             nextTrack: null,
-            pendingTracks: []
+            pendingTracks: [],
+            fetchingStatus: 'idle',
         });
     },
 
     initialize: function () {
+        this.on(FETCH_SAVED_TRACKS_REQUEST, fetchTracksRequest);
+        this.on(FETCH_SAVED_TRACKS_FAILURE, fetchTracksFailure);
         this.on(RECEIVE_SAVED_TRACKS, receiveTracks);
         this.on(PLAY_TRACK_REQUEST, onPlayTrackRequest);
         this.on(BLACKLIST_TRACK_REQUEST, removeTrack);
@@ -35,6 +40,14 @@ module.exports = new Store({
         this.on(PUBLISH_TRACK_SUCCESS, removeTrackSuccess);
     }
 });
+
+function fetchTracksRequest(state) {
+    return state.set('fetchingStatus', 'fetching');
+}
+
+function fetchTracksFailure(state) {
+    return state.set('fetchingStatus', 'failed');
+}
 
 function receiveTracks(state, tracks) {
     var newTracks = toImmutable(tracks)

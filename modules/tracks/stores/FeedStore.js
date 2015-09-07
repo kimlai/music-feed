@@ -26,8 +26,8 @@ module.exports = new Store({
     },
 
     initialize: function () {
-        this.on(FETCH_FEED_REQUEST, fetchFeedRequest);
-        this.on(FETCH_FEED_FAILURE, fetchFeedFailure);
+        this.on(FETCH_FEED_REQUEST, fetchTracksRequest);
+        this.on(FETCH_FEED_FAILURE, fetchTracksFailure);
         this.on(RECEIVE_FEED, receiveFeed);
         this.on(PLAY_TRACK_REQUEST, onPlayTrackRequest);
         this.on(BLACKLIST_TRACK_REQUEST, removeTrack);
@@ -42,11 +42,11 @@ module.exports = new Store({
     }
 });
 
-function fetchFeedRequest(state) {
+function fetchTracksRequest(state) {
     return state.set('fetchingStatus', 'fetching');
 }
 
-function fetchFeedFailure(state) {
+function fetchTracksFailure(state) {
     return state.set('fetchingStatus', 'failed');
 }
 

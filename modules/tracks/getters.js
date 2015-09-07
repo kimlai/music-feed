@@ -26,12 +26,14 @@ exports.feedWithTrackInfo = [
 exports.savedTracksWithTrackInfo = [
     ['tracks'],
     ['playbackStatus'],
-    ['savedTracks', 'tracks'],
+    ['savedTracks'],
     function (tracks, playbackStatus, savedTracks) {
-        return savedTracks.map(function (trackId) {
-            return tracks
-                .get(trackId)
-                .merge(playbackStatus.get(trackId));
+        return savedTracks.update('tracks', function (trackIds) {
+            return trackIds.map(function (trackId) {
+                return tracks
+                    .get(trackId)
+                    .merge(playbackStatus.get(trackId));
+            });
         });
     }
 ];

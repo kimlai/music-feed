@@ -1,5 +1,6 @@
 var React = require('react');
 var PlaylistTrack = require('./PlaylistTrack.react');
+var PlaylistLoader = require('./PlaylistLoader.react');
 var TracksModule = require('../modules/tracks');
 
 var reactor = require('../reactor');
@@ -12,18 +13,39 @@ module.exports = React.createClass({
 
     getDataBindings: function () {
         return {
-            tracks: getters.savedTracksWithTrackInfo
+            playlist: getters.savedTracksWithTrackInfo
         };
     },
 
+    fetchFeed: function () {
+        actions.fetchSavedTracks();
+    },
+
+
     render: function () {
+        var moreButton;
+        switch (this.state.playlist.get('fetchingStatus')) {
+            case 'fetching':
+                moreButton = <PlaylistLoader />;
+                break;
+            case 'failed':
+                moreButton =
+                    <div className="more-button" onClick={this.fetchFeed}>
+                        It looks like something went wrong. Retry ?
+                    </div>;
+                break;
+            default:
+                moreButton = <div className="more-button" onClick={this.fetchFeed}>More</div>;
+                break;
+        }
         return (
-            <div className="saved-tracks">
-                {this.state.tracks.map(function (track) {
+            <div>
+                {this.state.playlist.get('tracks').map(function (track) {
                     return (
                         <PlaylistTrack key={track.get('id')} track={track} playlistId={'savedTracks'} />
                     );
                 }).toList()}
+                {moreButton}
             </div>
         );
     }

@@ -17,6 +17,7 @@ module.exports = {
     saveTrack: saveTrack,
     publishTrack: publishTrack,
     fetchFeed: fetchFeed,
+    fetchSavedTracks: fetchSavedTracks,
     initializeFeed: initializeFeed,
     initializeSavedTracks: initializeSavedTracks,
     initializePublishedTracks: initializePublishedTracks,
@@ -156,6 +157,22 @@ function fetchFeed() {
             },
             function (error) {
                 reactor.dispatch(actionTypes.FETCH_FEED_FAILURE);
+            }
+        );
+}
+
+function fetchSavedTracks() {
+    var nextLink = reactor.evaluate(getters.savedTracks).get('nextLink');
+    reactor.dispatch(actionTypes.FETCH_SAVED_TRACKS_REQUEST);
+    request
+        .get(process.env.MUSICFEED_API_ROOT+'/saved_tracks')
+        .query({ nextLink: nextLink})
+        .then(
+            function (response) {
+                reactor.dispatch(actionTypes.RECEIVE_SAVED_TRACKS, response.body);
+            },
+            function (error) {
+                reactor.dispatch(actionTypes.FETCH_SAVED_TRACKS_FAILURE);
             }
         );
 }

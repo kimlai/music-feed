@@ -21,6 +21,8 @@ module.exports = keyMirror({
     FETCH_FEED_REQUEST: null,
     FETCH_FEED_FAILURE: null,
     RECEIVE_FEED: null,
+    FETCH_SAVED_TRACKS_REQUEST: null,
+    FETCH_SAVED_TRACKS_FAILURE: null,
     RECEIVE_SAVED_TRACKS: null,
     RECEIVE_PUBLISHED_TRACKS: null,
     SET_CURRENT_PLAYLIST_ID: null,

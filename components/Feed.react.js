@@ -1,5 +1,6 @@
 var React = require('react');
 var PlaylistTrack = require('./PlaylistTrack.react');
+var PlaylistLoader = require('./PlaylistLoader.react');
 var TracksModule = require('../modules/tracks');
 
 var reactor = require('../reactor');
@@ -12,7 +13,7 @@ module.exports = React.createClass({
 
     getDataBindings: function () {
         return {
-            feed: getters.feedWithTrackInfo
+            playlist: getters.feedWithTrackInfo
         };
     },
 
@@ -22,8 +23,7 @@ module.exports = React.createClass({
 
     render: function () {
         var moreButton;
-
-        switch (this.state.feed.get('fetchingStatus')) {
+        switch (this.state.playlist.get('fetchingStatus')) {
             case 'fetching':
                 moreButton = <PlaylistLoader />;
                 break;
@@ -38,37 +38,13 @@ module.exports = React.createClass({
                 break;
         }
         return (
-            <div className="feed">
-                {this.state.feed.get('tracks').map(function (track) {
+            <div>
+                {this.state.playlist.get('tracks').map(function (track) {
                     return (
                         <PlaylistTrack key={track.get('id')} track={track} playlistId={'feed'} />
                     );
                 }).toList()}
                 {moreButton}
-            </div>
-        );
-    }
-});
-
-var PlaylistLoader = React.createClass({
-    render: function () {
-        var placeholders = [];
-        for (var i=0; i < 10; i++) {
-            placeholders.push(
-                <div className="track" key={i}>
-                    <div className="track-info-container">
-                        <img src="/images/placeholder.jpg" />
-                    </div>
-                    <div className="progress-bar">
-                        <div className="outer" />
-                    </div>
-                </div>
-            );
-        }
-
-        return (
-            <div>
-                {placeholders}
             </div>
         );
     }
