@@ -41,12 +41,14 @@ exports.savedTracksWithTrackInfo = [
 exports.publishedTracksWithTrackInfo = [
     ['tracks'],
     ['playbackStatus'],
-    ['publishedTracks', 'tracks'],
+    ['publishedTracks'],
     function (tracks, playbackStatus, publishedTracks) {
-        return publishedTracks.map(function (trackId) {
-            return tracks
-                .get(trackId)
-                .merge(playbackStatus.get(trackId));
+        return publishedTracks.update('tracks', function (trackIds) {
+            return trackIds.map(function (trackId) {
+                return tracks
+                    .get(trackId)
+                    .merge(playbackStatus.get(trackId));
+            });
         });
     }
 ];

@@ -17,6 +17,7 @@ var PUBLISH_TRACK_FAILURE = require('../actionTypes').PUBLISH_TRACK_FAILURE;
 module.exports = new Store({
     getInitialState: function () {
         return toImmutable({
+            id: 'savedTracks',
             tracks: [],
             nextTrack: null,
             pendingTracks: [],

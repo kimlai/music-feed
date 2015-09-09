@@ -16,8 +16,7 @@ module.exports = {
     blacklistTrack: blacklistTrack,
     saveTrack: saveTrack,
     publishTrack: publishTrack,
-    fetchFeed: fetchFeed,
-    fetchSavedTracks: fetchSavedTracks,
+    fetchMoreTracks: fetchMoreTracks,
     initializeFeed: initializeFeed,
     initializeSavedTracks: initializeSavedTracks,
     initializePublishedTracks: initializePublishedTracks,
@@ -145,34 +144,33 @@ function initializePublishedTracks(tracks) {
     reactor.dispatch(actionTypes.RECEIVE_PUBLISHED_TRACKS, tracks);
 }
 
-function fetchFeed() {
+function fetchMoreTracks(playlistId) {
+    var playlists = {
+        feed: {
+            url: '/feed',
+            action: 'FEED',
+        },
+        savedTracks: {
+            url: '/saved-tracks',
+            action: 'SAVED_TRACKS',
+        },
+        publishedTracks: {
+            url: '/published-tracks',
+            action: 'PUBLISHED_TRACKS',
+        }
+    };
+    var playlist = playlists[playlistId];
     var nextLink = reactor.evaluate(getters.feed).get('nextLink');
-    reactor.dispatch(actionTypes.FETCH_FEED_REQUEST);
+    reactor.dispatch(actionTypes['FETCH_' + playlist.action + '_REQUEST']);
     request
-        .get(process.env.MUSICFEED_API_ROOT+'/feed')
+        .get(process.env.MUSICFEED_API_ROOT + playlist.url)
         .query({ nextLink: nextLink})
         .then(
             function (response) {
-                reactor.dispatch(actionTypes.RECEIVE_FEED, response.body);
+                reactor.dispatch(actionTypes['RECEIVE_' + playlist.action], response.body);
             },
             function (error) {
-                reactor.dispatch(actionTypes.FETCH_FEED_FAILURE);
-            }
-        );
-}
-
-function fetchSavedTracks() {
-    var nextLink = reactor.evaluate(getters.savedTracks).get('nextLink');
-    reactor.dispatch(actionTypes.FETCH_SAVED_TRACKS_REQUEST);
-    request
-        .get(process.env.MUSICFEED_API_ROOT+'/saved_tracks')
-        .query({ nextLink: nextLink})
-        .then(
-            function (response) {
-                reactor.dispatch(actionTypes.RECEIVE_SAVED_TRACKS, response.body);
-            },
-            function (error) {
-                reactor.dispatch(actionTypes.FETCH_SAVED_TRACKS_FAILURE);
+                reactor.dispatch(actionTypes['FETCH_' + playlist.action + '_FAILURE']);
             }
         );
 }

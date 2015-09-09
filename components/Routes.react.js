@@ -3,10 +3,13 @@ var Router = require('react-router');
 var Route = Router.Route;
 var DefaultRoute = Router.DefaultRoute;
 
+var TracksModule = require('../modules/tracks');
+var getters = TracksModule.getters;
+
 var App = require('./App.react');
-var Feed = require('./Feed.react');
-var SavedTracks = require('./SavedTracks.react');
-var PublishedTracks = require('./PublishedTracks.react');
+var Feed = require('./Playlist.react')(getters.feedWithTrackInfo);
+var SavedTracks = require('./Playlist.react')(getters.savedTracksWithTrackInfo);
+var PublishedTracks = require('./Playlist.react')(getters.publishedTracksWithTrackInfo);
 
 module.exports = (
     <Route handler={App}>
