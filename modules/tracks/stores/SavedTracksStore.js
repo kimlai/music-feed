@@ -50,14 +50,17 @@ function fetchTracksFailure(state) {
     return state.set('fetchingStatus', 'failed');
 }
 
-function receiveTracks(state, tracks) {
-    var newTracks = toImmutable(tracks)
+function receiveTracks(state, playlist) {
+    var newTracks = toImmutable(playlist.tracks)
         .map(function (track) {
             return track.get('id');
         })
         .toList();
 
-    return state.updateIn(['tracks'], function (tracks) {
+    return state
+        .set('fetchingStatus', 'idle')
+        .set('nextLink', playlist.next_href)
+        .updateIn(['tracks'], function (tracks) {
             return tracks.concat(newTracks);
         });
 }

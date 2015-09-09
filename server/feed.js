@@ -3,9 +3,9 @@ var knexfile = require('../knexfile');
 var knex = require('knex')(knexfile);
 var _ = require('lodash');
 
-module.exports = function fetchFeedApi(soundcloudUserId, token, nextLink) {
+module.exports = function fetchFeedApi(soundcloudUserId, token, nextSoundcloudLink) {
     return Promise.all([
-            fetchSoundcloudFeed(token, nextLink),
+            fetchSoundcloudFeed(token, nextSoundcloudLink),
             fetchBlacklist(soundcloudUserId),
             fetchSavedTracks(soundcloudUserId),
             fetchPublishedTracks(soundcloudUserId),
@@ -18,13 +18,15 @@ module.exports = function fetchFeedApi(soundcloudUserId, token, nextLink) {
             feed.tracks = _.filter(feed.tracks, function (track) {
                 return !_.includes(blacklist.concat(savedTracks, publishedTracks), track.id);
             });
+            feed.next_href = '/feed?nextLink=' + encodeURIComponent(feed.next_href);
+
             return feed;
         });
 };
 
-function fetchSoundcloudFeed(token, nextLink) {
+function fetchSoundcloudFeed(token, nextSoundcloudLink) {
     return soundcloud
-        .fetchActivities(token, nextLink)
+        .fetchActivities(token, nextSoundcloudLink)
         .then(parseSoundcloudActivities);
 }
 

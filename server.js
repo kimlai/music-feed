@@ -8,6 +8,7 @@ var knexfile = require('./knexfile');
 var knex = require('knex')(knexfile);
 var bodyParser = require('koa-bodyparser');
 var feedApi = require('./server/feed');
+var savedTracksApi = require('./server/savedTracks');
 var _ = require('lodash');
 
 var app = koa();
@@ -26,6 +27,7 @@ router.get('/connect', connect);
 router.get('/callback', callback);
 router.get('/', requireAuthentication, index);
 router.get('/feed', requireAuthentication, feed);
+router.get('/saved_tracks', requireAuthentication, savedTracks);
 router.post('/blacklist', requireAuthentication, blacklist);
 router.post('/save_track', requireAuthentication, saveTrack);
 router.post('/publish_track', requireAuthentication, publishTrack);
@@ -50,18 +52,7 @@ function *index() {
     var soundcloudUserId = this.state.user.id;
     var feeds = yield Promise.all([
         feedApi(soundcloudUserId, token),
-        knex.select('track', 'savedAt')
-            .where({soundcloudUserId: soundcloudUserId})
-            .orderBy('savedAt', 'DESC')
-            .limit(10)
-            .from('saved_tracks')
-            .then(function (rows) {
-                return _.map(rows, function (row) {
-                    var track = row.track;
-                    track.saved_at = row.savedAt;
-                    return track;
-                });
-            }),
+        savedTracksApi(soundcloudUserId, 0),
         knex.select('track', 'savedAt')
             .where({soundcloudUserId: soundcloudUserId})
             .orderBy('savedAt', 'DESC')
@@ -89,6 +80,12 @@ function *feed() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;
     this.body = yield feedApi(soundcloudUserId, token, this.request.query.nextLink);
+}
+
+function *savedTracks() {
+    var token = this.state.token;
+    var soundcloudUserId = this.state.user.id;
+    this.body = yield savedTracksApi(soundcloudUserId, this.request.query.offset);
 }
 
 function *connect() {

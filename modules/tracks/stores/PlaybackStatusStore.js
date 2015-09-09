@@ -43,8 +43,8 @@ function receiveFeed(state, feed) {
     return newTracks.merge(state);
 }
 
-function receiveSavedTracks(state, tracks) {
-    var newTracks = toImmutable(tracks)
+function receiveSavedTracks(state, playlist) {
+    var newTracks = toImmutable(playlist.tracks)
         .toMap()
         .mapKeys(function (k, v) {
             return v.get('id');

@@ -147,24 +147,20 @@ function initializePublishedTracks(tracks) {
 function fetchMoreTracks(playlistId) {
     var playlists = {
         feed: {
-            url: '/feed',
             action: 'FEED',
         },
         savedTracks: {
-            url: '/saved-tracks',
             action: 'SAVED_TRACKS',
         },
         publishedTracks: {
-            url: '/published-tracks',
             action: 'PUBLISHED_TRACKS',
         }
     };
     var playlist = playlists[playlistId];
-    var nextLink = reactor.evaluate(getters.feed).get('nextLink');
+    var nextLink = reactor.evaluate(getters[playlistId]).get('nextLink');
     reactor.dispatch(actionTypes['FETCH_' + playlist.action + '_REQUEST']);
     request
-        .get(process.env.MUSICFEED_API_ROOT + playlist.url)
-        .query({ nextLink: nextLink})
+        .get(nextLink)
         .then(
             function (response) {
                 reactor.dispatch(actionTypes['RECEIVE_' + playlist.action], response.body);
