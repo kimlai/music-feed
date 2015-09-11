@@ -25,10 +25,14 @@ module.exports = {
 
 function playTrack(trackId) {
     var currentTrackId = reactor.evaluate(getters.currentTrackId);
+    var currentPlaylistId = reactor.evaluate(getters.currentPlaylistId);
     if (null !== currentTrackId) {
         pauseTrack(currentTrackId);
     }
-    reactor.dispatch(actionTypes.PLAY_TRACK_REQUEST, { trackId: trackId });
+    reactor.dispatch(actionTypes.PLAY_TRACK_REQUEST, {
+        trackId: trackId,
+        playlistId: currentPlaylistId,
+    });
 }
 
 function setCurrentPlaylistId(playlistId) {
@@ -88,85 +92,81 @@ function blacklistTrack(trackId) {
     if (trackId === currentTrackId) {
         next();
     }
-    reactor.dispatch(actionTypes.BLACKLIST_TRACK_REQUEST, { trackId: trackId });
-    request
-        .post(process.env.MUSICFEED_API_ROOT+'/blacklist')
-        .send({ soundcloudTrackId: trackId})
-        .then(
-            function (response) {
-                reactor.dispatch(actionTypes.BLACKLIST_TRACK_SUCCESS, { trackId: trackId });
-            },
-            function (error) {
-                reactor.dispatch(actionTypes.BLACKLIST_TRACK_FAILURE, { trackId: trackId });
-            }
-        );
+    addTrackToPlaylist(trackId, 'blacklist');
 }
 
 function saveTrack(trackId) {
-    reactor.dispatch(actionTypes.SAVE_TRACK_REQUEST, { trackId: trackId });
-    request
-        .post(process.env.MUSICFEED_API_ROOT+'/save_track')
-        .send({ soundcloudTrackId: trackId})
-        .then(
-            function (response) {
-                reactor.dispatch(actionTypes.SAVE_TRACK_SUCCESS, { trackId: trackId });
-            },
-            function (error) {
-                reactor.dispatch(actionTypes.SAVE_TRACK_FAILURE, { trackId: trackId });
-            }
-        );
+    addTrackToPlaylist(trackId, 'savedTracks');
 }
 
 function publishTrack(trackId) {
-    reactor.dispatch(actionTypes.PUBLISH_TRACK_REQUEST, { trackId: trackId });
+    addTrackToPlaylist(trackId, 'publishedTracks');
+}
+
+function addTrackToPlaylist(trackId, playlistId) {
+    var urls = {
+        blacklist: '/blacklist',
+        savedTracks: '/save_track',
+        publishedTracks: '/publish_track',
+    };
+    reactor.dispatch(actionTypes.ADD_TRACK_TO_PLAYLIST_REQUEST, {
+        trackId: trackId,
+        playlistId: playlistId,
+    });
     request
-        .post(process.env.MUSICFEED_API_ROOT+'/publish_track')
+        .post(process.env.MUSICFEED_API_ROOT + urls[playlistId])
         .send({ soundcloudTrackId: trackId})
         .then(
             function (response) {
-                reactor.dispatch(actionTypes.PUBLISH_TRACK_SUCCESS, { trackId: trackId });
+                reactor.dispatch(actionTypes.ADD_TRACK_TO_PLAYLIST_SUCCESS, {
+                    trackId: trackId,
+                    playlistId: playlistId,
+                });
             },
             function (error) {
-                reactor.dispatch(actionTypes.PUBLISH_TRACK_FAILURE, { trackId: trackId });
+                reactor.dispatch(actionTypes.ADD_TRACK_TO_PLAYLIST_FAILURE, {
+                    trackId: trackId,
+                    playlistId: playlistId,
+                });
             }
         );
 }
 
 function initializeFeed(feed) {
-    reactor.dispatch(actionTypes.RECEIVE_FEED, feed);
+    reactor.dispatch(actionTypes.RECEIVE_TRACKS, {
+        playlistId: 'feed',
+        playlist: feed
+    });
 }
 
 function initializeSavedTracks(tracks) {
-    reactor.dispatch(actionTypes.RECEIVE_SAVED_TRACKS, tracks);
+    reactor.dispatch(actionTypes.RECEIVE_TRACKS, {
+        playlistId: 'savedTracks',
+        playlist: tracks
+    });
 }
 
 function initializePublishedTracks(tracks) {
-    reactor.dispatch(actionTypes.RECEIVE_PUBLISHED_TRACKS, tracks);
+    reactor.dispatch(actionTypes.RECEIVE_TRACKS, {
+        playlistId: 'publishedTracks',
+        playlist: tracks
+    });
 }
 
 function fetchMoreTracks(playlistId) {
-    var playlists = {
-        feed: {
-            action: 'FEED',
-        },
-        savedTracks: {
-            action: 'SAVED_TRACKS',
-        },
-        publishedTracks: {
-            action: 'PUBLISHED_TRACKS',
-        }
-    };
-    var playlist = playlists[playlistId];
-    var nextLink = reactor.evaluate(getters[playlistId]).get('nextLink');
-    reactor.dispatch(actionTypes['FETCH_' + playlist.action + '_REQUEST']);
+    var nextLink = reactor.evaluate(['playlists']).get(playlistId).get('nextLink');
+    reactor.dispatch(actionTypes.FETCH_TRACKS_REQUEST, { playlistId: playlistId });
     request
         .get(nextLink)
         .then(
             function (response) {
-                reactor.dispatch(actionTypes['RECEIVE_' + playlist.action], response.body);
+                reactor.dispatch(actionTypes.RECEIVE_TRACKS, {
+                    playlistId: playlistId,
+                    playlist: response.body,
+                });
             },
             function (error) {
-                reactor.dispatch(actionTypes['FETCH_' + playlist.action + '_FAILURE']);
+                reactor.dispatch(actionTypes.FETCH_TRACKS_FAILURE, { playlistId: playlistId });
             }
         );
 }

@@ -7,13 +7,14 @@ exports.tracks = ['tracks'];
 exports.playbackStatus = ['playbackStatus'];
 exports.currentTrackId = ['currentTrackId'];
 exports.currentPlaylistId = ['currentPlaylistId'];
+exports.playlists = ['playlists'];
 
 exports.feedWithTrackInfo = [
     ['tracks'],
     ['playbackStatus'],
-    ['feed'],
-    function (tracks, playbackStatus, feed) {
-        return feed.update('tracks', function (trackIds) {
+    ['playlists'],
+    function (tracks, playbackStatus, playlists) {
+        return playlists.get('feed').update('tracks', function (trackIds) {
             return trackIds.map(function (trackId) {
                 return tracks
                     .get(trackId)
@@ -26,9 +27,9 @@ exports.feedWithTrackInfo = [
 exports.savedTracksWithTrackInfo = [
     ['tracks'],
     ['playbackStatus'],
-    ['savedTracks'],
-    function (tracks, playbackStatus, savedTracks) {
-        return savedTracks.update('tracks', function (trackIds) {
+    ['playlists'],
+    function (tracks, playbackStatus, playlists) {
+        return playlists.get('savedTracks').update('tracks', function (trackIds) {
             return trackIds.map(function (trackId) {
                 return tracks
                     .get(trackId)
@@ -41,9 +42,9 @@ exports.savedTracksWithTrackInfo = [
 exports.publishedTracksWithTrackInfo = [
     ['tracks'],
     ['playbackStatus'],
-    ['publishedTracks'],
-    function (tracks, playbackStatus, publishedTracks) {
-        return publishedTracks.update('tracks', function (trackIds) {
+    ['playlists'],
+    function (tracks, playbackStatus, playlists) {
+        return playlists.get('publishedTracks').update('tracks', function (trackIds) {
             return trackIds.map(function (trackId) {
                 return tracks
                     .get(trackId)
@@ -55,18 +56,9 @@ exports.publishedTracksWithTrackInfo = [
 
 exports.nextTrackId = [
     ['currentPlaylistId'],
-    ['feed'],
-    ['savedTracks'],
-    ['publishedTracks'],
-    function (currentPlaylistId, feed, savedTracks, publishedTracks) {
-        switch (currentPlaylistId) {
-            case 'feed':
-                return feed.get('nextTrack');
-            case 'savedTracks':
-                return savedTracks.get('nextTrack');
-            case 'publishedTracks':
-                return publishedTracks.get('nextTrack');
-        }
+    ['playlists'],
+    function (currentPlaylistId, playlists) {
+        return playlists.get(currentPlaylistId).get('nextTrack');
     }
 ];
 

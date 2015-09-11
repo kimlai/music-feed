@@ -1,8 +1,6 @@
 var toImmutable = require('nuclear-js').toImmutable;
 var Store = require('nuclear-js').Store;
-var RECEIVE_FEED = require('../actionTypes').RECEIVE_FEED;
-var RECEIVE_SAVED_TRACKS = require('../actionTypes').RECEIVE_SAVED_TRACKS;
-var RECEIVE_PUBLISHED_TRACKS = require('../actionTypes').RECEIVE_PUBLISHED_TRACKS;
+var RECEIVE_TRACKS = require('../actionTypes').RECEIVE_TRACKS;
 var PLAY_TRACK_REQUEST = require('../actionTypes').PLAY_TRACK_REQUEST;
 var PLAY_TRACK_SUCCESS = require('../actionTypes').PLAY_TRACK_SUCCESS;
 var PAUSE_TRACK_REQUEST = require('../actionTypes').PAUSE_TRACK_REQUEST;
@@ -16,9 +14,7 @@ module.exports = new Store({
     },
 
     initialize: function () {
-        this.on(RECEIVE_FEED, receiveFeed);
-        this.on(RECEIVE_SAVED_TRACKS, receiveSavedTracks);
-        this.on(RECEIVE_PUBLISHED_TRACKS, receivePublishedTracks);
+        this.on(RECEIVE_TRACKS, receiveTracks);
         this.on(PLAY_TRACK_REQUEST, playTrackRequest);
         this.on(PLAY_TRACK_SUCCESS, playTrackSuccess);
         this.on(PAUSE_TRACK_REQUEST, pauseTrackRequest);
@@ -28,38 +24,8 @@ module.exports = new Store({
     }
 });
 
-function receiveFeed(state, feed) {
-    var newTracks = toImmutable(feed.tracks)
-        .toMap()
-        .mapKeys(function (k, v) {
-            return v.get('id');
-        }).map(function (track, trackId) {
-            return toImmutable({
-                'stream_url': track.get('stream_url'),
-                'playbackStatus': 'stopped',
-            });
-        });
-
-    return newTracks.merge(state);
-}
-
-function receiveSavedTracks(state, playlist) {
-    var newTracks = toImmutable(playlist.tracks)
-        .toMap()
-        .mapKeys(function (k, v) {
-            return v.get('id');
-        }).map(function (track, trackId) {
-            return toImmutable({
-                'stream_url': track.get('stream_url'),
-                'playbackStatus': 'stopped',
-            });
-        });
-
-    return newTracks.merge(state);
-}
-
-function receivePublishedTracks(state, tracks) {
-    var newTracks = toImmutable(tracks)
+function receiveTracks(state, payload) {
+    var newTracks = toImmutable(payload.playlist.tracks)
         .toMap()
         .mapKeys(function (k, v) {
             return v.get('id');
