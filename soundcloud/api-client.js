@@ -14,6 +14,7 @@ module.exports = {
     requestAccessToken: function (code) {
         return request
             .post('https://api.soundcloud.com/oauth2/token')
+            .type('form')
             .send({
                 client_id: process.env.SOUNDCLOUD_CLIENT_ID,
                 client_secret: process.env.SOUNDCLOUD_SECRET,
