@@ -50,21 +50,7 @@ function *requireAuthentication(next) {
 }
 
 function *index() {
-    var token = this.state.token;
-    var soundcloudUserId = this.state.user.id;
-    var feeds = yield Promise.all([
-        feedApi(soundcloudUserId, token),
-        savedTracksApi(soundcloudUserId, 0),
-        publishedTracksApi(soundcloudUserId, 0),
-    ]).then(function (results) {
-        return {
-            feed: results[0],
-            savedTracks: results[1],
-            publishedTracks: results[2],
-        };
-    });
-
-    yield this.render('feed', { context: JSON.stringify(feeds) });
+    yield this.render('feed');
 }
 
 function *feed() {
