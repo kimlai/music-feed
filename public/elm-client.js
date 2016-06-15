@@ -8393,12 +8393,269 @@ var _user$project$Main$viewTrackPlaceHolder = A2(
 						[]))
 				]))
 		]));
+var _user$project$Main$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {tracks: a, feed: b, nextLink: c, loading: d, playing: e, currentTrack: f};
+	});
+var _user$project$Main$Track = F4(
+	function (a, b, c, d) {
+		return {id: a, artist: b, artwork_url: c, title: d};
+	});
+var _user$project$Main$decodeTrack = A2(
+	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+	A2(
+		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+		A2(
+			_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+			A2(
+				_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+				_elm_lang$core$Json_Decode$succeed(_user$project$Main$Track),
+				A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
+			A2(
+				_elm_lang$core$Json_Decode$at,
+				_elm_lang$core$Native_List.fromArray(
+					['user', 'username']),
+				_elm_lang$core$Json_Decode$string)),
+		A2(
+			_elm_lang$core$Json_Decode_ops[':='],
+			'artwork_url',
+			A2(_elm_community$elm_json_extra$Json_Decode_Extra$withDefault, '/images/placeholder.jpg', _elm_lang$core$Json_Decode$string))),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'title', _elm_lang$core$Json_Decode$string));
+var _user$project$Main$FetchFeedPayload = F2(
+	function (a, b) {
+		return {tracks: a, nextLink: b};
+	});
+var _user$project$Main$decodeFeed = A2(
+	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+	A2(
+		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+		_elm_lang$core$Json_Decode$succeed(_user$project$Main$FetchFeedPayload),
+		A2(
+			_elm_lang$core$Json_Decode_ops[':='],
+			'tracks',
+			_elm_lang$core$Json_Decode$list(_user$project$Main$decodeTrack))),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'next_href', _elm_lang$core$Json_Decode$string));
+var _user$project$Main$Navigation = F2(
+	function (a, b) {
+		return {items: a, activeItem: b};
+	});
+var _user$project$Main$NavigationItem = F2(
+	function (a, b) {
+		return {displayName: a, href: b};
+	});
+var _user$project$Main$navigation = A2(
+	_user$project$Main$Navigation,
+	_elm_lang$core$Native_List.fromArray(
+		[
+			A2(_user$project$Main$NavigationItem, 'feed', '/'),
+			A2(_user$project$Main$NavigationItem, 'saved tracks', '/saved-tracks'),
+			A2(_user$project$Main$NavigationItem, 'published tracks', '/pubished-tracks')
+		]),
+	A2(_user$project$Main$NavigationItem, 'feed', '/'));
+var _user$project$Main$TogglePlayback = function (a) {
+	return {ctor: 'TogglePlayback', _0: a};
+};
+var _user$project$Main$viewGlobalPlayer = F2(
+	function (track, playing) {
+		var _p0 = track;
+		if (_p0.ctor === 'Nothing') {
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class('global-player')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('controls')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('playback-button')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('Play')
+									])),
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('next-button')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('Next')
+									]))
+							])),
+						A2(
+						_elm_lang$html$Html$img,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$src('images/placeholder.jpg')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('track-info')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('progress-bar')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('outer')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[]))
+							])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('actions')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[]))
+					]));
+		} else {
+			var _p1 = _p0._0;
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class('global-player')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('controls')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class(
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											'playback-button',
+											playing ? ' playing' : '')),
+										_elm_lang$html$Html_Events$onClick(
+										_user$project$Main$TogglePlayback(_p1.id))
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('Play')
+									])),
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('next-button')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('Next')
+									]))
+							])),
+						A2(
+						_elm_lang$html$Html$img,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$src(_p1.artwork_url)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('track-info')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('artist')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text(_p1.artist)
+									])),
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('title')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text(_p1.title)
+									]))
+							])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('progress-bar')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('outer')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[]))
+							])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('actions')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[]))
+					]));
+		}
+	});
 var _user$project$Main$viewTrack = function (track) {
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$html$Html_Attributes$class('track')
+				_elm_lang$html$Html_Attributes$class('track'),
+				_elm_lang$html$Html_Events$onClick(
+				_user$project$Main$TogglePlayback(track.id))
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
@@ -8414,8 +8671,7 @@ var _user$project$Main$viewTrack = function (track) {
 						_elm_lang$html$Html$img,
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html_Attributes$src(
-								A2(_elm_lang$core$Maybe$withDefault, '/images/placeholder.jpg', track.artwork_url))
+								_elm_lang$html$Html_Attributes$src(track.artwork_url)
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[])),
@@ -8464,65 +8720,6 @@ var _user$project$Main$viewTrack = function (track) {
 					]))
 			]));
 };
-var _user$project$Main$Model = F3(
-	function (a, b, c) {
-		return {tracks: a, nextLink: b, loading: c};
-	});
-var _user$project$Main$Track = F4(
-	function (a, b, c, d) {
-		return {id: a, artist: b, artwork_url: c, title: d};
-	});
-var _user$project$Main$decodeTrack = A2(
-	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-	A2(
-		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-		A2(
-			_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-			A2(
-				_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-				_elm_lang$core$Json_Decode$succeed(_user$project$Main$Track),
-				A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
-			A2(
-				_elm_lang$core$Json_Decode$at,
-				_elm_lang$core$Native_List.fromArray(
-					['user', 'username']),
-				_elm_lang$core$Json_Decode$string)),
-		A2(
-			_elm_lang$core$Json_Decode_ops[':='],
-			'artwork_url',
-			_elm_community$elm_json_extra$Json_Decode_Extra$maybeNull(_elm_lang$core$Json_Decode$string))),
-	A2(_elm_lang$core$Json_Decode_ops[':='], 'title', _elm_lang$core$Json_Decode$string));
-var _user$project$Main$FetchFeedPayload = F2(
-	function (a, b) {
-		return {tracks: a, nextLink: b};
-	});
-var _user$project$Main$decodeFeed = A2(
-	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-	A2(
-		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-		_elm_lang$core$Json_Decode$succeed(_user$project$Main$FetchFeedPayload),
-		A2(
-			_elm_lang$core$Json_Decode_ops[':='],
-			'tracks',
-			_elm_lang$core$Json_Decode$list(_user$project$Main$decodeTrack))),
-	A2(_elm_lang$core$Json_Decode_ops[':='], 'next_href', _elm_lang$core$Json_Decode$string));
-var _user$project$Main$Navigation = F2(
-	function (a, b) {
-		return {items: a, activeItem: b};
-	});
-var _user$project$Main$NavigationItem = F2(
-	function (a, b) {
-		return {displayName: a, href: b};
-	});
-var _user$project$Main$navigation = A2(
-	_user$project$Main$Navigation,
-	_elm_lang$core$Native_List.fromArray(
-		[
-			A2(_user$project$Main$NavigationItem, 'feed', '/'),
-			A2(_user$project$Main$NavigationItem, 'saved tracks', '/saved-tracks'),
-			A2(_user$project$Main$NavigationItem, 'published tracks', '/pubished-tracks')
-		]),
-	A2(_user$project$Main$NavigationItem, 'feed', '/'));
 var _user$project$Main$FetchMore = {ctor: 'FetchMore'};
 var _user$project$Main$viewMoreButton = A2(
 	_elm_lang$html$Html$div,
@@ -8536,7 +8733,13 @@ var _user$project$Main$viewMoreButton = A2(
 			_elm_lang$html$Html$text('More')
 		]));
 var _user$project$Main$viewFeed = function (model) {
-	var tracksView = A2(_elm_lang$core$List$map, _user$project$Main$viewTrack, model.tracks);
+	var feedTracks = A2(
+		_elm_lang$core$List$filterMap,
+		function (trackId) {
+			return A2(_elm_lang$core$Dict$get, trackId, model.tracks);
+		},
+		model.feed);
+	var tracksView = A2(_elm_lang$core$List$map, _user$project$Main$viewTrack, feedTracks);
 	return _elm_lang$core$Native_Utils.eq(model.loading, true) ? A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -8555,12 +8758,21 @@ var _user$project$Main$viewFeed = function (model) {
 				[_user$project$Main$viewMoreButton])));
 };
 var _user$project$Main$view = function (model) {
+	var currentTrack = function () {
+		var _p2 = model.currentTrack;
+		if (_p2.ctor === 'Just') {
+			return A2(_elm_lang$core$Dict$get, _p2._0, model.tracks);
+		} else {
+			return _elm_lang$core$Maybe$Nothing;
+		}
+	}();
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
+				A2(_user$project$Main$viewGlobalPlayer, currentTrack, model.playing),
 				_user$project$Main$viewNavigation(_user$project$Main$navigation),
 				A2(
 				_elm_lang$html$Html$div,
@@ -8593,32 +8805,53 @@ var _user$project$Main$fetchFeed = function (nextLink) {
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
 	_0: {
-		tracks: _elm_lang$core$Native_List.fromArray(
+		tracks: _elm_lang$core$Dict$empty,
+		feed: _elm_lang$core$Native_List.fromArray(
 			[]),
 		loading: true,
-		nextLink: _elm_lang$core$Maybe$Nothing
+		playing: false,
+		nextLink: _elm_lang$core$Maybe$Nothing,
+		currentTrack: _elm_lang$core$Maybe$Nothing
 	},
 	_1: _user$project$Main$fetchFeed(_elm_lang$core$Maybe$Nothing)
 };
 var _user$project$Main$update = F2(
 	function (message, model) {
-		var _p0 = message;
-		switch (_p0.ctor) {
+		var _p3 = message;
+		switch (_p3.ctor) {
 			case 'FetchFeedSuccess':
-				var _p1 = _p0._0;
+				var _p4 = _p3._0;
+				var updatedTrackDict = A2(
+					_elm_lang$core$Dict$union,
+					model.tracks,
+					_elm_lang$core$Dict$fromList(
+						A2(
+							_elm_lang$core$List$map,
+							function (track) {
+								return {ctor: '_Tuple2', _0: track.id, _1: track};
+							},
+							_p4.tracks)));
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							tracks: A2(_elm_lang$core$List$append, model.tracks, _p1.tracks),
-							nextLink: _elm_lang$core$Maybe$Just(_p1.nextLink),
+							tracks: updatedTrackDict,
+							feed: A2(
+								_elm_lang$core$List$append,
+								model.feed,
+								A2(
+									_elm_lang$core$List$map,
+									function (_) {
+										return _.id;
+									},
+									_p4.tracks)),
+							nextLink: _elm_lang$core$Maybe$Just(_p4.nextLink),
 							loading: false
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'FetchFeedFail':
-				var _p2 = A2(_elm_lang$core$Debug$log, 'error', _p0._0);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -8626,13 +8859,27 @@ var _user$project$Main$update = F2(
 						{loading: false}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'FetchMore':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{loading: true}),
 					_1: _user$project$Main$fetchFeed(model.nextLink)
+				};
+			default:
+				var _p5 = _p3._0;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							currentTrack: _elm_lang$core$Maybe$Just(_p5),
+							playing: (!_elm_lang$core$Native_Utils.eq(
+								model.currentTrack,
+								_elm_lang$core$Maybe$Just(_p5))) || _elm_lang$core$Basics$not(model.playing)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
@@ -8642,7 +8889,7 @@ var _user$project$Main$main = {
 			init: _user$project$Main$init,
 			view: _user$project$Main$view,
 			update: _user$project$Main$update,
-			subscriptions: function (_p3) {
+			subscriptions: function (_p6) {
 				return _elm_lang$core$Platform_Sub$none;
 			}
 		})
