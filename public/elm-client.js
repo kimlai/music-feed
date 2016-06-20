@@ -8393,9 +8393,9 @@ var _user$project$Main$viewTrackPlaceHolder = A2(
 						[]))
 				]))
 		]));
-var _user$project$Main$Model = F6(
-	function (a, b, c, d, e, f) {
-		return {tracks: a, feed: b, nextLink: c, loading: d, playing: e, currentTrack: f};
+var _user$project$Main$Model = F7(
+	function (a, b, c, d, e, f, g) {
+		return {tracks: a, feed: b, queue: c, nextLink: d, loading: e, playing: f, currentTrack: g};
 	});
 var _user$project$Main$Track = F4(
 	function (a, b, c, d) {
@@ -8452,9 +8452,8 @@ var _user$project$Main$navigation = A2(
 			A2(_user$project$Main$NavigationItem, 'published tracks', '/pubished-tracks')
 		]),
 	A2(_user$project$Main$NavigationItem, 'feed', '/'));
-var _user$project$Main$TogglePlayback = function (a) {
-	return {ctor: 'TogglePlayback', _0: a};
-};
+var _user$project$Main$Next = {ctor: 'Next'};
+var _user$project$Main$TogglePlayback = {ctor: 'TogglePlayback'};
 var _user$project$Main$viewGlobalPlayer = F2(
 	function (track, playing) {
 		var _p0 = track;
@@ -8565,8 +8564,7 @@ var _user$project$Main$viewGlobalPlayer = F2(
 											_elm_lang$core$Basics_ops['++'],
 											'playback-button',
 											playing ? ' playing' : '')),
-										_elm_lang$html$Html_Events$onClick(
-										_user$project$Main$TogglePlayback(_p1.id))
+										_elm_lang$html$Html_Events$onClick(_user$project$Main$TogglePlayback)
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
@@ -8576,7 +8574,8 @@ var _user$project$Main$viewGlobalPlayer = F2(
 								_elm_lang$html$Html$div,
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html_Attributes$class('next-button')
+										_elm_lang$html$Html_Attributes$class('next-button'),
+										_elm_lang$html$Html_Events$onClick(_user$project$Main$Next)
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
@@ -8648,78 +8647,83 @@ var _user$project$Main$viewGlobalPlayer = F2(
 					]));
 		}
 	});
-var _user$project$Main$viewTrack = function (track) {
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$html$Html_Attributes$class('track'),
-				_elm_lang$html$Html_Events$onClick(
-				_user$project$Main$TogglePlayback(track.id))
-			]),
-		_elm_lang$core$Native_List.fromArray(
-			[
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$class('track-info-container')
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						A2(
-						_elm_lang$html$Html$img,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$src(track.artwork_url)
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$class('track-info')
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html$text(track.artist)
-									])),
-								A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html$text(track.title)
-									]))
-							]))
-					])),
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$class('progress-bar')
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$class('outer')
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[]))
-					]))
-			]));
-};
+var _user$project$Main$TogglePlaybackFromFeed = F2(
+	function (a, b) {
+		return {ctor: 'TogglePlaybackFromFeed', _0: a, _1: b};
+	});
+var _user$project$Main$viewTrack = F2(
+	function (position, track) {
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('track'),
+					_elm_lang$html$Html_Events$onClick(
+					A2(_user$project$Main$TogglePlaybackFromFeed, position, track.id))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(
+					_elm_lang$html$Html$div,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$class('track-info-container')
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_elm_lang$html$Html$img,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$src(track.artwork_url)
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[])),
+							A2(
+							_elm_lang$html$Html$div,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$class('track-info')
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[
+									A2(
+									_elm_lang$html$Html$div,
+									_elm_lang$core$Native_List.fromArray(
+										[]),
+									_elm_lang$core$Native_List.fromArray(
+										[
+											_elm_lang$html$Html$text(track.artist)
+										])),
+									A2(
+									_elm_lang$html$Html$div,
+									_elm_lang$core$Native_List.fromArray(
+										[]),
+									_elm_lang$core$Native_List.fromArray(
+										[
+											_elm_lang$html$Html$text(track.title)
+										]))
+								]))
+						])),
+					A2(
+					_elm_lang$html$Html$div,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$class('progress-bar')
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_elm_lang$html$Html$div,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$class('outer')
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[]))
+						]))
+				]));
+	});
 var _user$project$Main$FetchMore = {ctor: 'FetchMore'};
 var _user$project$Main$viewMoreButton = A2(
 	_elm_lang$html$Html$div,
@@ -8739,7 +8743,7 @@ var _user$project$Main$viewFeed = function (model) {
 			return A2(_elm_lang$core$Dict$get, trackId, model.tracks);
 		},
 		model.feed);
-	var tracksView = A2(_elm_lang$core$List$map, _user$project$Main$viewTrack, feedTracks);
+	var tracksView = A2(_elm_lang$core$List$indexedMap, _user$project$Main$viewTrack, feedTracks);
 	return _elm_lang$core$Native_Utils.eq(model.loading, true) ? A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -8808,6 +8812,8 @@ var _user$project$Main$init = {
 		tracks: _elm_lang$core$Dict$empty,
 		feed: _elm_lang$core$Native_List.fromArray(
 			[]),
+		queue: _elm_lang$core$Native_List.fromArray(
+			[]),
 		loading: true,
 		playing: false,
 		nextLink: _elm_lang$core$Maybe$Nothing,
@@ -8846,6 +8852,15 @@ var _user$project$Main$update = F2(
 										return _.id;
 									},
 									_p4.tracks)),
+							queue: A2(
+								_elm_lang$core$List$append,
+								model.queue,
+								A2(
+									_elm_lang$core$List$map,
+									function (_) {
+										return _.id;
+									},
+									_p4.tracks)),
 							nextLink: _elm_lang$core$Maybe$Just(_p4.nextLink),
 							loading: false
 						}),
@@ -8867,8 +8882,8 @@ var _user$project$Main$update = F2(
 						{loading: true}),
 					_1: _user$project$Main$fetchFeed(model.nextLink)
 				};
-			default:
-				var _p5 = _p3._0;
+			case 'TogglePlaybackFromFeed':
+				var _p5 = _p3._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -8877,7 +8892,29 @@ var _user$project$Main$update = F2(
 							currentTrack: _elm_lang$core$Maybe$Just(_p5),
 							playing: (!_elm_lang$core$Native_Utils.eq(
 								model.currentTrack,
-								_elm_lang$core$Maybe$Just(_p5))) || _elm_lang$core$Basics$not(model.playing)
+								_elm_lang$core$Maybe$Just(_p5))) || _elm_lang$core$Basics$not(model.playing),
+							queue: A2(_elm_lang$core$List$drop, _p3._0 + 1, model.feed)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'TogglePlayback':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							playing: _elm_lang$core$Basics$not(model.playing)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							currentTrack: _elm_lang$core$List$head(model.queue),
+							queue: A2(_elm_lang$core$List$drop, 1, model.queue)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};

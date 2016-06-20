@@ -26,6 +26,7 @@ main =
 type alias Model =
     { tracks : Dict TrackId Track
     , feed : List TrackId
+    , queue : List TrackId
     , nextLink : Maybe String
     , loading : Bool
     , playing : Bool
@@ -54,6 +55,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { tracks = Dict.empty
       , feed = []
+      , queue = []
       , loading = True
       , playing = False
       , nextLink = Nothing
@@ -71,7 +73,9 @@ type Msg
     = FetchFeedSuccess FetchFeedPayload
     | FetchFeedFail Http.Error
     | FetchMore
-    | TogglePlayback TrackId
+    | TogglePlaybackFromFeed Int TrackId
+    | TogglePlayback
+    | Next
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -88,6 +92,7 @@ update message model =
             ( { model
                 | tracks = updatedTrackDict
                 , feed = List.append model.feed ( List.map .id payload.tracks )
+                , queue = List.append model.queue ( List.map .id payload.tracks )
                 , nextLink = Just payload.nextLink
                 , loading = False
               }
@@ -105,10 +110,24 @@ update message model =
               }
             , fetchFeed model.nextLink
             )
-        TogglePlayback trackId ->
+        TogglePlaybackFromFeed position trackId ->
             ( { model
                 | currentTrack = Just trackId
                 , playing = model.currentTrack /= Just trackId || not model.playing
+                , queue = List.drop ( position + 1 ) model.feed
+              }
+            , Cmd.none
+            )
+        TogglePlayback ->
+            ( { model
+                | playing = not model.playing
+              }
+            , Cmd.none
+            )
+        Next ->
+            ( { model
+                | currentTrack = List.head model.queue
+                , queue = List.drop 1 model.queue
               }
             , Cmd.none
             )
@@ -168,11 +187,13 @@ viewGlobalPlayer track playing =
                     [ class "controls" ]
                     [ div
                         [ class ( "playback-button" ++ ( if playing then " playing" else "" ) )
-                        , onClick ( TogglePlayback track.id )
+                        , onClick ( TogglePlayback )
                         ]
                         [ text "Play" ]
                     , div
-                        [ class "next-button" ]
+                        [ class "next-button"
+                        , onClick Next
+                        ]
                         [ text "Next" ]
                     ]
                 , img
@@ -199,7 +220,7 @@ viewFeed model =
         feedTracks =
             List.filterMap ( \trackId -> Dict.get trackId model.tracks ) model.feed
         tracksView =
-            List.map viewTrack feedTracks
+            List.indexedMap viewTrack feedTracks
     in
         if model.loading == True then
             List.repeat 10 viewTrackPlaceHolder
@@ -211,11 +232,11 @@ viewFeed model =
                 |> div []
 
 
-viewTrack : Track -> Html Msg
-viewTrack track =
+viewTrack : Int -> Track -> Html Msg
+viewTrack position track =
     div
         [ class "track"
-        , onClick ( TogglePlayback track.id )
+        , onClick ( TogglePlaybackFromFeed position track.id )
         ]
         [ div
             [ class "track-info-container" ]
