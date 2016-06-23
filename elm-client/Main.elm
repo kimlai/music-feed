@@ -10,6 +10,8 @@ import Json.Decode as Json
 import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
 import Task
+import Keyboard
+import Char
 
 
 main =
@@ -83,6 +85,7 @@ type Msg
     | Next
     | PlayTrackSuccess Track
     | TrackProgress ( TrackId, Float, Float )
+    | KeyPressed Keyboard.KeyCode
 
 
 port playTrack : Track -> Cmd msg
@@ -185,6 +188,16 @@ update message model =
                           }
                         , Cmd.none
                         )
+        KeyPressed keyCode ->
+            case ( Char.fromCode keyCode ) of
+                'n' ->
+                    update Next model
+                ' ' ->
+                    update TogglePlayback model
+                _ ->
+                    ( model
+                    , Cmd.none
+                    )
 
 
 
@@ -196,8 +209,10 @@ port trackProgress : ( ( Int, Float, Float ) -> msg ) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    trackProgress TrackProgress
-
+    Sub.batch
+        [ trackProgress TrackProgress
+        , Keyboard.presses KeyPressed
+        ]
 
 
 -- VIEW

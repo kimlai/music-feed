@@ -6302,6 +6302,47 @@ var _elm_community$elm_json_extra$Json_Decode_Extra$apply = _elm_lang$core$Json_
 var _elm_community$elm_json_extra$Json_Decode_Extra_ops = _elm_community$elm_json_extra$Json_Decode_Extra_ops || {};
 _elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'] = _elm_community$elm_json_extra$Json_Decode_Extra$apply;
 
+var _elm_lang$core$Process$kill = _elm_lang$core$Native_Scheduler.kill;
+var _elm_lang$core$Process$sleep = _elm_lang$core$Native_Scheduler.sleep;
+var _elm_lang$core$Process$spawn = _elm_lang$core$Native_Scheduler.spawn;
+
+var _elm_lang$dom$Native_Dom = function() {
+
+function on(node)
+{
+	return function(eventName, decoder, toTask)
+	{
+		return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+
+			function performTask(event)
+			{
+				var result = A2(_elm_lang$core$Json_Decode$decodeValue, decoder, event);
+				if (result.ctor === 'Ok')
+				{
+					_elm_lang$core$Native_Scheduler.rawSpawn(toTask(result._0));
+				}
+			}
+
+			node.addEventListener(eventName, performTask);
+
+			return function()
+			{
+				node.removeEventListener(eventName, performTask);
+			};
+		});
+	};
+}
+
+return {
+	onDocument: F3(on(document)),
+	onWindow: F3(on(window))
+};
+
+}();
+
+var _elm_lang$dom$Dom_LowLevel$onWindow = _elm_lang$dom$Native_Dom.onWindow;
+var _elm_lang$dom$Dom_LowLevel$onDocument = _elm_lang$dom$Native_Dom.onDocument;
+
 //import Native.Json //
 
 var _elm_lang$virtual_dom$Native_VirtualDom = function() {
@@ -7945,6 +7986,176 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
+var _elm_lang$keyboard$Keyboard$onSelfMsg = F3(
+	function (router, _p0, state) {
+		var _p1 = _p0;
+		var _p2 = A2(_elm_lang$core$Dict$get, _p1.category, state);
+		if (_p2.ctor === 'Nothing') {
+			return _elm_lang$core$Task$succeed(state);
+		} else {
+			var send = function (tagger) {
+				return A2(
+					_elm_lang$core$Platform$sendToApp,
+					router,
+					tagger(_p1.keyCode));
+			};
+			return A2(
+				_elm_lang$core$Task$andThen,
+				_elm_lang$core$Task$sequence(
+					A2(_elm_lang$core$List$map, send, _p2._0.taggers)),
+				function (_p3) {
+					return _elm_lang$core$Task$succeed(state);
+				});
+		}
+	});
+var _elm_lang$keyboard$Keyboard_ops = _elm_lang$keyboard$Keyboard_ops || {};
+_elm_lang$keyboard$Keyboard_ops['&>'] = F2(
+	function (t1, t2) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			t1,
+			function (_p4) {
+				return t2;
+			});
+	});
+var _elm_lang$keyboard$Keyboard$init = _elm_lang$core$Task$succeed(_elm_lang$core$Dict$empty);
+var _elm_lang$keyboard$Keyboard$categorizeHelpHelp = F2(
+	function (value, maybeValues) {
+		var _p5 = maybeValues;
+		if (_p5.ctor === 'Nothing') {
+			return _elm_lang$core$Maybe$Just(
+				_elm_lang$core$Native_List.fromArray(
+					[value]));
+		} else {
+			return _elm_lang$core$Maybe$Just(
+				A2(_elm_lang$core$List_ops['::'], value, _p5._0));
+		}
+	});
+var _elm_lang$keyboard$Keyboard$categorizeHelp = F2(
+	function (subs, subDict) {
+		categorizeHelp:
+		while (true) {
+			var _p6 = subs;
+			if (_p6.ctor === '[]') {
+				return subDict;
+			} else {
+				var _v4 = _p6._1,
+					_v5 = A3(
+					_elm_lang$core$Dict$update,
+					_p6._0._0,
+					_elm_lang$keyboard$Keyboard$categorizeHelpHelp(_p6._0._1),
+					subDict);
+				subs = _v4;
+				subDict = _v5;
+				continue categorizeHelp;
+			}
+		}
+	});
+var _elm_lang$keyboard$Keyboard$categorize = function (subs) {
+	return A2(_elm_lang$keyboard$Keyboard$categorizeHelp, subs, _elm_lang$core$Dict$empty);
+};
+var _elm_lang$keyboard$Keyboard$keyCode = A2(_elm_lang$core$Json_Decode_ops[':='], 'keyCode', _elm_lang$core$Json_Decode$int);
+var _elm_lang$keyboard$Keyboard$subscription = _elm_lang$core$Native_Platform.leaf('Keyboard');
+var _elm_lang$keyboard$Keyboard$Watcher = F2(
+	function (a, b) {
+		return {taggers: a, pid: b};
+	});
+var _elm_lang$keyboard$Keyboard$Msg = F2(
+	function (a, b) {
+		return {category: a, keyCode: b};
+	});
+var _elm_lang$keyboard$Keyboard$onEffects = F3(
+	function (router, newSubs, oldState) {
+		var rightStep = F3(
+			function (category, taggers, task) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					task,
+					function (state) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							_elm_lang$core$Process$spawn(
+								A3(
+									_elm_lang$dom$Dom_LowLevel$onDocument,
+									category,
+									_elm_lang$keyboard$Keyboard$keyCode,
+									function (_p7) {
+										return A2(
+											_elm_lang$core$Platform$sendToSelf,
+											router,
+											A2(_elm_lang$keyboard$Keyboard$Msg, category, _p7));
+									})),
+							function (pid) {
+								return _elm_lang$core$Task$succeed(
+									A3(
+										_elm_lang$core$Dict$insert,
+										category,
+										A2(_elm_lang$keyboard$Keyboard$Watcher, taggers, pid),
+										state));
+							});
+					});
+			});
+		var bothStep = F4(
+			function (category, _p8, taggers, task) {
+				var _p9 = _p8;
+				return A2(
+					_elm_lang$core$Task$andThen,
+					task,
+					function (state) {
+						return _elm_lang$core$Task$succeed(
+							A3(
+								_elm_lang$core$Dict$insert,
+								category,
+								A2(_elm_lang$keyboard$Keyboard$Watcher, taggers, _p9.pid),
+								state));
+					});
+			});
+		var leftStep = F3(
+			function (category, _p10, task) {
+				var _p11 = _p10;
+				return A2(
+					_elm_lang$keyboard$Keyboard_ops['&>'],
+					_elm_lang$core$Process$kill(_p11.pid),
+					task);
+			});
+		return A6(
+			_elm_lang$core$Dict$merge,
+			leftStep,
+			bothStep,
+			rightStep,
+			oldState,
+			_elm_lang$keyboard$Keyboard$categorize(newSubs),
+			_elm_lang$core$Task$succeed(_elm_lang$core$Dict$empty));
+	});
+var _elm_lang$keyboard$Keyboard$MySub = F2(
+	function (a, b) {
+		return {ctor: 'MySub', _0: a, _1: b};
+	});
+var _elm_lang$keyboard$Keyboard$presses = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keypress', tagger));
+};
+var _elm_lang$keyboard$Keyboard$downs = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keydown', tagger));
+};
+var _elm_lang$keyboard$Keyboard$ups = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keyup', tagger));
+};
+var _elm_lang$keyboard$Keyboard$subMap = F2(
+	function (func, _p12) {
+		var _p13 = _p12;
+		return A2(
+			_elm_lang$keyboard$Keyboard$MySub,
+			_p13._0,
+			function (_p14) {
+				return func(
+					_p13._1(_p14));
+			});
+	});
+_elm_lang$core$Native_Platform.effectManagers['Keyboard'] = {pkg: 'elm-lang/keyboard', init: _elm_lang$keyboard$Keyboard$init, onEffects: _elm_lang$keyboard$Keyboard$onEffects, onSelfMsg: _elm_lang$keyboard$Keyboard$onSelfMsg, tag: 'sub', subMap: _elm_lang$keyboard$Keyboard$subMap};
+
 //import Dict, List, Maybe, Native.Scheduler //
 
 var _evancz$elm_http$Native_Http = function() {
@@ -8482,11 +8693,19 @@ var _user$project$Main$navigation = A2(
 			A2(_user$project$Main$NavigationItem, 'published tracks', '/pubished-tracks')
 		]),
 	A2(_user$project$Main$NavigationItem, 'feed', '/'));
+var _user$project$Main$KeyPressed = function (a) {
+	return {ctor: 'KeyPressed', _0: a};
+};
 var _user$project$Main$TrackProgress = function (a) {
 	return {ctor: 'TrackProgress', _0: a};
 };
 var _user$project$Main$subscriptions = function (model) {
-	return _user$project$Main$trackProgress(_user$project$Main$TrackProgress);
+	return _elm_lang$core$Platform_Sub$batch(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_user$project$Main$trackProgress(_user$project$Main$TrackProgress),
+				_elm_lang$keyboard$Keyboard$presses(_user$project$Main$KeyPressed)
+			]));
 };
 var _user$project$Main$PlayTrackSuccess = function (a) {
 	return {ctor: 'PlayTrackSuccess', _0: a};
@@ -8904,157 +9123,178 @@ var _user$project$Main$init = {
 };
 var _user$project$Main$update = F2(
 	function (message, model) {
-		var _p3 = message;
-		switch (_p3.ctor) {
-			case 'FetchFeedSuccess':
-				var _p4 = _p3._0;
-				var updatedTrackDict = A2(
-					_elm_lang$core$Dict$union,
-					model.tracks,
-					_elm_lang$core$Dict$fromList(
-						A2(
-							_elm_lang$core$List$map,
-							function (track) {
-								return {ctor: '_Tuple2', _0: track.id, _1: track};
-							},
-							_p4.tracks)));
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							tracks: updatedTrackDict,
-							feed: A2(
-								_elm_lang$core$List$append,
-								model.feed,
-								A2(
-									_elm_lang$core$List$map,
-									function (_) {
-										return _.id;
-									},
-									_p4.tracks)),
-							queue: A2(
-								_elm_lang$core$List$append,
-								model.queue,
-								A2(
-									_elm_lang$core$List$map,
-									function (_) {
-										return _.id;
-									},
-									_p4.tracks)),
-							nextLink: _elm_lang$core$Maybe$Just(_p4.nextLink),
-							loading: false
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'FetchFeedFail':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{loading: false}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'FetchMore':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{loading: true}),
-					_1: _user$project$Main$fetchFeed(model.nextLink)
-				};
-			case 'TogglePlaybackFromFeed':
-				var _p6 = _p3._1;
-				return _elm_lang$core$Native_Utils.eq(
-					model.currentTrack,
-					_elm_lang$core$Maybe$Just(_p6)) ? {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							playing: _elm_lang$core$Basics$not(model.playing)
-						}),
-					_1: _user$project$Main$togglePlayback(
-						_elm_lang$core$Maybe$Just(_p6))
-				} : {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							currentTrack: _elm_lang$core$Maybe$Just(_p6),
-							playing: (!_elm_lang$core$Native_Utils.eq(
-								model.currentTrack,
-								_elm_lang$core$Maybe$Just(_p6))) || _elm_lang$core$Basics$not(model.playing),
-							queue: A2(_elm_lang$core$List$drop, _p3._0 + 1, model.feed)
-						}),
-					_1: function () {
-						var _p5 = A2(_elm_lang$core$Dict$get, _p6, model.tracks);
-						if (_p5.ctor === 'Nothing') {
-							return _elm_lang$core$Platform_Cmd$none;
-						} else {
-							return _user$project$Main$playTrack(_p5._0);
-						}
-					}()
-				};
-			case 'TogglePlayback':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							playing: _elm_lang$core$Basics$not(model.playing)
-						}),
-					_1: _user$project$Main$togglePlayback(model.currentTrack)
-				};
-			case 'Next':
-				var newCurrentTrack = _elm_lang$core$List$head(model.queue);
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							currentTrack: newCurrentTrack,
-							queue: A2(_elm_lang$core$List$drop, 1, model.queue)
-						}),
-					_1: function () {
-						var _p7 = newCurrentTrack;
-						if (_p7.ctor === 'Nothing') {
-							return _user$project$Main$togglePlayback(model.currentTrack);
-						} else {
-							var _p8 = A2(_elm_lang$core$Dict$get, _p7._0, model.tracks);
-							if (_p8.ctor === 'Nothing') {
-								return _elm_lang$core$Platform_Cmd$none;
-							} else {
-								return _user$project$Main$playTrack(_p8._0);
-							}
-						}
-					}()
-				};
-			case 'PlayTrackSuccess':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			default:
-				var _p10 = _p3._0._0;
-				var track = A2(_elm_lang$core$Dict$get, _p10, model.tracks);
-				var _p9 = track;
-				if (_p9.ctor === 'Nothing') {
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				} else {
+		update:
+		while (true) {
+			var _p3 = message;
+			switch (_p3.ctor) {
+				case 'FetchFeedSuccess':
+					var _p4 = _p3._0;
+					var updatedTrackDict = A2(
+						_elm_lang$core$Dict$union,
+						model.tracks,
+						_elm_lang$core$Dict$fromList(
+							A2(
+								_elm_lang$core$List$map,
+								function (track) {
+									return {ctor: '_Tuple2', _0: track.id, _1: track};
+								},
+								_p4.tracks)));
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								tracks: A3(
-									_elm_lang$core$Dict$insert,
-									_p10,
-									_elm_lang$core$Native_Utils.update(
-										_p9._0,
-										{progress: _p3._0._1, currentTime: _p3._0._2}),
-									model.tracks)
+								tracks: updatedTrackDict,
+								feed: A2(
+									_elm_lang$core$List$append,
+									model.feed,
+									A2(
+										_elm_lang$core$List$map,
+										function (_) {
+											return _.id;
+										},
+										_p4.tracks)),
+								queue: A2(
+									_elm_lang$core$List$append,
+									model.queue,
+									A2(
+										_elm_lang$core$List$map,
+										function (_) {
+											return _.id;
+										},
+										_p4.tracks)),
+								nextLink: _elm_lang$core$Maybe$Just(_p4.nextLink),
+								loading: false
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
-				}
+				case 'FetchFeedFail':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{loading: false}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'FetchMore':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{loading: true}),
+						_1: _user$project$Main$fetchFeed(model.nextLink)
+					};
+				case 'TogglePlaybackFromFeed':
+					var _p6 = _p3._1;
+					return _elm_lang$core$Native_Utils.eq(
+						model.currentTrack,
+						_elm_lang$core$Maybe$Just(_p6)) ? {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								playing: _elm_lang$core$Basics$not(model.playing)
+							}),
+						_1: _user$project$Main$togglePlayback(
+							_elm_lang$core$Maybe$Just(_p6))
+					} : {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								currentTrack: _elm_lang$core$Maybe$Just(_p6),
+								playing: (!_elm_lang$core$Native_Utils.eq(
+									model.currentTrack,
+									_elm_lang$core$Maybe$Just(_p6))) || _elm_lang$core$Basics$not(model.playing),
+								queue: A2(_elm_lang$core$List$drop, _p3._0 + 1, model.feed)
+							}),
+						_1: function () {
+							var _p5 = A2(_elm_lang$core$Dict$get, _p6, model.tracks);
+							if (_p5.ctor === 'Nothing') {
+								return _elm_lang$core$Platform_Cmd$none;
+							} else {
+								return _user$project$Main$playTrack(_p5._0);
+							}
+						}()
+					};
+				case 'TogglePlayback':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								playing: _elm_lang$core$Basics$not(model.playing)
+							}),
+						_1: _user$project$Main$togglePlayback(model.currentTrack)
+					};
+				case 'Next':
+					var newCurrentTrack = _elm_lang$core$List$head(model.queue);
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								currentTrack: newCurrentTrack,
+								queue: A2(_elm_lang$core$List$drop, 1, model.queue)
+							}),
+						_1: function () {
+							var _p7 = newCurrentTrack;
+							if (_p7.ctor === 'Nothing') {
+								return _user$project$Main$togglePlayback(model.currentTrack);
+							} else {
+								var _p8 = A2(_elm_lang$core$Dict$get, _p7._0, model.tracks);
+								if (_p8.ctor === 'Nothing') {
+									return _elm_lang$core$Platform_Cmd$none;
+								} else {
+									return _user$project$Main$playTrack(_p8._0);
+								}
+							}
+						}()
+					};
+				case 'PlayTrackSuccess':
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				case 'TrackProgress':
+					var _p10 = _p3._0._0;
+					var track = A2(_elm_lang$core$Dict$get, _p10, model.tracks);
+					var _p9 = track;
+					if (_p9.ctor === 'Nothing') {
+						return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+					} else {
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{
+									tracks: A3(
+										_elm_lang$core$Dict$insert,
+										_p10,
+										_elm_lang$core$Native_Utils.update(
+											_p9._0,
+											{progress: _p3._0._1, currentTime: _p3._0._2}),
+										model.tracks)
+								}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					}
+				default:
+					var _p11 = _elm_lang$core$Char$fromCode(_p3._0);
+					switch (_p11.valueOf()) {
+						case 'n':
+							var _v8 = _user$project$Main$Next,
+								_v9 = model;
+							message = _v8;
+							model = _v9;
+							continue update;
+						case ' ':
+							var _v10 = _user$project$Main$TogglePlayback,
+								_v11 = model;
+							message = _v10;
+							model = _v11;
+							continue update;
+						default:
+							return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+					}
+			}
 		}
 	});
 var _user$project$Main$main = {
