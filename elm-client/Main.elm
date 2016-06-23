@@ -1,7 +1,9 @@
+port module Main exposing(..)
+
 import Dict exposing (Dict)
 import Html exposing (Html, a, nav, li, ul, text, div, img)
 import Html.App as Html
-import Html.Attributes exposing (class, href, src)
+import Html.Attributes exposing (class, href, src, style)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Json
@@ -15,7 +17,7 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         }
 
 
@@ -39,6 +41,9 @@ type alias Track =
     , artist : String
     , artwork_url : String
     , title : String
+    , streamUrl : String
+    , progress : Float
+    , currentTime : Float
     }
 
 
@@ -76,6 +81,12 @@ type Msg
     | TogglePlaybackFromFeed Int TrackId
     | TogglePlayback
     | Next
+    | PlayTrackSuccess Track
+    | TrackProgress ( TrackId, Float, Float )
+
+
+port playTrack : Track -> Cmd msg
+port togglePlayback : Maybe TrackId -> Cmd msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -111,26 +122,85 @@ update message model =
             , fetchFeed model.nextLink
             )
         TogglePlaybackFromFeed position trackId ->
-            ( { model
-                | currentTrack = Just trackId
-                , playing = model.currentTrack /= Just trackId || not model.playing
-                , queue = List.drop ( position + 1 ) model.feed
-              }
-            , Cmd.none
-            )
+            if model.currentTrack == Just trackId then
+                ( { model | playing = not model.playing }
+                , togglePlayback ( Just trackId )
+                )
+            else
+                ( { model
+                    | currentTrack = Just trackId
+                    , playing = model.currentTrack /= Just trackId || not model.playing
+                    , queue = List.drop ( position + 1 ) model.feed
+                  }
+                , case Dict.get trackId model.tracks of
+                    Nothing ->
+                        Cmd.none
+                    Just track ->
+                        playTrack track
+                )
         TogglePlayback ->
-            ( { model
-                | playing = not model.playing
-              }
-            , Cmd.none
+            ( { model | playing = not model.playing }
+            , togglePlayback model.currentTrack
             )
         Next ->
-            ( { model
-                | currentTrack = List.head model.queue
-                , queue = List.drop 1 model.queue
-              }
+            let
+                newCurrentTrack =
+                    List.head model.queue
+            in
+                ( { model
+                    | currentTrack = newCurrentTrack
+                    , queue = List.drop 1 model.queue
+                  }
+                , case newCurrentTrack of
+                    Nothing ->
+                        togglePlayback model.currentTrack
+                    Just trackId ->
+                        case Dict.get trackId model.tracks of
+                            Nothing ->
+                                Cmd.none
+                            Just track ->
+                                playTrack track
+                )
+        PlayTrackSuccess track ->
+            ( model
             , Cmd.none
             )
+        TrackProgress ( trackId, progress, currentTime ) ->
+            let
+                track =
+                    Dict.get trackId model.tracks
+            in
+                case track of
+                    Nothing ->
+                        ( model
+                        , Cmd.none
+                        )
+                    Just track ->
+                        ( { model
+                            | tracks =
+                                Dict.insert
+                                    trackId
+                                    { track | progress = progress, currentTime = currentTime }
+                                    model.tracks
+                          }
+                        , Cmd.none
+                        )
+
+
+
+-- SUBSCRIPTIONS
+
+
+port trackProgress : ( ( Int, Float, Float ) -> msg ) -> Sub msg
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    trackProgress TrackProgress
+
+
+
+-- VIEW
 
 
 view : Model -> Html Msg
@@ -206,7 +276,14 @@ viewGlobalPlayer track playing =
                     ]
                 , div
                     [ class "progress-bar" ]
-                    [ div [ class "outer" ] []
+                    [ div
+                        [ class "outer" ]
+                        [ div
+                            [ class "inner"
+                            , style [ ("width", ( toString track.progress ) ++ "%" ) ]
+                            ]
+                            []
+                        ]
                     ]
                 , div
                     [ class "actions" ]
@@ -251,7 +328,15 @@ viewTrack position track =
             ]
         , div
             [ class "progress-bar" ]
-            [ div [ class "outer" ] [] ]
+            [ div
+                [ class "outer" ]
+                [ div
+                    [ class "inner"
+                    , style [ ("width", ( toString track.progress ) ++ "%" ) ]
+                    ]
+                    []
+                ]
+            ]
         ]
 
 
@@ -350,4 +435,6 @@ decodeTrack =
         |: (Json.Decode.at [ "user", "username" ] Json.Decode.string)
         |: ("artwork_url" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
         |: ("title" := Json.Decode.string)
-
+        |: ("stream_url" := Json.Decode.string)
+        |: Json.Decode.succeed 0
+        |: Json.Decode.succeed 0

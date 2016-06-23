@@ -50,7 +50,9 @@ function *requireAuthentication(next) {
 }
 
 function *index() {
-    yield this.render('feed');
+    yield this.render('feed', {
+        client_id: process.env.SOUNDCLOUD_CLIENT_ID,
+    });
 }
 
 function *feed() {

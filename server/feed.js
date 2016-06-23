@@ -76,6 +76,8 @@ function parseSoundcloudActivities(activities) {
         }
 
         return track;
+    }).filter(function (feedItem) {
+        return feedItem.kind === "track";
     });
 
     return {

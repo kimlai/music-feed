@@ -10,7 +10,38 @@
     </head>
     <body>
         <script>
-            Elm.Main.fullscreen();
+            var app = Elm.Main.fullscreen();
+
+            var soundcloudClientId = '<%=client_id%>';
+            var audio = new Audio();
+            var currentTrackId;
+
+            audio.addEventListener('timeupdate', function (e) {
+                app.ports.trackProgress.send([
+                    currentTrackId,
+                    e.target.currentTime / e.target.duration * 100,
+                    e.target.currentTime
+                ]);
+            });
+            app.ports.playTrack.subscribe(function(track) {
+                currentTrackId = track.id;
+                audio.src = track.streamUrl + '?client_id=' + soundcloudClientId;
+                audio.currentTime = track.currentTime;
+                audio.play();
+            });
+            app.ports.togglePlayback.subscribe(function(trackId) {
+                if (currentTrackId !== trackId) {
+                    throw new Error(
+                        'You are trying to toggle the playback of track ' + trackId +
+                        ', but the current track is ' + currentTrackId + '.'
+                    );
+                }
+                if (audio.paused === true) {
+                    audio.play();
+                } else {
+                    audio.pause();
+                }
+            });
         </script>
     </body>
 </html>
