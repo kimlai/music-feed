@@ -8514,6 +8514,61 @@ var _evancz$elm_http$Http$post = F3(
 			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request));
 	});
 
+var _user$project$Feed$Track = F7(
+	function (a, b, c, d, e, f, g) {
+		return {id: a, artist: b, artwork_url: c, title: d, streamUrl: e, progress: f, currentTime: g};
+	});
+
+var _user$project$FeedApi$decodeTrack = A2(
+	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+	A2(
+		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+		A2(
+			_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+			A2(
+				_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+				A2(
+					_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+					A2(
+						_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+						A2(
+							_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+							_elm_lang$core$Json_Decode$succeed(_user$project$Feed$Track),
+							A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
+						A2(
+							_elm_lang$core$Json_Decode$at,
+							_elm_lang$core$Native_List.fromArray(
+								['user', 'username']),
+							_elm_lang$core$Json_Decode$string)),
+					A2(
+						_elm_lang$core$Json_Decode_ops[':='],
+						'artwork_url',
+						A2(_elm_community$elm_json_extra$Json_Decode_Extra$withDefault, '/images/placeholder.jpg', _elm_lang$core$Json_Decode$string))),
+				A2(_elm_lang$core$Json_Decode_ops[':='], 'title', _elm_lang$core$Json_Decode$string)),
+			A2(_elm_lang$core$Json_Decode_ops[':='], 'stream_url', _elm_lang$core$Json_Decode$string)),
+		_elm_lang$core$Json_Decode$succeed(0)),
+	_elm_lang$core$Json_Decode$succeed(0));
+var _user$project$FeedApi$FetchFeedPayload = F2(
+	function (a, b) {
+		return {tracks: a, nextLink: b};
+	});
+var _user$project$FeedApi$decodeFeed = A2(
+	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+	A2(
+		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+		_elm_lang$core$Json_Decode$succeed(_user$project$FeedApi$FetchFeedPayload),
+		A2(
+			_elm_lang$core$Json_Decode_ops[':='],
+			'tracks',
+			_elm_lang$core$Json_Decode$list(_user$project$FeedApi$decodeTrack))),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'next_href', _elm_lang$core$Json_Decode$string));
+var _user$project$FeedApi$fetch = function (nextLink) {
+	return A2(
+		_evancz$elm_http$Http$get,
+		_user$project$FeedApi$decodeFeed,
+		A2(_elm_lang$core$Maybe$withDefault, '/feed', nextLink));
+};
+
 var _user$project$Main$viewNavigationItem = F2(
 	function (activeNavigationItem, navigationItem) {
 		var linkAttributes = _elm_lang$core$Native_Utils.eq(navigationItem, activeNavigationItem) ? _elm_lang$core$Native_List.fromArray(
@@ -8629,53 +8684,6 @@ var _user$project$Main$Model = F7(
 	function (a, b, c, d, e, f, g) {
 		return {tracks: a, feed: b, queue: c, nextLink: d, loading: e, playing: f, currentTrack: g};
 	});
-var _user$project$Main$Track = F7(
-	function (a, b, c, d, e, f, g) {
-		return {id: a, artist: b, artwork_url: c, title: d, streamUrl: e, progress: f, currentTime: g};
-	});
-var _user$project$Main$decodeTrack = A2(
-	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-	A2(
-		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-		A2(
-			_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-			A2(
-				_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-				A2(
-					_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-					A2(
-						_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-						A2(
-							_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-							_elm_lang$core$Json_Decode$succeed(_user$project$Main$Track),
-							A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
-						A2(
-							_elm_lang$core$Json_Decode$at,
-							_elm_lang$core$Native_List.fromArray(
-								['user', 'username']),
-							_elm_lang$core$Json_Decode$string)),
-					A2(
-						_elm_lang$core$Json_Decode_ops[':='],
-						'artwork_url',
-						A2(_elm_community$elm_json_extra$Json_Decode_Extra$withDefault, '/images/placeholder.jpg', _elm_lang$core$Json_Decode$string))),
-				A2(_elm_lang$core$Json_Decode_ops[':='], 'title', _elm_lang$core$Json_Decode$string)),
-			A2(_elm_lang$core$Json_Decode_ops[':='], 'stream_url', _elm_lang$core$Json_Decode$string)),
-		_elm_lang$core$Json_Decode$succeed(0)),
-	_elm_lang$core$Json_Decode$succeed(0));
-var _user$project$Main$FetchFeedPayload = F2(
-	function (a, b) {
-		return {tracks: a, nextLink: b};
-	});
-var _user$project$Main$decodeFeed = A2(
-	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-	A2(
-		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-		_elm_lang$core$Json_Decode$succeed(_user$project$Main$FetchFeedPayload),
-		A2(
-			_elm_lang$core$Json_Decode_ops[':='],
-			'tracks',
-			_elm_lang$core$Json_Decode$list(_user$project$Main$decodeTrack))),
-	A2(_elm_lang$core$Json_Decode_ops[':='], 'next_href', _elm_lang$core$Json_Decode$string));
 var _user$project$Main$Navigation = F2(
 	function (a, b) {
 		return {items: a, activeItem: b};
@@ -9101,10 +9109,7 @@ var _user$project$Main$fetchFeed = function (nextLink) {
 		_elm_lang$core$Task$perform,
 		_user$project$Main$FetchFeedFail,
 		_user$project$Main$FetchFeedSuccess,
-		A2(
-			_evancz$elm_http$Http$get,
-			_user$project$Main$decodeFeed,
-			A2(_elm_lang$core$Maybe$withDefault, '/feed', nextLink)));
+		_user$project$FeedApi$fetch(nextLink));
 };
 var _user$project$Main$init = {
 	ctor: '_Tuple2',

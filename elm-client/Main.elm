@@ -6,9 +6,8 @@ import Html.App as Html
 import Html.Attributes exposing (class, href, src, style)
 import Html.Events exposing (onClick)
 import Http
-import Json.Decode as Json
-import Json.Decode exposing ((:=))
-import Json.Decode.Extra exposing ((|:))
+import FeedApi
+import Feed exposing (Track, TrackId)
 import Task
 import Keyboard
 import Char
@@ -38,26 +37,6 @@ type alias Model =
     }
 
 
-type alias Track =
-    { id : TrackId
-    , artist : String
-    , artwork_url : String
-    , title : String
-    , streamUrl : String
-    , progress : Float
-    , currentTime : Float
-    }
-
-
-type alias TrackId = Int
-
-
-type alias FetchFeedPayload =
-    { tracks : List Track
-    , nextLink : String
-    }
-
-
 init : ( Model, Cmd Msg )
 init =
     ( { tracks = Dict.empty
@@ -77,7 +56,7 @@ init =
 
 
 type Msg
-    = FetchFeedSuccess FetchFeedPayload
+    = FetchFeedSuccess FeedApi.FetchFeedPayload
     | FetchFeedFail Http.Error
     | FetchMore
     | TogglePlaybackFromFeed Int TrackId
@@ -432,24 +411,5 @@ viewNavigationItem activeNavigationItem navigationItem =
 
 fetchFeed : Maybe String -> Cmd Msg
 fetchFeed nextLink =
-    Http.get decodeFeed ( Maybe.withDefault "/feed" nextLink )
+    FeedApi.fetch nextLink
         |> Task.perform FetchFeedFail FetchFeedSuccess
-
-
-decodeFeed : Json.Decoder FetchFeedPayload
-decodeFeed =
-    Json.Decode.succeed FetchFeedPayload
-        |: ( "tracks" := Json.Decode.list decodeTrack )
-        |: ( "next_href" := Json.Decode.string )
-
-
-decodeTrack : Json.Decode.Decoder Track
-decodeTrack =
-    Json.Decode.succeed Track
-        |: ("id" := Json.Decode.int)
-        |: (Json.Decode.at [ "user", "username" ] Json.Decode.string)
-        |: ("artwork_url" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
-        |: ("title" := Json.Decode.string)
-        |: ("stream_url" := Json.Decode.string)
-        |: Json.Decode.succeed 0
-        |: Json.Decode.succeed 0
