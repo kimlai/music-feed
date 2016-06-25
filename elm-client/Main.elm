@@ -59,7 +59,7 @@ type Msg
     = FetchFeedSuccess FeedApi.FetchFeedPayload
     | FetchFeedFail Http.Error
     | FetchMore
-    | TogglePlaybackFromFeed Int TrackId
+    | TogglePlaybackFromFeed Int Track
     | TogglePlayback
     | Next
     | PlayTrackSuccess Track
@@ -103,22 +103,16 @@ update message model =
               }
             , fetchFeed model.nextLink
             )
-        TogglePlaybackFromFeed position trackId ->
-            if model.currentTrack == Just trackId then
-                ( { model | playing = not model.playing }
-                , togglePlayback ( Just trackId )
-                )
+        TogglePlaybackFromFeed position track ->
+            if model.currentTrack == Just track.id then
+                update TogglePlayback model
             else
                 ( { model
-                    | currentTrack = Just trackId
-                    , playing = model.currentTrack /= Just trackId || not model.playing
+                    | currentTrack = Just track.id
+                    , playing = True
                     , queue = List.drop ( position + 1 ) model.feed
                   }
-                , case Dict.get trackId model.tracks of
-                    Nothing ->
-                        Cmd.none
-                    Just track ->
-                        playTrack track
+                  , playTrack track
                 )
         TogglePlayback ->
             ( { model | playing = not model.playing }
@@ -307,7 +301,7 @@ viewTrack : Int -> Track -> Html Msg
 viewTrack position track =
     div
         [ class "track"
-        , onClick ( TogglePlaybackFromFeed position track.id )
+        , onClick ( TogglePlaybackFromFeed position track )
         ]
         [ div
             [ class "track-info-container" ]

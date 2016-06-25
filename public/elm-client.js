@@ -8946,7 +8946,7 @@ var _user$project$Main$viewTrack = F2(
 				[
 					_elm_lang$html$Html_Attributes$class('track'),
 					_elm_lang$html$Html_Events$onClick(
-					A2(_user$project$Main$TogglePlaybackFromFeed, position, track.id))
+					A2(_user$project$Main$TogglePlaybackFromFeed, position, track))
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
@@ -9190,38 +9190,28 @@ var _user$project$Main$update = F2(
 						_1: _user$project$Main$fetchFeed(model.nextLink)
 					};
 				case 'TogglePlaybackFromFeed':
-					var _p6 = _p3._1;
-					return _elm_lang$core$Native_Utils.eq(
+					var _p5 = _p3._1;
+					if (_elm_lang$core$Native_Utils.eq(
 						model.currentTrack,
-						_elm_lang$core$Maybe$Just(_p6)) ? {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								playing: _elm_lang$core$Basics$not(model.playing)
-							}),
-						_1: _user$project$Main$togglePlayback(
-							_elm_lang$core$Maybe$Just(_p6))
-					} : {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								currentTrack: _elm_lang$core$Maybe$Just(_p6),
-								playing: (!_elm_lang$core$Native_Utils.eq(
-									model.currentTrack,
-									_elm_lang$core$Maybe$Just(_p6))) || _elm_lang$core$Basics$not(model.playing),
-								queue: A2(_elm_lang$core$List$drop, _p3._0 + 1, model.feed)
-							}),
-						_1: function () {
-							var _p5 = A2(_elm_lang$core$Dict$get, _p6, model.tracks);
-							if (_p5.ctor === 'Nothing') {
-								return _elm_lang$core$Platform_Cmd$none;
-							} else {
-								return _user$project$Main$playTrack(_p5._0);
-							}
-						}()
-					};
+						_elm_lang$core$Maybe$Just(_p5.id))) {
+						var _v3 = _user$project$Main$TogglePlayback,
+							_v4 = model;
+						message = _v3;
+						model = _v4;
+						continue update;
+					} else {
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{
+									currentTrack: _elm_lang$core$Maybe$Just(_p5.id),
+									playing: true,
+									queue: A2(_elm_lang$core$List$drop, _p3._0 + 1, model.feed)
+								}),
+							_1: _user$project$Main$playTrack(_p5)
+						};
+					}
 				case 'TogglePlayback':
 					return {
 						ctor: '_Tuple2',
@@ -9243,15 +9233,15 @@ var _user$project$Main$update = F2(
 								queue: A2(_elm_lang$core$List$drop, 1, model.queue)
 							}),
 						_1: function () {
-							var _p7 = newCurrentTrack;
-							if (_p7.ctor === 'Nothing') {
+							var _p6 = newCurrentTrack;
+							if (_p6.ctor === 'Nothing') {
 								return _user$project$Main$togglePlayback(model.currentTrack);
 							} else {
-								var _p8 = A2(_elm_lang$core$Dict$get, _p7._0, model.tracks);
-								if (_p8.ctor === 'Nothing') {
+								var _p7 = A2(_elm_lang$core$Dict$get, _p6._0, model.tracks);
+								if (_p7.ctor === 'Nothing') {
 									return _elm_lang$core$Platform_Cmd$none;
 								} else {
-									return _user$project$Main$playTrack(_p8._0);
+									return _user$project$Main$playTrack(_p7._0);
 								}
 							}
 						}()
@@ -9259,10 +9249,10 @@ var _user$project$Main$update = F2(
 				case 'PlayTrackSuccess':
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				case 'TrackProgress':
-					var _p10 = _p3._0._0;
-					var track = A2(_elm_lang$core$Dict$get, _p10, model.tracks);
-					var _p9 = track;
-					if (_p9.ctor === 'Nothing') {
+					var _p9 = _p3._0._0;
+					var track = A2(_elm_lang$core$Dict$get, _p9, model.tracks);
+					var _p8 = track;
+					if (_p8.ctor === 'Nothing') {
 						return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 					} else {
 						return {
@@ -9272,9 +9262,9 @@ var _user$project$Main$update = F2(
 								{
 									tracks: A3(
 										_elm_lang$core$Dict$insert,
-										_p10,
+										_p9,
 										_elm_lang$core$Native_Utils.update(
-											_p9._0,
+											_p8._0,
 											{progress: _p3._0._1, currentTime: _p3._0._2}),
 										model.tracks)
 								}),
@@ -9282,19 +9272,19 @@ var _user$project$Main$update = F2(
 						};
 					}
 				default:
-					var _p11 = _elm_lang$core$Char$fromCode(_p3._0);
-					switch (_p11.valueOf()) {
+					var _p10 = _elm_lang$core$Char$fromCode(_p3._0);
+					switch (_p10.valueOf()) {
 						case 'n':
-							var _v8 = _user$project$Main$Next,
-								_v9 = model;
-							message = _v8;
-							model = _v9;
+							var _v9 = _user$project$Main$Next,
+								_v10 = model;
+							message = _v9;
+							model = _v10;
 							continue update;
 						case ' ':
-							var _v10 = _user$project$Main$TogglePlayback,
-								_v11 = model;
-							message = _v10;
-							model = _v11;
+							var _v11 = _user$project$Main$TogglePlayback,
+								_v12 = model;
+							message = _v11;
+							model = _v12;
 							continue update;
 						default:
 							return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
