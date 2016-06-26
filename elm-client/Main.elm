@@ -64,11 +64,13 @@ type Msg
     | Next
     | PlayTrackSuccess Track
     | TrackProgress ( TrackId, Float, Float )
+    | FastForward
     | KeyPressed Keyboard.KeyCode
 
 
 port playTrack : Track -> Cmd msg
 port togglePlayback : Maybe TrackId -> Cmd msg
+port fastForward : Int -> Cmd msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -141,6 +143,10 @@ update message model =
             ( model
             , Cmd.none
             )
+        FastForward ->
+            ( model
+            , fastForward 10
+            )
         TrackProgress ( trackId, progress, currentTime ) ->
             let
                 track =
@@ -165,8 +171,12 @@ update message model =
             case ( Char.fromCode keyCode ) of
                 'n' ->
                     update Next model
-                ' ' ->
+                'p' ->
                     update TogglePlayback model
+                'f' ->
+                    update FastForward model
+                'm' ->
+                    update FetchMore model
                 _ ->
                     ( model
                     , Cmd.none

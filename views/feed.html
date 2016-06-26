@@ -42,6 +42,9 @@
                     audio.pause();
                 }
             });
+            app.ports.fastForward.subscribe(function(amount) {
+                audio.currentTime = audio.currentTime + amount;
+            });
         </script>
     </body>
 </html>

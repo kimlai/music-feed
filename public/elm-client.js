@@ -8669,6 +8669,11 @@ var _user$project$Main$togglePlayback = _elm_lang$core$Native_Platform.outgoingP
 	function (v) {
 		return (v.ctor === 'Nothing') ? null : v._0;
 	});
+var _user$project$Main$fastForward = _elm_lang$core$Native_Platform.outgoingPort(
+	'fastForward',
+	function (v) {
+		return v;
+	});
 var _user$project$Main$trackProgress = _elm_lang$core$Native_Platform.incomingPort(
 	'trackProgress',
 	A4(
@@ -8704,6 +8709,7 @@ var _user$project$Main$navigation = A2(
 var _user$project$Main$KeyPressed = function (a) {
 	return {ctor: 'KeyPressed', _0: a};
 };
+var _user$project$Main$FastForward = {ctor: 'FastForward'};
 var _user$project$Main$TrackProgress = function (a) {
 	return {ctor: 'TrackProgress', _0: a};
 };
@@ -9248,6 +9254,12 @@ var _user$project$Main$update = F2(
 					};
 				case 'PlayTrackSuccess':
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				case 'FastForward':
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: _user$project$Main$fastForward(10)
+					};
 				case 'TrackProgress':
 					var _p9 = _p3._0._0;
 					var track = A2(_elm_lang$core$Dict$get, _p9, model.tracks);
@@ -9280,11 +9292,23 @@ var _user$project$Main$update = F2(
 							message = _v9;
 							model = _v10;
 							continue update;
-						case ' ':
+						case 'p':
 							var _v11 = _user$project$Main$TogglePlayback,
 								_v12 = model;
 							message = _v11;
 							model = _v12;
+							continue update;
+						case 'f':
+							var _v13 = _user$project$Main$FastForward,
+								_v14 = model;
+							message = _v13;
+							model = _v14;
+							continue update;
+						case 'm':
+							var _v15 = _user$project$Main$FetchMore,
+								_v16 = model;
+							message = _v15;
+							model = _v16;
 							continue update;
 						default:
 							return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
