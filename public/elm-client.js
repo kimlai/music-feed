@@ -8721,9 +8721,6 @@ var _user$project$Main$subscriptions = function (model) {
 				_elm_lang$keyboard$Keyboard$presses(_user$project$Main$KeyPressed)
 			]));
 };
-var _user$project$Main$PlayTrackSuccess = function (a) {
-	return {ctor: 'PlayTrackSuccess', _0: a};
-};
 var _user$project$Main$Next = {ctor: 'Next'};
 var _user$project$Main$TogglePlayback = {ctor: 'TogglePlayback'};
 var _user$project$Main$viewGlobalPlayer = F2(
@@ -9252,8 +9249,6 @@ var _user$project$Main$update = F2(
 							}
 						}()
 					};
-				case 'PlayTrackSuccess':
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				case 'FastForward':
 					return {
 						ctor: '_Tuple2',

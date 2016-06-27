@@ -62,7 +62,6 @@ type Msg
     | TogglePlaybackFromFeed Int Track
     | TogglePlayback
     | Next
-    | PlayTrackSuccess Track
     | TrackProgress ( TrackId, Float, Float )
     | FastForward
     | KeyPressed Keyboard.KeyCode
@@ -139,10 +138,6 @@ update message model =
                             Just track ->
                                 playTrack track
                 )
-        PlayTrackSuccess track ->
-            ( model
-            , Cmd.none
-            )
         FastForward ->
             ( model
             , fastForward 10
