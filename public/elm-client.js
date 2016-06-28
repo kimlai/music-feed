@@ -8664,8 +8664,13 @@ var _user$project$Main$playTrack = _elm_lang$core$Native_Platform.outgoingPort(
 	function (v) {
 		return {id: v.id, artist: v.artist, artwork_url: v.artwork_url, title: v.title, streamUrl: v.streamUrl, progress: v.progress, currentTime: v.currentTime};
 	});
-var _user$project$Main$togglePlayback = _elm_lang$core$Native_Platform.outgoingPort(
-	'togglePlayback',
+var _user$project$Main$resume = _elm_lang$core$Native_Platform.outgoingPort(
+	'resume',
+	function (v) {
+		return (v.ctor === 'Nothing') ? null : v._0;
+	});
+var _user$project$Main$pause = _elm_lang$core$Native_Platform.outgoingPort(
+	'pause',
 	function (v) {
 		return (v.ctor === 'Nothing') ? null : v._0;
 	});
@@ -9228,7 +9233,7 @@ var _user$project$Main$update = F2(
 							{
 								playing: _elm_lang$core$Basics$not(model.playing)
 							}),
-						_1: _user$project$Main$togglePlayback(model.currentTrack)
+						_1: model.playing ? _user$project$Main$pause(model.currentTrack) : _user$project$Main$resume(model.currentTrack)
 					};
 				case 'Next':
 					var newCurrentTrack = _elm_lang$core$List$head(model.queue);
@@ -9243,7 +9248,7 @@ var _user$project$Main$update = F2(
 						_1: function () {
 							var _p7 = newCurrentTrack;
 							if (_p7.ctor === 'Nothing') {
-								return _user$project$Main$togglePlayback(model.currentTrack);
+								return _user$project$Main$pause(model.currentTrack);
 							} else {
 								var _p8 = A2(_elm_lang$core$Dict$get, _p7._0, model.tracks);
 								if (_p8.ctor === 'Nothing') {

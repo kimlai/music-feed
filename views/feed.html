@@ -32,21 +32,14 @@
                 audio.currentTime = track.currentTime;
                 audio.play();
             });
-            app.ports.togglePlayback.subscribe(function(trackId) {
-                if (currentTrackId !== trackId) {
-                    throw new Error(
-                        'You are trying to toggle the playback of track ' + trackId +
-                        ', but the current track is ' + currentTrackId + '.'
-                    );
-                }
-                if (audio.paused === true) {
-                    audio.play();
-                } else {
-                    audio.pause();
-                }
-            });
             app.ports.fastForward.subscribe(function(amount) {
                 audio.currentTime = audio.currentTime + amount;
+            });
+            app.ports.pause.subscribe(function(trackId) {
+                audio.pause();
+            });
+            app.ports.resume.subscribe(function(trackId) {
+                audio.play();
             });
         </script>
     </body>

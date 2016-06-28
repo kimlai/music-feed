@@ -68,7 +68,8 @@ type Msg
 
 
 port playTrack : Track -> Cmd msg
-port togglePlayback : Maybe TrackId -> Cmd msg
+port resume : Maybe TrackId -> Cmd msg
+port pause : Maybe TrackId -> Cmd msg
 port fastForward : Int -> Cmd msg
 
 
@@ -117,7 +118,10 @@ update message model =
                 )
         TogglePlayback ->
             ( { model | playing = not model.playing }
-            , togglePlayback model.currentTrack
+            , if model.playing then
+                pause model.currentTrack
+              else
+                resume model.currentTrack
             )
         Next ->
             let
@@ -130,7 +134,7 @@ update message model =
                   }
                 , case newCurrentTrack of
                     Nothing ->
-                        togglePlayback model.currentTrack
+                        pause model.currentTrack
                     Just trackId ->
                         case Dict.get trackId model.tracks of
                             Nothing ->
