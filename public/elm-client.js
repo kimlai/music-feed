@@ -8679,6 +8679,11 @@ var _user$project$Main$fastForward = _elm_lang$core$Native_Platform.outgoingPort
 	function (v) {
 		return v;
 	});
+var _user$project$Main$scroll = _elm_lang$core$Native_Platform.outgoingPort(
+	'scroll',
+	function (v) {
+		return v;
+	});
 var _user$project$Main$trackProgress = _elm_lang$core$Native_Platform.incomingPort(
 	'trackProgress',
 	A4(
@@ -9315,6 +9320,18 @@ var _user$project$Main$update = F2(
 							message = _v15;
 							model = _v16;
 							continue update;
+						case 'j':
+							return {
+								ctor: '_Tuple2',
+								_0: model,
+								_1: _user$project$Main$scroll(120)
+							};
+						case 'k':
+							return {
+								ctor: '_Tuple2',
+								_0: model,
+								_1: _user$project$Main$scroll(-120)
+							};
 						default:
 							return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 					}

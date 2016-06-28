@@ -71,6 +71,7 @@ port playTrack : Track -> Cmd msg
 port resume : Maybe TrackId -> Cmd msg
 port pause : Maybe TrackId -> Cmd msg
 port fastForward : Int -> Cmd msg
+port scroll : Int -> Cmd msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -176,6 +177,14 @@ update message model =
                     update FastForward model
                 'm' ->
                     update FetchMore model
+                'j' ->
+                    ( model
+                    , scroll 120
+                    )
+                'k' ->
+                    ( model
+                    , scroll -120
+                    )
                 _ ->
                     ( model
                     , Cmd.none

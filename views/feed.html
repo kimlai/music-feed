@@ -41,6 +41,10 @@
             app.ports.resume.subscribe(function(trackId) {
                 audio.play();
             });
+
+            app.ports.scroll.subscribe(function(offset) {
+                window.scrollBy(0, offset);
+            });
         </script>
     </body>
 </html>
