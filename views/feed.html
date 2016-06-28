@@ -23,6 +23,9 @@
                     e.target.currentTime
                 ]);
             });
+            audio.addEventListener('ended', function (e) {
+                app.ports.trackEnd.send(currentTrackId);
+            });
             app.ports.playTrack.subscribe(function(track) {
                 currentTrackId = track.id;
                 audio.src = track.streamUrl + '?client_id=' + soundcloudClientId;

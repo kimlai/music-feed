@@ -182,13 +182,15 @@ update message model =
 -- SUBSCRIPTIONS
 
 
-port trackProgress : ( ( Int, Float, Float ) -> msg ) -> Sub msg
+port trackProgress : ( ( TrackId, Float, Float ) -> msg ) -> Sub msg
+port trackEnd : ( TrackId -> msg ) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ trackProgress TrackProgress
+        , trackEnd ( \_ -> Next )
         , Keyboard.presses KeyPressed
         ]
 
