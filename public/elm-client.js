@@ -8728,9 +8728,9 @@ var _user$project$Main$trackProgress = _elm_lang$core$Native_Platform.incomingPo
 		_elm_lang$core$Json_Decode$float,
 		_elm_lang$core$Json_Decode$float));
 var _user$project$Main$trackEnd = _elm_lang$core$Native_Platform.incomingPort('trackEnd', _elm_lang$core$Json_Decode$int);
-var _user$project$Main$Model = F7(
-	function (a, b, c, d, e, f, g) {
-		return {tracks: a, feed: b, queue: c, nextLink: d, loading: e, playing: f, currentTrack: g};
+var _user$project$Main$Model = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {tracks: a, feed: b, queue: c, nextLink: d, loading: e, playing: f, currentTrack: g, lastKeyPressed: h};
 	});
 var _user$project$Main$Navigation = F2(
 	function (a, b) {
@@ -9188,7 +9188,8 @@ var _user$project$Main$init = {
 		loading: true,
 		playing: false,
 		nextLink: _elm_lang$core$Maybe$Nothing,
-		currentTrack: _elm_lang$core$Maybe$Nothing
+		currentTrack: _elm_lang$core$Maybe$Nothing,
+		lastKeyPressed: _elm_lang$core$Maybe$Nothing
 	},
 	_1: _user$project$Main$fetchFeed(_elm_lang$core$Maybe$Nothing)
 };
@@ -9428,6 +9429,32 @@ var _user$project$Main$update = F2(
 								ctor: '_Tuple2',
 								_0: model,
 								_1: _user$project$Main$scroll(-120)
+							};
+						case 'g':
+							return _elm_lang$core$Native_Utils.eq(
+								model.lastKeyPressed,
+								_elm_lang$core$Maybe$Just(
+									_elm_lang$core$Native_Utils.chr('g'))) ? {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Native_Utils.update(
+									model,
+									{lastKeyPressed: _elm_lang$core$Maybe$Nothing}),
+								_1: _user$project$Main$scroll(-9999999)
+							} : {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Native_Utils.update(
+									model,
+									{
+										lastKeyPressed: _elm_lang$core$Maybe$Just(
+											_elm_lang$core$Native_Utils.chr('g'))
+									}),
+								_1: _elm_lang$core$Platform_Cmd$none
+							};
+						case 'G':
+							return {
+								ctor: '_Tuple2',
+								_0: model,
+								_1: _user$project$Main$scroll(99999999)
 							};
 						default:
 							return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};

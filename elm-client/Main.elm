@@ -34,6 +34,7 @@ type alias Model =
     , loading : Bool
     , playing : Bool
     , currentTrack : Maybe TrackId
+    , lastKeyPressed : Maybe Char
     }
 
 
@@ -46,6 +47,7 @@ init =
       , playing = False
       , nextLink = Nothing
       , currentTrack = Nothing
+      , lastKeyPressed = Nothing
       }
     , fetchFeed Nothing
     )
@@ -218,6 +220,19 @@ update message model =
                 'k' ->
                     ( model
                     , scroll -120
+                    )
+                'g' ->
+                    if model.lastKeyPressed == Just 'g' then
+                        ( { model | lastKeyPressed = Nothing }
+                        , scroll -9999999
+                        )
+                    else
+                        ( { model | lastKeyPressed = Just 'g' }
+                        , Cmd.none
+                        )
+                'G' ->
+                    ( model
+                    , scroll 99999999
                     )
                 _ ->
                     ( model
