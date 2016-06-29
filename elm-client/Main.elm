@@ -64,6 +64,9 @@ type Msg
     | Next
     | TrackProgress ( TrackId, Float, Float )
     | FastForward
+    | Blacklist TrackId
+    | BlacklistFail Http.Error
+    | BlacklistSuccess
     | KeyPressed Keyboard.KeyCode
 
 
@@ -167,6 +170,29 @@ update message model =
                           }
                         , Cmd.none
                         )
+        Blacklist trackId ->
+            let ( newModel, commands ) =
+                if model.currentTrack == Just trackId then
+                    update Next model
+                else
+                    ( model
+                    , Cmd.none
+                    )
+            in
+                ( { newModel
+                    | feed = List.filter ((/=) trackId) newModel.feed
+                    , queue = List.filter ((/=) trackId) newModel.queue
+                  }
+                , Cmd.batch [ commands, blacklist trackId ]
+                )
+        BlacklistFail error ->
+            ( model
+            , Cmd.none
+            )
+        BlacklistSuccess ->
+            ( model
+            , Cmd.none
+            )
         KeyPressed keyCode ->
             case ( Char.fromCode keyCode ) of
                 'n' ->
@@ -177,6 +203,14 @@ update message model =
                     update FastForward model
                 'm' ->
                     update FetchMore model
+                'b' ->
+                    case model.currentTrack of
+                        Nothing ->
+                            ( model
+                            , Cmd.none
+                            )
+                        Just trackId ->
+                            update ( Blacklist trackId ) model
                 'j' ->
                     ( model
                     , scroll 120
@@ -427,3 +461,9 @@ fetchFeed : Maybe String -> Cmd Msg
 fetchFeed nextLink =
     FeedApi.fetch nextLink
         |> Task.perform FetchFeedFail FetchFeedSuccess
+
+
+blacklist : TrackId -> Cmd Msg
+blacklist trackId =
+    FeedApi.blacklist trackId
+        |> Task.perform BlacklistFail ( \_ -> BlacklistSuccess )
