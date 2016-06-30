@@ -8706,8 +8706,8 @@ var _user$project$Main$pause = _elm_lang$core$Native_Platform.outgoingPort(
 	function (v) {
 		return (v.ctor === 'Nothing') ? null : v._0;
 	});
-var _user$project$Main$fastForward = _elm_lang$core$Native_Platform.outgoingPort(
-	'fastForward',
+var _user$project$Main$changeCurrentTime = _elm_lang$core$Native_Platform.outgoingPort(
+	'changeCurrentTime',
 	function (v) {
 		return v;
 	});
@@ -8768,6 +8768,7 @@ var _user$project$Main$blacklist = function (trackId) {
 var _user$project$Main$Blacklist = function (a) {
 	return {ctor: 'Blacklist', _0: a};
 };
+var _user$project$Main$Rewind = {ctor: 'Rewind'};
 var _user$project$Main$FastForward = {ctor: 'FastForward'};
 var _user$project$Main$TrackProgress = function (a) {
 	return {ctor: 'TrackProgress', _0: a};
@@ -9317,7 +9318,13 @@ var _user$project$Main$update = F2(
 					return {
 						ctor: '_Tuple2',
 						_0: model,
-						_1: _user$project$Main$fastForward(10)
+						_1: _user$project$Main$changeCurrentTime(10)
+					};
+				case 'Rewind':
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: _user$project$Main$changeCurrentTime(-10)
 					};
 				case 'TrackProgress':
 					var _p11 = _p5._0._0;
@@ -9395,27 +9402,33 @@ var _user$project$Main$update = F2(
 							message = _v11;
 							model = _v12;
 							continue update;
-						case 'f':
+						case 'l':
 							var _v13 = _user$project$Main$FastForward,
 								_v14 = model;
 							message = _v13;
 							model = _v14;
 							continue update;
-						case 'm':
-							var _v15 = _user$project$Main$FetchMore,
+						case 'h':
+							var _v15 = _user$project$Main$Rewind,
 								_v16 = model;
 							message = _v15;
 							model = _v16;
+							continue update;
+						case 'm':
+							var _v17 = _user$project$Main$FetchMore,
+								_v18 = model;
+							message = _v17;
+							model = _v18;
 							continue update;
 						case 'b':
 							var _p15 = model.currentTrack;
 							if (_p15.ctor === 'Nothing') {
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							} else {
-								var _v18 = _user$project$Main$Blacklist(_p15._0),
-									_v19 = model;
-								message = _v18;
-								model = _v19;
+								var _v20 = _user$project$Main$Blacklist(_p15._0),
+									_v21 = model;
+								message = _v20;
+								model = _v21;
 								continue update;
 							}
 						case 'j':

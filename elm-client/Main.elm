@@ -66,6 +66,7 @@ type Msg
     | Next
     | TrackProgress ( TrackId, Float, Float )
     | FastForward
+    | Rewind
     | Blacklist TrackId
     | BlacklistFail Http.Error
     | BlacklistSuccess
@@ -75,7 +76,7 @@ type Msg
 port playTrack : Track -> Cmd msg
 port resume : Maybe TrackId -> Cmd msg
 port pause : Maybe TrackId -> Cmd msg
-port fastForward : Int -> Cmd msg
+port changeCurrentTime : Int -> Cmd msg
 port scroll : Int -> Cmd msg
 
 
@@ -150,7 +151,11 @@ update message model =
                 )
         FastForward ->
             ( model
-            , fastForward 10
+            , changeCurrentTime 10
+            )
+        Rewind ->
+            ( model
+            , changeCurrentTime -10
             )
         TrackProgress ( trackId, progress, currentTime ) ->
             let
@@ -201,8 +206,10 @@ update message model =
                     update Next model
                 'p' ->
                     update TogglePlayback model
-                'f' ->
+                'l' ->
                     update FastForward model
+                'h' ->
+                    update Rewind model
                 'm' ->
                     update FetchMore model
                 'b' ->
