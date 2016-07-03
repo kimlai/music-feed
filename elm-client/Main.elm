@@ -4,22 +4,52 @@ import Dict exposing (Dict)
 import Html exposing (Html, a, nav, li, ul, text, div, img)
 import Html.App as Html
 import Html.Attributes exposing (class, href, src, style)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onWithOptions)
 import Http
 import FeedApi
 import Feed exposing (Track, TrackId)
 import Task
 import Keyboard
 import Char
+import Json.Decode
+import Navigation
 
 
 main =
-    Html.program
+    Navigation.program urlParser
         { init = init
         , view = view
         , update = update
+        , urlUpdate = urlUpdate
         , subscriptions = subscriptions
         }
+
+
+
+-- URL PARSERS
+
+
+urlParser : Navigation.Parser Page
+urlParser =
+    Navigation.makeParser
+        (\location ->
+            case location.pathname of
+                "/feed" ->
+                    Feed
+                "/saved-tracks" ->
+                    SavedTracks
+                "/published-tracks" ->
+                    PublishedTracks
+                _ ->
+                    Feed
+        )
+
+
+urlUpdate : Page -> Model -> ( Model, Cmd Msg )
+urlUpdate page model =
+    ( { model | currentPage = page }
+    , Cmd.none
+    )
 
 
 
@@ -34,12 +64,19 @@ type alias Model =
     , loading : Bool
     , playing : Bool
     , currentTrack : Maybe TrackId
+    , currentPage : Page
     , lastKeyPressed : Maybe Char
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+type Page
+    = Feed
+    | SavedTracks
+    | PublishedTracks
+
+
+init : Page -> ( Model, Cmd Msg )
+init page =
     ( { tracks = Dict.empty
       , feed = []
       , queue = []
@@ -47,6 +84,7 @@ init =
       , playing = False
       , nextLink = Nothing
       , currentTrack = Nothing
+      , currentPage = page
       , lastKeyPressed = Nothing
       }
     , fetchFeed Nothing
@@ -70,6 +108,7 @@ type Msg
     | Blacklist TrackId
     | BlacklistFail Http.Error
     | BlacklistSuccess
+    | ChangePage String
     | KeyPressed Keyboard.KeyCode
 
 
@@ -200,6 +239,10 @@ update message model =
             ( model
             , Cmd.none
             )
+        ChangePage url ->
+            ( model
+            , Navigation.newUrl url
+            )
         KeyPressed keyCode ->
             case ( Char.fromCode keyCode ) of
                 'n' ->
@@ -280,10 +323,17 @@ view model =
         div
             []
             [ viewGlobalPlayer currentTrack model.playing
-            , viewNavigation navigation
+            , viewNavigation navigation model.currentPage
             , div
                 [ class "playlist-container" ]
-                [ viewFeed model ]
+                [ case model.currentPage of
+                    Feed ->
+                        viewFeed model
+                    SavedTracks ->
+                        text "saved tracks"
+                    PublishedTracks ->
+                        text "published tracks"
+                ]
             ]
 
 
@@ -426,49 +476,48 @@ viewMoreButton =
         [ text "More" ]
 
 
-type alias Navigation =
-    { items : List NavigationItem
-    , activeItem : NavigationItem
-    }
-
-
 type alias NavigationItem =
     { displayName : String
     , href : String
+    , page : Page
     }
 
 
-navigation : Navigation
+navigation : List NavigationItem
 navigation =
-    Navigation
-        [ NavigationItem "feed" "/"
-        , NavigationItem "saved tracks" "/saved-tracks"
-        , NavigationItem "published tracks" "/pubished-tracks"
-        ]
-        ( NavigationItem "feed" "/" )
+    [ NavigationItem "feed" "/" Feed
+    , NavigationItem "saved tracks" "/saved-tracks" SavedTracks
+    , NavigationItem "published tracks" "/published-tracks" PublishedTracks
+    ]
 
 
 
-viewNavigation : Navigation -> Html Msg
-viewNavigation navigation =
-    navigation.items
-        |> List.map ( viewNavigationItem navigation.activeItem )
+viewNavigation : List NavigationItem -> Page -> Html Msg
+viewNavigation navigationItems currentPage =
+    navigationItems
+        |> List.map ( viewNavigationItem currentPage )
         |> ul []
         |> List.repeat 1
         |> nav [ class "navigation" ]
 
 
-viewNavigationItem : NavigationItem -> NavigationItem -> Html Msg
-viewNavigationItem activeNavigationItem navigationItem =
+viewNavigationItem : Page -> NavigationItem -> Html Msg
+viewNavigationItem currentPage navigationItem =
     let
         linkAttributes =
-            if navigationItem == activeNavigationItem then
+            if navigationItem.page == currentPage then
                 [ class "active" ]
             else
                 []
     in
         li
-            []
+            [ onWithOptions
+                "click"
+                { stopPropagation = False
+                , preventDefault = True
+                }
+                ( Json.Decode.succeed ( ChangePage navigationItem.href ) )
+            ]
             [ a
                 ( List.append linkAttributes [ href navigationItem.href ] )
                 [ text navigationItem.displayName ]
