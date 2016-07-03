@@ -9361,19 +9361,16 @@ var _user$project$FeedApi$decodeTrack = A2(
 			A2(_elm_lang$core$Json_Decode_ops[':='], 'stream_url', _elm_lang$core$Json_Decode$string)),
 		_elm_lang$core$Json_Decode$succeed(0)),
 	_elm_lang$core$Json_Decode$succeed(0));
-var _user$project$FeedApi$FetchFeedPayload = F2(
-	function (a, b) {
-		return {tracks: a, nextLink: b};
-	});
-var _user$project$FeedApi$decodeFeed = A2(
-	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+var _user$project$FeedApi$decodeFeed = A3(
+	_elm_lang$core$Json_Decode$object2,
+	F2(
+		function (v0, v1) {
+			return {ctor: '_Tuple2', _0: v0, _1: v1};
+		}),
 	A2(
-		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-		_elm_lang$core$Json_Decode$succeed(_user$project$FeedApi$FetchFeedPayload),
-		A2(
-			_elm_lang$core$Json_Decode_ops[':='],
-			'tracks',
-			_elm_lang$core$Json_Decode$list(_user$project$FeedApi$decodeTrack))),
+		_elm_lang$core$Json_Decode_ops[':='],
+		'tracks',
+		_elm_lang$core$Json_Decode$list(_user$project$FeedApi$decodeTrack)),
 	A2(_elm_lang$core$Json_Decode_ops[':='], 'next_href', _elm_lang$core$Json_Decode$string));
 var _user$project$FeedApi$fetch = function (nextLink) {
 	return A2(
@@ -9381,6 +9378,10 @@ var _user$project$FeedApi$fetch = function (nextLink) {
 		_user$project$FeedApi$decodeFeed,
 		A2(_elm_lang$core$Maybe$withDefault, '/feed', nextLink));
 };
+var _user$project$FeedApi$FetchFeedPayload = F2(
+	function (a, b) {
+		return {tracks: a, nextLink: b};
+	});
 
 var _user$project$Main$viewTrackPlaceHolder = A2(
 	_elm_lang$html$Html$div,
@@ -10026,7 +10027,7 @@ var _user$project$Main$update = F2(
 			var _p7 = message;
 			switch (_p7.ctor) {
 				case 'FetchFeedSuccess':
-					var _p8 = _p7._0;
+					var _p8 = _p7._0._0;
 					var updatedTrackDict = A2(
 						_elm_lang$core$Dict$union,
 						model.tracks,
@@ -10036,7 +10037,7 @@ var _user$project$Main$update = F2(
 								function (track) {
 									return {ctor: '_Tuple2', _0: track.id, _1: track};
 								},
-								_p8.tracks)));
+								_p8)));
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -10051,7 +10052,7 @@ var _user$project$Main$update = F2(
 										function (_) {
 											return _.id;
 										},
-										_p8.tracks)),
+										_p8)),
 								queue: A2(
 									_elm_lang$core$List$append,
 									model.queue,
@@ -10060,8 +10061,8 @@ var _user$project$Main$update = F2(
 										function (_) {
 											return _.id;
 										},
-										_p8.tracks)),
-								nextLink: _elm_lang$core$Maybe$Just(_p8.nextLink),
+										_p8)),
+								nextLink: _elm_lang$core$Maybe$Just(_p7._0._1),
 								loading: false
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none

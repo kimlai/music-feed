@@ -10,26 +10,20 @@ import Json.Encode
 import Task exposing (Task)
 
 
-type alias FetchFeedPayload =
-    { tracks : List Track
-    , nextLink : String
-    }
-
-
 
 -- HTTP
 
 
-fetch : Maybe String -> Task Http.Error FetchFeedPayload
+fetch : Maybe String -> Task Http.Error ( List Track, String )
 fetch nextLink =
     Http.get decodeFeed ( Maybe.withDefault "/feed" nextLink )
 
 
-decodeFeed : Json.Decode.Decoder FetchFeedPayload
+decodeFeed : Json.Decode.Decoder ( List Track, String )
 decodeFeed =
-    Json.Decode.succeed FetchFeedPayload
-        |: ( "tracks" := Json.Decode.list decodeTrack )
-        |: ( "next_href" := Json.Decode.string )
+    Json.Decode.object2 (,)
+        ( "tracks" := Json.Decode.list decodeTrack )
+        ( "next_href" := Json.Decode.string )
 
 
 decodeTrack : Json.Decode.Decoder Track

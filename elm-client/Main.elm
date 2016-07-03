@@ -96,7 +96,7 @@ init page =
 
 
 type Msg
-    = FetchFeedSuccess FeedApi.FetchFeedPayload
+    = FetchFeedSuccess ( List Track, String )
     | FetchFeedFail Http.Error
     | FetchMore
     | TogglePlaybackFromFeed Int Track
@@ -122,19 +122,19 @@ port scroll : Int -> Cmd msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
-        FetchFeedSuccess payload ->
+        FetchFeedSuccess ( tracks, nextLink ) ->
             let
                 updatedTrackDict =
-                    payload.tracks
+                    tracks
                         |> List.map (\track -> ( track.id, track ))
                         |> Dict.fromList
                         |> Dict.union model.tracks
             in
             ( { model
                 | tracks = updatedTrackDict
-                , feed = List.append model.feed ( List.map .id payload.tracks )
-                , queue = List.append model.queue ( List.map .id payload.tracks )
-                , nextLink = Just payload.nextLink
+                , feed = List.append model.feed ( List.map .id tracks )
+                , queue = List.append model.queue ( List.map .id tracks )
+                , nextLink = Just nextLink
                 , loading = False
               }
             , Cmd.none
