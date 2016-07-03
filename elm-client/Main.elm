@@ -197,25 +197,18 @@ update message model =
             , changeCurrentTime -10
             )
         TrackProgress ( trackId, progress, currentTime ) ->
-            let
-                track =
-                    Dict.get trackId model.tracks
-            in
-                case track of
-                    Nothing ->
-                        ( model
-                        , Cmd.none
+            ( { model
+                | tracks =
+                    Dict.update
+                        trackId
+                        ( \maybeTrack ->
+                            maybeTrack `Maybe.andThen`
+                            ( \track -> Just { track | progress = progress, currentTime = currentTime } )
                         )
-                    Just track ->
-                        ( { model
-                            | tracks =
-                                Dict.insert
-                                    trackId
-                                    { track | progress = progress, currentTime = currentTime }
-                                    model.tracks
-                          }
-                        , Cmd.none
-                        )
+                        model.tracks
+              }
+            , Cmd.none
+            )
         Blacklist trackId ->
             let ( newModel, commands ) =
                 if model.currentTrack == Just trackId then
@@ -314,11 +307,9 @@ view : Model -> Html Msg
 view model =
     let
         currentTrack =
-            case model.currentTrack of
-                Just trackId ->
-                    Dict.get trackId model.tracks
-                Nothing ->
-                    Nothing
+            model.currentTrack
+                `Maybe.andThen`
+                ( \trackId -> Dict.get trackId model.tracks )
     in
         div
             []
