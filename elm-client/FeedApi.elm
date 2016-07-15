@@ -1,7 +1,7 @@
 module FeedApi exposing(..)
 
 import Dict exposing (Dict)
-import Feed exposing (Track, TrackId)
+import Playlist exposing (Track, TrackId)
 import Http
 import Json.Decode
 import Json.Decode exposing ((:=))
@@ -12,30 +12,6 @@ import Task exposing (Task)
 
 
 -- HTTP
-
-
-fetch : Maybe String -> Task Http.Error ( List Track, String )
-fetch nextLink =
-    Http.get decodeFeed ( Maybe.withDefault "/feed" nextLink )
-
-
-decodeFeed : Json.Decode.Decoder ( List Track, String )
-decodeFeed =
-    Json.Decode.object2 (,)
-        ( "tracks" := Json.Decode.list decodeTrack )
-        ( "next_href" := Json.Decode.string )
-
-
-decodeTrack : Json.Decode.Decoder Track
-decodeTrack =
-    Json.Decode.succeed Track
-        |: ("id" := Json.Decode.int)
-        |: (Json.Decode.at [ "user", "username" ] Json.Decode.string)
-        |: ("artwork_url" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
-        |: ("title" := Json.Decode.string)
-        |: ("stream_url" := Json.Decode.string)
-        |: Json.Decode.succeed 0
-        |: Json.Decode.succeed 0
 
 
 blacklist : TrackId -> Task Http.Error String

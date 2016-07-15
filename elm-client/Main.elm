@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, href, src, style)
 import Html.Events exposing (onClick, onWithOptions)
 import Http
 import FeedApi
-import Feed exposing (Track, TrackId)
+import Playlist exposing (Track, TrackId)
 import Task
 import Keyboard
 import Char
@@ -58,10 +58,10 @@ urlUpdate page model =
 
 type alias Model =
     { tracks : Dict TrackId Track
-    , feed : List TrackId
+    , feed : Playlist.Model
+    , savedTracks : Playlist.Model
+    , publishedTracks : Playlist.Model
     , queue : List TrackId
-    , nextLink : Maybe String
-    , loading : Bool
     , playing : Bool
     , currentTrack : Maybe TrackId
     , currentPage : Page
@@ -69,25 +69,32 @@ type alias Model =
     }
 
 
-type Page
+type PlaylistId
     = Feed
     | SavedTracks
     | PublishedTracks
 
 
+type alias Page = PlaylistId
+
+
 init : Page -> ( Model, Cmd Msg )
 init page =
     ( { tracks = Dict.empty
-      , feed = []
+      , feed = Playlist.initialModel "/feed"
+      , savedTracks = Playlist.initialModel "/saved-tracks"
+      , publishedTracks = Playlist.initialModel "/published-tracks"
       , queue = []
-      , loading = True
       , playing = False
-      , nextLink = Nothing
       , currentTrack = Nothing
       , currentPage = page
       , lastKeyPressed = Nothing
       }
-    , fetchFeed Nothing
+    , Cmd.batch
+        [ Cmd.map ( PlaylistMsg Feed ) ( Playlist.initialCmd "/feed" )
+        , Cmd.map ( PlaylistMsg SavedTracks ) ( Playlist.initialCmd "/saved_tracks" )
+        , Cmd.map ( PlaylistMsg PublishedTracks ) ( Playlist.initialCmd "/published_tracks" )
+        ]
     )
 
 
@@ -96,10 +103,8 @@ init page =
 
 
 type Msg
-    = FetchFeedSuccess ( List Track, String )
-    | FetchFeedFail Http.Error
-    | FetchMore
-    | TogglePlaybackFromFeed Int Track
+    = PlaylistMsg PlaylistId Playlist.Msg
+    | PlaylistEvent PlaylistId Playlist.Event
     | TogglePlayback
     | Next
     | TrackProgress ( TrackId, Float, Float )
@@ -122,46 +127,75 @@ port scroll : Int -> Cmd msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
-        FetchFeedSuccess ( tracks, nextLink ) ->
+        PlaylistMsg playlistId playlistMsg ->
             let
-                updatedTrackDict =
-                    tracks
-                        |> List.map (\track -> ( track.id, track ))
-                        |> Dict.fromList
-                        |> Dict.union model.tracks
+                ( updatedPlaylist, command, event ) =
+                    case playlistId of
+                        Feed ->
+                            Playlist.update playlistMsg model.feed
+                        SavedTracks ->
+                            Playlist.update playlistMsg model.savedTracks
+                        PublishedTracks ->
+                            Playlist.update playlistMsg model.publishedTracks
+                updatedModel =
+                    case playlistId of
+                        Feed ->
+                            { model | feed = updatedPlaylist }
+                        SavedTracks ->
+                            { model | savedTracks = updatedPlaylist }
+                        PublishedTracks ->
+                            { model | publishedTracks = updatedPlaylist }
             in
-            ( { model
-                | tracks = updatedTrackDict
-                , feed = List.append model.feed ( List.map .id tracks )
-                , queue = List.append model.queue ( List.map .id tracks )
-                , nextLink = Just nextLink
-                , loading = False
-              }
-            , Cmd.none
-            )
-        FetchFeedFail error ->
-            ( { model
-                | loading = False
-              }
-            , Cmd.none
-            )
-        FetchMore ->
-            ( { model
-                | loading = True
-              }
-            , fetchFeed model.nextLink
-            )
-        TogglePlaybackFromFeed position track ->
-            if model.currentTrack == Just track.id then
-                update TogglePlayback model
-            else
-                ( { model
-                    | currentTrack = Just track.id
-                    , playing = True
-                    , queue = List.drop ( position + 1 ) model.feed
-                  }
-                  , playTrack track
-                )
+                case event of
+                    Nothing ->
+                        ( updatedModel
+                        , Cmd.map ( PlaylistMsg playlistId ) command
+                        )
+                    Just event ->
+                        let
+                            ( modelAfterEvent, eventCommand )  =
+                                update ( PlaylistEvent playlistId event ) updatedModel
+                        in
+                            ( modelAfterEvent
+                            , Cmd.batch [ Cmd.map ( PlaylistMsg playlistId ) command, eventCommand ]
+                            )
+        PlaylistEvent playlistId event ->
+            case event of
+                Playlist.NewTracksWereFetched ( tracks, nextLink ) ->
+                    let
+                        updatedTrackDict =
+                            tracks
+                                |> List.map (\track -> ( track.id, track ))
+                                |> Dict.fromList
+                                |> Dict.union model.tracks
+                    in
+                    ( { model
+                        | tracks = updatedTrackDict
+                        , queue = List.append model.queue ( List.map .id tracks )
+                      }
+                    , Cmd.none
+                    )
+                Playlist.TrackWasClicked position track ->
+                    let
+                        playlistTracks =
+                            case playlistId of
+                                Feed ->
+                                    model.feed.trackIds
+                                SavedTracks ->
+                                    model.savedTracks.trackIds
+                                PublishedTracks ->
+                                    model.publishedTracks.trackIds
+                    in
+                        if model.currentTrack == Just track.id then
+                            update TogglePlayback model
+                        else
+                            ( { model
+                                | currentTrack = Just track.id
+                                , playing = True
+                                , queue = List.drop ( position + 1 ) playlistTracks
+                              }
+                              , playTrack track
+                            )
         TogglePlayback ->
             ( { model | playing = not model.playing }
             , if model.playing then
@@ -210,16 +244,21 @@ update message model =
             , Cmd.none
             )
         Blacklist trackId ->
-            let ( newModel, commands ) =
-                if model.currentTrack == Just trackId then
-                    update Next model
-                else
-                    ( model
-                    , Cmd.none
-                    )
+            let
+                ( newModel, commands ) =
+                    if model.currentTrack == Just trackId then
+                        update Next model
+                    else
+                        ( model
+                        , Cmd.none
+                        )
+                originalFeed =
+                    model.feed
+                updatedFeed =
+                    { originalFeed | trackIds = List.filter ((/=) trackId) newModel.feed.trackIds }
             in
                 ( { newModel
-                    | feed = List.filter ((/=) trackId) newModel.feed
+                    | feed = updatedFeed
                     , queue = List.filter ((/=) trackId) newModel.queue
                   }
                 , Cmd.batch [ commands, blacklist trackId ]
@@ -247,7 +286,7 @@ update message model =
                 'h' ->
                     update Rewind model
                 'm' ->
-                    update FetchMore model
+                    update ( PlaylistMsg model.currentPage Playlist.FetchMore ) model
                 'b' ->
                     case model.currentTrack of
                         Nothing ->
@@ -319,11 +358,11 @@ view model =
                 [ class "playlist-container" ]
                 [ case model.currentPage of
                     Feed ->
-                        viewFeed model
+                        Html.map ( PlaylistMsg Feed ) ( Playlist.view model.tracks model.feed )
                     SavedTracks ->
-                        text "saved tracks"
+                        Html.map ( PlaylistMsg SavedTracks ) ( Playlist.view model.tracks model.savedTracks )
                     PublishedTracks ->
-                        text "published tracks"
+                        Html.map ( PlaylistMsg PublishedTracks ) ( Playlist.view model.tracks model.publishedTracks )
                 ]
             ]
 
@@ -396,77 +435,6 @@ viewGlobalPlayer track playing =
                 ]
 
 
-viewFeed : Model -> Html Msg
-viewFeed model =
-    let
-        feedTracks =
-            List.filterMap ( \trackId -> Dict.get trackId model.tracks ) model.feed
-        tracksView =
-            List.indexedMap viewTrack feedTracks
-    in
-        if model.loading == True then
-            List.repeat 10 viewTrackPlaceHolder
-                |> List.append tracksView
-                |> div []
-        else
-            [ viewMoreButton ]
-                |> List.append tracksView
-                |> div []
-
-
-viewTrack : Int -> Track -> Html Msg
-viewTrack position track =
-    div
-        [ class "track"
-        , onClick ( TogglePlaybackFromFeed position track )
-        ]
-        [ div
-            [ class "track-info-container" ]
-            [ img
-                [ src track.artwork_url ]
-                []
-            , div
-                [ class "track-info" ]
-                [ div [] [ text track.artist ]
-                , div [] [ text track.title ]
-                ]
-            ]
-        , div
-            [ class "progress-bar" ]
-            [ div
-                [ class "outer" ]
-                [ div
-                    [ class "inner"
-                    , style [ ("width", ( toString track.progress ) ++ "%" ) ]
-                    ]
-                    []
-                ]
-            ]
-        ]
-
-
-viewTrackPlaceHolder : Html Msg
-viewTrackPlaceHolder =
-    div
-        [ class "track" ]
-        [ div
-            [ class "track-info-container" ]
-            [ img [ src "/images/placeholder.jpg" ] [] ]
-        , div
-            [ class "progress-bar" ]
-            [ div [ class "outer" ] [] ]
-        ]
-
-
-viewMoreButton : Html Msg
-viewMoreButton =
-    div
-        [ class "more-button"
-        , onClick FetchMore
-        ]
-        [ text "More" ]
-
-
 type alias NavigationItem =
     { displayName : String
     , href : String
@@ -517,12 +485,6 @@ viewNavigationItem currentPage navigationItem =
 
 
 -- HTTP
-
-
-fetchFeed : Maybe String -> Cmd Msg
-fetchFeed nextLink =
-    FeedApi.fetch nextLink
-        |> Task.perform FetchFeedFail FetchFeedSuccess
 
 
 blacklist : TrackId -> Cmd Msg

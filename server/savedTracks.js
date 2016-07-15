@@ -4,6 +4,7 @@ var knex = require('knex')(knexfile);
 var _ = require('lodash');
 
 module.exports = function fetchSavedTracksApi(soundcloudUserId, offset) {
+    offset = offset || 0;
     offset = parseInt(offset, 10);
     return knex
         .select('track', 'savedAt')

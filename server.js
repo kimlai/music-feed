@@ -36,6 +36,11 @@ router.post('/publish_track', requireAuthentication, publishTrack);
 
 app.use(router.routes());
 
+app.use(function *(next) {
+    yield next;
+    yield index.call(this, requireAuthentication.call(this));
+});
+
 function *requireAuthentication(next) {
     var token = this.cookies.get('access_token');
     try {
