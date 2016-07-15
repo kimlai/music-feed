@@ -49,8 +49,8 @@ initialCmd initialUrl =
 
 
 type Msg
-    = FetchFeedSuccess ( List Track, String )
-    | FetchFeedFail Http.Error
+    = FetchSuccess ( List Track, String )
+    | FetchFail Http.Error
     | FetchMore
     | OnTrackClicked Int Track
 
@@ -63,7 +63,7 @@ type Event
 update : Msg -> Model -> ( Model, Cmd Msg, Maybe Event )
 update message model =
     case message of
-        FetchFeedSuccess ( tracks, nextLink ) ->
+        FetchSuccess ( tracks, nextLink ) ->
             ( { model
                 | trackIds = List.append model.trackIds ( List.map .id tracks )
                 , nextLink = nextLink
@@ -72,7 +72,7 @@ update message model =
             , Cmd.none
             , Just ( NewTracksWereFetched ( tracks, nextLink ) )
             )
-        FetchFeedFail error ->
+        FetchFail error ->
             ( { model | loading = False }
             , Cmd.none
             , Nothing
@@ -171,7 +171,7 @@ viewMoreButton =
 fetchMore : String -> Cmd Msg
 fetchMore nextLink =
     fetch nextLink
-        |> Task.perform FetchFeedFail FetchFeedSuccess
+        |> Task.perform FetchFail FetchSuccess
 
 
 fetch : String -> Task Http.Error ( List Track, String )

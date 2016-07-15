@@ -9533,17 +9533,17 @@ var _user$project$Playlist$view = F2(
 				_elm_lang$core$Native_List.fromArray(
 					[_user$project$Playlist$viewMoreButton])));
 	});
-var _user$project$Playlist$FetchFeedFail = function (a) {
-	return {ctor: 'FetchFeedFail', _0: a};
+var _user$project$Playlist$FetchFail = function (a) {
+	return {ctor: 'FetchFail', _0: a};
 };
-var _user$project$Playlist$FetchFeedSuccess = function (a) {
-	return {ctor: 'FetchFeedSuccess', _0: a};
+var _user$project$Playlist$FetchSuccess = function (a) {
+	return {ctor: 'FetchSuccess', _0: a};
 };
 var _user$project$Playlist$fetchMore = function (nextLink) {
 	return A3(
 		_elm_lang$core$Task$perform,
-		_user$project$Playlist$FetchFeedFail,
-		_user$project$Playlist$FetchFeedSuccess,
+		_user$project$Playlist$FetchFail,
+		_user$project$Playlist$FetchSuccess,
 		_user$project$Playlist$fetch(nextLink));
 };
 var _user$project$Playlist$initialCmd = function (initialUrl) {
@@ -9560,7 +9560,7 @@ var _user$project$Playlist$update = F2(
 	function (message, model) {
 		var _p0 = message;
 		switch (_p0.ctor) {
-			case 'FetchFeedSuccess':
+			case 'FetchSuccess':
 				var _p2 = _p0._0._0;
 				var _p1 = _p0._0._1;
 				return {
@@ -9585,7 +9585,7 @@ var _user$project$Playlist$update = F2(
 						_user$project$Playlist$NewTracksWereFetched(
 							{ctor: '_Tuple2', _0: _p2, _1: _p1}))
 				};
-			case 'FetchFeedFail':
+			case 'FetchFail':
 				return {
 					ctor: '_Tuple3',
 					_0: _elm_lang$core$Native_Utils.update(
