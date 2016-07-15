@@ -52,7 +52,7 @@ type Msg
     = FetchFeedSuccess ( List Track, String )
     | FetchFeedFail Http.Error
     | FetchMore
-    | TogglePlaybackFromFeed Int Track
+    | OnTrackClicked Int Track
 
 
 type Event
@@ -82,7 +82,7 @@ update message model =
             , fetchMore model.nextLink
             , Nothing
             )
-        TogglePlaybackFromFeed position track ->
+        OnTrackClicked position track ->
             ( model
             , Cmd.none
             , Just ( TrackWasClicked position track )
@@ -114,7 +114,7 @@ viewTrack : Int -> Track -> Html Msg
 viewTrack position track =
     div
         [ class "track"
-        , onClick ( TogglePlaybackFromFeed position track )
+        , onClick ( OnTrackClicked position track )
         ]
         [ div
             [ class "track-info-container" ]

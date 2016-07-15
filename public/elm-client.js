@@ -9397,9 +9397,9 @@ var _user$project$Playlist$Model = F3(
 	function (a, b, c) {
 		return {trackIds: a, loading: b, nextLink: c};
 	});
-var _user$project$Playlist$TogglePlaybackFromFeed = F2(
+var _user$project$Playlist$OnTrackClicked = F2(
 	function (a, b) {
-		return {ctor: 'TogglePlaybackFromFeed', _0: a, _1: b};
+		return {ctor: 'OnTrackClicked', _0: a, _1: b};
 	});
 var _user$project$Playlist$viewTrack = F2(
 	function (position, track) {
@@ -9409,7 +9409,7 @@ var _user$project$Playlist$viewTrack = F2(
 				[
 					_elm_lang$html$Html_Attributes$class('track'),
 					_elm_lang$html$Html_Events$onClick(
-					A2(_user$project$Playlist$TogglePlaybackFromFeed, position, track))
+					A2(_user$project$Playlist$OnTrackClicked, position, track))
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
