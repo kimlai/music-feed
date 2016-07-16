@@ -280,6 +280,22 @@ update message model =
                     update FastForward model
                 'h' ->
                     update Rewind model
+                'L' ->
+                    case model.currentPage of
+                        Feed ->
+                            update ( ChangePage "/saved-tracks" ) model
+                        SavedTracks ->
+                            update ( ChangePage "/published-tracks" ) model
+                        PublishedTracks ->
+                            update ( ChangePage "/feed" ) model
+                'H' ->
+                    case model.currentPage of
+                        Feed ->
+                            update ( ChangePage "/published-tracks" ) model
+                        SavedTracks ->
+                            update ( ChangePage "/feed" ) model
+                        PublishedTracks ->
+                            update ( ChangePage "/saved-tracks" ) model
                 'm' ->
                     update ( PlaylistMsg model.currentPage Playlist.FetchMore ) model
                 'b' ->
