@@ -111,12 +111,12 @@ type Msg
     | TrackProgress ( TrackId, Float, Float )
     | FastForward
     | Rewind
+    | MoveToPlaylist PlaylistId TrackId
+    | MoveToPlaylistFail Http.Error
+    | MoveToPlaylistSuccess
     | Blacklist TrackId
     | BlacklistFail Http.Error
     | BlacklistSuccess
-    | SaveTrack TrackId
-    | SaveTrackFail Http.Error
-    | SaveTrackSuccess
     | ChangePage String
     | KeyPressed Keyboard.KeyCode
 
@@ -132,7 +132,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
         PlaylistMsg playlistId playlistMsg ->
-            handlePlaylistMsg playlistId playlistMsg model
+            applyMessageToPlaylists playlistMsg model [ playlistId ]
         PlaylistEvent playlistId event ->
             case event of
                 Playlist.NewTracksWereFetched ( tracks, nextLink ) ->
@@ -242,21 +242,27 @@ update message model =
             ( model
             , Cmd.none
             )
-        SaveTrack trackId ->
+        MoveToPlaylist playlistId trackId ->
             let
                 ( newModel, command ) =
-                    applyMessageToPlaylists ( Playlist.RemoveTrack trackId ) model [ Feed, PublishedTracks ]
+                    applyMessageToPlaylists
+                        ( Playlist.RemoveTrack trackId )
+                        model
+                        ( List.filter ( (/=) playlistId ) [ Feed, SavedTracks, PublishedTracks ] )
                 ( newModel', command' ) =
-                    applyMessageToPlaylists ( Playlist.AddTrack trackId ) newModel [ SavedTracks ]
+                    applyMessageToPlaylists
+                        ( Playlist.AddTrack trackId )
+                        newModel
+                        [ playlistId ]
             in
                 ( newModel'
-                , Cmd.batch [ command, command', save trackId ]
+                , Cmd.batch [ command, command', moveToPlaylist playlistId trackId ]
                 )
-        SaveTrackFail error ->
+        MoveToPlaylistFail error ->
             ( model
             , Cmd.none
             )
-        SaveTrackSuccess ->
+        MoveToPlaylistSuccess ->
             ( model
             , Cmd.none
             )
@@ -291,7 +297,15 @@ update message model =
                             , Cmd.none
                             )
                         Just trackId ->
-                            update ( SaveTrack trackId ) model
+                            update ( MoveToPlaylist SavedTracks trackId ) model
+                'P' ->
+                    case model.currentTrack of
+                        Nothing ->
+                            ( model
+                            , Cmd.none
+                            )
+                        Just trackId ->
+                            update ( MoveToPlaylist PublishedTracks trackId ) model
                 'j' ->
                     ( model
                     , scroll 120
@@ -542,7 +556,14 @@ blacklist trackId =
         |> Task.perform BlacklistFail ( \_ -> BlacklistSuccess )
 
 
-save : TrackId -> Cmd Msg
-save trackId =
-    FeedApi.save trackId
-        |> Task.perform SaveTrackFail ( \_ -> SaveTrackSuccess )
+moveToPlaylist : PlaylistId -> TrackId -> Cmd Msg
+moveToPlaylist playlistId trackId =
+    case playlistId of
+        Feed ->
+            Cmd.none
+        SavedTracks ->
+            FeedApi.save trackId
+                |> Task.perform MoveToPlaylistFail ( \_ -> MoveToPlaylistSuccess )
+        PublishedTracks ->
+            FeedApi.publish trackId
+                |> Task.perform MoveToPlaylistFail ( \_ -> MoveToPlaylistSuccess )

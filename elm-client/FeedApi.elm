@@ -36,6 +36,18 @@ save trackId =
         |> Http.fromJson ( Json.Decode.succeed "ok" )
 
 
+publish : TrackId -> Task Http.Error String
+publish trackId =
+    Http.send
+        Http.defaultSettings
+        { verb = "POST"
+        , headers = [ ( "Content-Type", "application/json" ) ]
+        , url = "/publish_track"
+        , body = ( body trackId )
+        }
+        |> Http.fromJson ( Json.Decode.succeed "ok" )
+
+
 body trackId =
     Json.Encode.object
         [ ( "soundcloudTrackId", Json.Encode.int trackId ) ]
