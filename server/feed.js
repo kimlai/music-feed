@@ -3,7 +3,9 @@ var knexfile = require('../knexfile');
 var knex = require('knex')(knexfile);
 var _ = require('lodash');
 
-module.exports = function fetchFeedApi(soundcloudUserId, token, nextSoundcloudLink) {
+module.exports = function fetchFeedApi(soundcloudUserId, token, nextSoundcloudLink, feed) {
+    feed = feed || {};
+    feed.tracks = feed.tracks || [];
     return Promise.all([
             fetchSoundcloudFeed(token, nextSoundcloudLink),
             fetchBlacklist(soundcloudUserId),
@@ -11,16 +13,20 @@ module.exports = function fetchFeedApi(soundcloudUserId, token, nextSoundcloudLi
             fetchPublishedTracks(soundcloudUserId),
         ])
         .then(function (results) {
-            var feed = results[0];
+            var newFeed = results[0];
             var blacklist =  results[1];
             var savedTracks =  results[2];
             var publishedTracks =  results[3];
-            feed.tracks = _.filter(feed.tracks, function (track) {
-                return !_.includes(blacklist.concat(savedTracks, publishedTracks), track.id);
-            });
-            feed.next_href = '/feed?nextLink=' + encodeURIComponent(feed.next_href);
-
-            return feed;
+            newFeed.tracks = feed.tracks.concat(
+                _.filter(newFeed.tracks, function (track) {
+                    return !_.includes(blacklist.concat(savedTracks, publishedTracks), track.id);
+                })
+            );
+            if (newFeed.tracks.length >= 10) {
+                newFeed.next_href = '/feed?nextLink=' + encodeURIComponent(newFeed.next_href);
+                return newFeed;
+            }
+            return fetchFeedApi(soundcloudUserId, token, newFeed.next_href, newFeed);
         });
 };
 
