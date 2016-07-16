@@ -3,7 +3,7 @@ port module Main exposing(..)
 import Dict exposing (Dict)
 import Html exposing (Html, a, nav, li, ul, text, div, img)
 import Html.App as Html
-import Html.Attributes exposing (class, href, src, style)
+import Html.Attributes exposing (class, classList, href, src, style)
 import Html.Events exposing (onClick, onWithOptions)
 import Http
 import FeedApi
@@ -66,6 +66,7 @@ type alias Model =
     , queue : List TrackId
     , playing : Bool
     , currentTrack : Maybe TrackId
+    , currentPlaylist : Maybe PlaylistId
     , currentPage : Page
     , lastKeyPressed : Maybe Char
     , currentTime : Maybe Time
@@ -90,6 +91,7 @@ init page =
       , queue = []
       , playing = False
       , currentTrack = Nothing
+      , currentPlaylist = Nothing
       , currentPage = page
       , lastKeyPressed = Nothing
       , currentTime = Nothing
@@ -178,11 +180,13 @@ update message model =
                                     model.savedTracks.trackIds
                                 PublishedTracks ->
                                     model.publishedTracks.trackIds
+                        newModel =
+                            { model | currentPlaylist = Just playlistId }
                     in
                         if model.currentTrack == Just track.id then
-                            update TogglePlayback model
+                            update TogglePlayback newModel
                         else
-                            ( { model
+                            ( { newModel
                                 | currentTrack = Just track.id
                                 , playing = True
                                 , queue = List.drop ( position + 1 ) playlistTracks
@@ -459,7 +463,7 @@ view model =
         div
             []
             [ viewGlobalPlayer currentTrack model.playing
-            , viewNavigation navigation model.currentPage
+            , viewNavigation navigation model.currentPage model.currentPlaylist
             , div
                 [ class "playlist-container" ]
                 [ case model.currentPage of
@@ -563,23 +567,23 @@ navigation =
 
 
 
-viewNavigation : List NavigationItem -> Page -> Html Msg
-viewNavigation navigationItems currentPage =
+viewNavigation : List NavigationItem -> Page -> Maybe PlaylistId -> Html Msg
+viewNavigation navigationItems currentPage currentPlaylist =
     navigationItems
-        |> List.map ( viewNavigationItem currentPage )
+        |> List.map ( viewNavigationItem currentPage currentPlaylist )
         |> ul []
         |> List.repeat 1
         |> nav [ class "navigation" ]
 
 
-viewNavigationItem : Page -> NavigationItem -> Html Msg
-viewNavigationItem currentPage navigationItem =
+viewNavigationItem : Page -> Maybe PlaylistId -> NavigationItem -> Html Msg
+viewNavigationItem currentPage currentPlaylist navigationItem =
     let
-        linkAttributes =
-            if navigationItem.page == currentPage then
-                [ class "active" ]
-            else
-                []
+        classes =
+            classList
+                [ ( "active", navigationItem.page == currentPage )
+                , ( "playing", Just navigationItem.page == currentPlaylist )
+                ]
     in
         li
             [ onWithOptions
@@ -590,7 +594,7 @@ viewNavigationItem currentPage navigationItem =
                 ( Json.Decode.succeed ( ChangePage navigationItem.href ) )
             ]
             [ a
-                ( List.append linkAttributes [ href navigationItem.href ] )
+                ( classes :: [ href navigationItem.href ] )
                 [ text navigationItem.displayName ]
             ]
 

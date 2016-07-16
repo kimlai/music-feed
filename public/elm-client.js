@@ -9838,7 +9838,9 @@ var _user$project$Main$Model = function (a) {
 							return function (h) {
 								return function (i) {
 									return function (j) {
-										return {tracks: a, feed: b, savedTracks: c, publishedTracks: d, queue: e, playing: f, currentTrack: g, currentPage: h, lastKeyPressed: i, currentTime: j};
+										return function (k) {
+											return {tracks: a, feed: b, savedTracks: c, publishedTracks: d, queue: e, playing: f, currentTrack: g, currentPlaylist: h, currentPage: i, lastKeyPressed: j, currentTime: k};
+										};
 									};
 								};
 							};
@@ -9886,13 +9888,24 @@ var _user$project$Main$KeyPressed = function (a) {
 var _user$project$Main$ChangePage = function (a) {
 	return {ctor: 'ChangePage', _0: a};
 };
-var _user$project$Main$viewNavigationItem = F2(
-	function (currentPage, navigationItem) {
-		var linkAttributes = _elm_lang$core$Native_Utils.eq(navigationItem.page, currentPage) ? _elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$html$Html_Attributes$class('active')
-			]) : _elm_lang$core$Native_List.fromArray(
-			[]);
+var _user$project$Main$viewNavigationItem = F3(
+	function (currentPage, currentPlaylist, navigationItem) {
+		var classes = _elm_lang$html$Html_Attributes$classList(
+			_elm_lang$core$Native_List.fromArray(
+				[
+					{
+					ctor: '_Tuple2',
+					_0: 'active',
+					_1: _elm_lang$core$Native_Utils.eq(navigationItem.page, currentPage)
+				},
+					{
+					ctor: '_Tuple2',
+					_0: 'playing',
+					_1: _elm_lang$core$Native_Utils.eq(
+						_elm_lang$core$Maybe$Just(navigationItem.page),
+						currentPlaylist)
+				}
+				]));
 		return A2(
 			_elm_lang$html$Html$li,
 			_elm_lang$core$Native_List.fromArray(
@@ -9909,8 +9922,8 @@ var _user$project$Main$viewNavigationItem = F2(
 					A2(
 					_elm_lang$html$Html$a,
 					A2(
-						_elm_lang$core$List$append,
-						linkAttributes,
+						_elm_lang$core$List_ops['::'],
+						classes,
 						_elm_lang$core$Native_List.fromArray(
 							[
 								_elm_lang$html$Html_Attributes$href(navigationItem.href)
@@ -9921,8 +9934,8 @@ var _user$project$Main$viewNavigationItem = F2(
 						]))
 				]));
 	});
-var _user$project$Main$viewNavigation = F2(
-	function (navigationItems, currentPage) {
+var _user$project$Main$viewNavigation = F3(
+	function (navigationItems, currentPage, currentPlaylist) {
 		return A2(
 			_elm_lang$html$Html$nav,
 			_elm_lang$core$Native_List.fromArray(
@@ -9938,7 +9951,7 @@ var _user$project$Main$viewNavigation = F2(
 						[]),
 					A2(
 						_elm_lang$core$List$map,
-						_user$project$Main$viewNavigationItem(currentPage),
+						A2(_user$project$Main$viewNavigationItem, currentPage, currentPlaylist),
 						navigationItems))));
 	});
 var _user$project$Main$BlacklistSuccess = {ctor: 'BlacklistSuccess'};
@@ -10242,6 +10255,7 @@ var _user$project$Main$init = function (page) {
 				[]),
 			playing: false,
 			currentTrack: _elm_lang$core$Maybe$Nothing,
+			currentPlaylist: _elm_lang$core$Maybe$Nothing,
 			currentPage: page,
 			lastKeyPressed: _elm_lang$core$Maybe$Nothing,
 			currentTime: _elm_lang$core$Maybe$Nothing
@@ -10394,6 +10408,11 @@ var _user$project$Main$update = F2(
 						};
 					} else {
 						var _p18 = _p15._1;
+						var newModel = _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								currentPlaylist: _elm_lang$core$Maybe$Just(_p19)
+							});
 						var playlistTracks = function () {
 							var _p17 = _p19;
 							switch (_p17.ctor) {
@@ -10409,7 +10428,7 @@ var _user$project$Main$update = F2(
 							model.currentTrack,
 							_elm_lang$core$Maybe$Just(_p18.id))) {
 							var _v9 = _user$project$Main$TogglePlayback,
-								_v10 = model;
+								_v10 = newModel;
 							message = _v9;
 							model = _v10;
 							continue update;
@@ -10417,7 +10436,7 @@ var _user$project$Main$update = F2(
 							return {
 								ctor: '_Tuple2',
 								_0: _elm_lang$core$Native_Utils.update(
-									model,
+									newModel,
 									{
 										currentTrack: _elm_lang$core$Maybe$Just(_p18.id),
 										playing: true,
@@ -10770,7 +10789,7 @@ var _user$project$Main$view = function (model) {
 		_elm_lang$core$Native_List.fromArray(
 			[
 				A2(_user$project$Main$viewGlobalPlayer, currentTrack, model.playing),
-				A2(_user$project$Main$viewNavigation, _user$project$Main$navigation, model.currentPage),
+				A3(_user$project$Main$viewNavigation, _user$project$Main$navigation, model.currentPage, model.currentPlaylist),
 				A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
