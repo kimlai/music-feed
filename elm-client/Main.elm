@@ -206,10 +206,7 @@ update message model =
                 | tracks =
                     Dict.update
                         trackId
-                        ( \maybeTrack ->
-                            maybeTrack `Maybe.andThen`
-                            ( \track -> Just { track | progress = progress, currentTime = currentTime } )
-                        )
+                        ( Maybe.map ( \track -> { track | progress = progress, currentTime = currentTime } ) )
                         model.tracks
               }
             , Cmd.none
