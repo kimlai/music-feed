@@ -156,10 +156,15 @@ update message model =
                                 |> List.map (\track -> ( track.id, track ))
                                 |> Dict.fromList
                                 |> Dict.union model.tracks
+                        updatedQueue =
+                            if ( model.currentPage == playlistId ) then
+                                model.queue
+                            else
+                                List.append model.queue ( List.map .id tracks )
                     in
                     ( { model
                         | tracks = updatedTrackDict
-                        , queue = List.append model.queue ( List.map .id tracks )
+                        , queue = updatedQueue
                       }
                     , Cmd.none
                     )
