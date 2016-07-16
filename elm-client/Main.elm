@@ -13,6 +13,7 @@ import Keyboard
 import Char
 import Json.Decode
 import Navigation
+import Time exposing (Time)
 
 
 main : Program Never
@@ -67,6 +68,7 @@ type alias Model =
     , currentTrack : Maybe TrackId
     , currentPage : Page
     , lastKeyPressed : Maybe Char
+    , currentTime : Maybe Time
     }
 
 
@@ -90,11 +92,13 @@ init page =
       , currentTrack = Nothing
       , currentPage = page
       , lastKeyPressed = Nothing
+      , currentTime = Nothing
       }
     , Cmd.batch
         [ Cmd.map ( PlaylistMsg Feed ) ( Playlist.initialCmd "/feed" )
         , Cmd.map ( PlaylistMsg SavedTracks ) ( Playlist.initialCmd "/saved_tracks" )
         , Cmd.map ( PlaylistMsg PublishedTracks ) ( Playlist.initialCmd "/published_tracks" )
+        , Time.now |> Task.perform ( \_ -> UpdateCurrentTimeFail ) UpdateCurrentTime
         ]
     )
 
@@ -119,9 +123,11 @@ type Msg
     | BlacklistSuccess
     | ChangePage String
     | KeyPressed Keyboard.KeyCode
+    | UpdateCurrentTime Time
+    | UpdateCurrentTimeFail
 
 
-port playTrack : Track -> Cmd msg
+port playTrack : { id : Int, streamUrl : String, currentTime : Float } -> Cmd msg
 port resume : Maybe TrackId -> Cmd msg
 port pause : Maybe TrackId -> Cmd msg
 port changeCurrentTime : Int -> Cmd msg
@@ -131,6 +137,14 @@ port scroll : Int -> Cmd msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
+        UpdateCurrentTimeFail ->
+            ( model
+            , Cmd.none
+            )
+        UpdateCurrentTime newTime ->
+            ( { model | currentTime = Just newTime }
+            , Cmd.none
+            )
         PlaylistMsg playlistId playlistMsg ->
             applyMessageToPlaylists playlistMsg model [ playlistId ]
         PlaylistEvent playlistId event ->
@@ -168,7 +182,11 @@ update message model =
                                 , playing = True
                                 , queue = List.drop ( position + 1 ) playlistTracks
                               }
-                              , playTrack track
+                              , playTrack
+                                  { id = track.id
+                                  , streamUrl = track.streamUrl
+                                  , currentTime = track.currentTime
+                                  }
                             )
         TogglePlayback ->
             ( { model | playing = not model.playing }
@@ -194,7 +212,11 @@ update message model =
                             Nothing ->
                                 Cmd.none
                             Just track ->
-                                playTrack track
+                              playTrack
+                                  { id = track.id
+                                  , streamUrl = track.streamUrl
+                                  , currentTime = track.currentTime
+                                  }
                 )
         FastForward ->
             ( model
@@ -287,13 +309,13 @@ update message model =
                         SavedTracks ->
                             update ( ChangePage "/published-tracks" ) model
                         PublishedTracks ->
-                            update ( ChangePage "/feed" ) model
+                            update ( ChangePage "/" ) model
                 'H' ->
                     case model.currentPage of
                         Feed ->
                             update ( ChangePage "/published-tracks" ) model
                         SavedTracks ->
-                            update ( ChangePage "/feed" ) model
+                            update ( ChangePage "/" ) model
                         PublishedTracks ->
                             update ( ChangePage "/saved-tracks" ) model
                 'm' ->
@@ -437,11 +459,17 @@ view model =
                 [ class "playlist-container" ]
                 [ case model.currentPage of
                     Feed ->
-                        Html.map ( PlaylistMsg Feed ) ( Playlist.view model.tracks model.feed )
+                        Html.map
+                            ( PlaylistMsg Feed )
+                            ( Playlist.view model.currentTime model.tracks model.feed )
                     SavedTracks ->
-                        Html.map ( PlaylistMsg SavedTracks ) ( Playlist.view model.tracks model.savedTracks )
+                        Html.map
+                            ( PlaylistMsg SavedTracks )
+                            ( Playlist.view model.currentTime model.tracks model.savedTracks )
                     PublishedTracks ->
-                        Html.map ( PlaylistMsg PublishedTracks ) ( Playlist.view model.tracks model.publishedTracks )
+                        Html.map
+                            ( PlaylistMsg PublishedTracks )
+                            ( Playlist.view model.currentTime model.tracks model.publishedTracks )
                 ]
             ]
 

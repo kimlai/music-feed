@@ -1,6 +1,7 @@
 module Playlist exposing (..)
 
 
+import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, text, div, img)
 import Html.Attributes exposing (class, href, src, style)
@@ -10,6 +11,7 @@ import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
 import Http
 import Task exposing (Task)
+import Time exposing (Time)
 
 
 type alias Track =
@@ -18,6 +20,7 @@ type alias Track =
     , artwork_url : String
     , title : String
     , streamUrl : String
+    , createdAt : Date
     , progress : Float
     , currentTime : Float
     }
@@ -105,13 +108,13 @@ update message model =
 -- VIEW
 
 
-view : Dict TrackId Track -> Model -> Html Msg
-view tracks model =
+view : Maybe Time -> Dict TrackId Track -> Model -> Html Msg
+view currentTime tracks model =
     let
         feedTracks =
             List.filterMap ( \trackId -> Dict.get trackId tracks ) model.trackIds
         tracksView =
-            List.indexedMap viewTrack feedTracks
+            List.indexedMap ( viewTrack currentTime ) feedTracks
     in
         if model.loading == True then
             List.repeat 10 viewTrackPlaceHolder
@@ -123,8 +126,8 @@ view tracks model =
                 |> div []
 
 
-viewTrack : Int -> Track -> Html Msg
-viewTrack position track =
+viewTrack : Maybe Time -> Int -> Track -> Html Msg
+viewTrack currentTime position track =
     div
         [ class "track"
         , onClick ( OnTrackClicked position track )
@@ -139,6 +142,9 @@ viewTrack position track =
                 [ div [] [ text track.artist ]
                 , div [] [ text track.title ]
                 ]
+            , div
+                [ class "time-ago" ]
+                [ text ( timeAgo currentTime track.createdAt ) ]
             ]
         , div
             [ class "progress-bar" ]
@@ -152,6 +158,47 @@ viewTrack position track =
                 ]
             ]
         ]
+
+
+timeAgo : Maybe Time -> Date -> String
+timeAgo currentTime date =
+    case currentTime of
+        Nothing ->
+            ""
+        Just time ->
+            let
+                timeAgo = time - Date.toTime date
+                day = 24 * Time.hour
+                week = 7 * day
+                month = 30 * day
+                year = 365 * day
+                inUnitAgo value ( unitName, unit ) =
+                    let
+                        valueInUnit =
+                            value / unit |> floor
+                        pluralize value string =
+                            if value > 1 then
+                                string ++ "s"
+                            else
+                                string ++ ""
+                    in
+                    if valueInUnit == 0 then
+                        Nothing
+                    else
+                        Just ( toString valueInUnit ++ " " ++ ( pluralize valueInUnit unitName ) ++ " ago" )
+            in
+                Maybe.oneOf
+                    ( List.map
+                        ( inUnitAgo timeAgo )
+                        [ ( "year", year )
+                        , ( "month", month )
+                        , ( "week", week )
+                        , ( "day", day )
+                        , ( "hour", Time.hour )
+                        , ( "minute" , Time.minute )
+                        ]
+                    )
+                    |> Maybe.withDefault "more than a week ago"
 
 
 viewTrackPlaceHolder : Html Msg
@@ -207,5 +254,6 @@ decodeTrack =
         |: ("artwork_url" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
         |: ("title" := Json.Decode.string)
         |: ("stream_url" := Json.Decode.string)
+        |: ("created_at" := Json.Decode.Extra.date)
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed 0
