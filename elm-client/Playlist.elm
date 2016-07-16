@@ -53,6 +53,7 @@ type Msg
     | FetchFail Http.Error
     | FetchMore
     | OnTrackClicked Int Track
+    | RemoveTrack TrackId
 
 
 type Event
@@ -87,6 +88,12 @@ update message model =
             , Cmd.none
             , Just ( TrackWasClicked position track )
             )
+        RemoveTrack trackId ->
+            ( { model | trackIds = List.filter ((/=) trackId) model.trackIds }
+            , Cmd.none
+            , Nothing
+            )
+
 
 
 -- VIEW

@@ -15,6 +15,7 @@ import Json.Decode
 import Navigation
 
 
+main : Program Never
 main =
     Navigation.program urlParser
         { init = init
@@ -128,37 +129,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
         PlaylistMsg playlistId playlistMsg ->
-            let
-                ( updatedPlaylist, command, event ) =
-                    case playlistId of
-                        Feed ->
-                            Playlist.update playlistMsg model.feed
-                        SavedTracks ->
-                            Playlist.update playlistMsg model.savedTracks
-                        PublishedTracks ->
-                            Playlist.update playlistMsg model.publishedTracks
-                updatedModel =
-                    case playlistId of
-                        Feed ->
-                            { model | feed = updatedPlaylist }
-                        SavedTracks ->
-                            { model | savedTracks = updatedPlaylist }
-                        PublishedTracks ->
-                            { model | publishedTracks = updatedPlaylist }
-            in
-                case event of
-                    Nothing ->
-                        ( updatedModel
-                        , Cmd.map ( PlaylistMsg playlistId ) command
-                        )
-                    Just event ->
-                        let
-                            ( modelAfterEvent, eventCommand )  =
-                                update ( PlaylistEvent playlistId event ) updatedModel
-                        in
-                            ( modelAfterEvent
-                            , Cmd.batch [ Cmd.map ( PlaylistMsg playlistId ) command, eventCommand ]
-                            )
+            handlePlaylistMsg playlistId playlistMsg model
         PlaylistEvent playlistId event ->
             case event of
                 Playlist.NewTracksWereFetched ( tracks, nextLink ) ->
@@ -252,16 +223,13 @@ update message model =
                         ( model
                         , Cmd.none
                         )
-                originalFeed =
-                    model.feed
-                updatedFeed =
-                    { originalFeed | trackIds = List.filter ((/=) trackId) newModel.feed.trackIds }
+                ( newModel', commands' ) =
+                    applyMessageToAllPlaylists ( Playlist.RemoveTrack trackId ) newModel
             in
-                ( { newModel
-                    | feed = updatedFeed
-                    , queue = List.filter ((/=) trackId) newModel.queue
+                ( { newModel'
+                    | queue = List.filter ((/=) trackId) newModel.queue
                   }
-                , Cmd.batch [ commands, blacklist trackId ]
+                , Cmd.batch [ commands, commands', blacklist trackId ]
                 )
         BlacklistFail error ->
             ( model
@@ -320,6 +288,58 @@ update message model =
                     ( model
                     , Cmd.none
                     )
+
+
+handlePlaylistMsg : PlaylistId -> Playlist.Msg -> Model -> ( Model, Cmd Msg )
+handlePlaylistMsg playlistId playlistMsg model =
+    let
+        ( updatedPlaylist, command, event ) =
+            case playlistId of
+                Feed ->
+                    Playlist.update playlistMsg model.feed
+                SavedTracks ->
+                    Playlist.update playlistMsg model.savedTracks
+                PublishedTracks ->
+                    Playlist.update playlistMsg model.publishedTracks
+        updatedModel =
+            case playlistId of
+                Feed ->
+                    { model | feed = updatedPlaylist }
+                SavedTracks ->
+                    { model | savedTracks = updatedPlaylist }
+                PublishedTracks ->
+                    { model | publishedTracks = updatedPlaylist }
+    in
+        case event of
+            Nothing ->
+                ( updatedModel
+                , Cmd.map ( PlaylistMsg playlistId ) command
+                )
+            Just event ->
+                let
+                    ( modelAfterEvent, eventCommand )  =
+                        update ( PlaylistEvent playlistId event ) updatedModel
+                in
+                    ( modelAfterEvent
+                    , Cmd.batch
+                        [ Cmd.map ( PlaylistMsg playlistId ) command
+                        , eventCommand
+                        ]
+                    )
+
+
+applyMessageToAllPlaylists : Playlist.Msg -> Model -> ( Model, Cmd Msg )
+applyMessageToAllPlaylists  playlistMsg model =
+    List.foldr
+        ( \playlistId (m, c) ->
+            let
+                ( m', c' ) =
+                    handlePlaylistMsg playlistId  playlistMsg m
+            in
+                ( m', Cmd.batch [c, c'] )
+        )
+        ( model, Cmd.none )
+        [ Feed, SavedTracks, PublishedTracks ]
 
 
 
