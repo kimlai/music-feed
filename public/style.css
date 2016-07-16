@@ -155,6 +155,7 @@ body {
   overflow-y: auto; }
 
 .custom-queue-track {
+  cursor: pointer;
   height: 50px;
   display: flex;
   align-items: center; }

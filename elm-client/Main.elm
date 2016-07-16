@@ -129,6 +129,7 @@ type Msg
     | KeyPressed Keyboard.KeyCode
     | UpdateCurrentTime Time
     | UpdateCurrentTimeFail
+    | PlayFromCustomQueue Track
 
 
 port playTrack : { id : Int, streamUrl : String, currentTime : Float } -> Cmd msg
@@ -244,6 +245,19 @@ update message model =
                                   , currentTime = track.currentTime
                                   }
                 )
+        PlayFromCustomQueue track ->
+            ( { model
+                | playing = True
+                , currentTrack = Just track.id
+                , customQueue = List.filter ((/=) track.id) model.customQueue
+              }
+            , playTrack
+                { id = track.id
+                , streamUrl = track.streamUrl
+                , currentTime = track.currentTime
+                }
+            )
+
         FastForward ->
             ( model
             , changeCurrentTime 10
@@ -579,7 +593,9 @@ viewCustomQueue tracks queue =
 
 viewCustomPlaylistItem : Track -> Html Msg
 viewCustomPlaylistItem track =
-    div [ class "custom-queue-track" ]
+    div [ class "custom-queue-track"
+        , onClick ( PlayFromCustomQueue track )
+        ]
         [ img [ src track.artwork_url ] []
         , div
             [ class "track-info" ]
