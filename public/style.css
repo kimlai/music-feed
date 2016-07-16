@@ -146,4 +146,30 @@ body {
   .more-button:hover {
     background: #f0f0f0; }
 
+.custom-queue {
+  position: fixed;
+  top: 40px;
+  bottom: 75px;
+  left: 0;
+  width: 210px;
+  overflow-y: auto; }
+
+.custom-queue-track {
+  height: 50px;
+  display: flex;
+  align-items: center; }
+  .custom-queue-track img {
+    width: 50px;
+    height: 50px;
+    background: #f0f0f0;
+    float: left;
+    margin: 0 6px 0 0; }
+  .custom-queue-track .track-info {
+    width: 160px; }
+    .custom-queue-track .track-info div {
+      font-size: 14px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden; }
+
 /*# sourceMappingURL=style.css.map */

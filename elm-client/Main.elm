@@ -64,6 +64,7 @@ type alias Model =
     , savedTracks : Playlist.Model
     , publishedTracks : Playlist.Model
     , queue : List TrackId
+    , customQueue : List TrackId
     , playing : Bool
     , currentTrack : Maybe TrackId
     , currentPlaylist : Maybe PlaylistId
@@ -89,6 +90,7 @@ init page =
       , savedTracks = Playlist.initialModel "/saved-tracks"
       , publishedTracks = Playlist.initialModel "/published-tracks"
       , queue = []
+      , customQueue = []
       , playing = False
       , currentTrack = Nothing
       , currentPlaylist = Nothing
@@ -197,6 +199,10 @@ update message model =
                                   , currentTime = track.currentTime
                                   }
                             )
+                Playlist.TrackWasAddedToCustomQueue trackId ->
+                    ( { model | customQueue = List.append model.customQueue [trackId] }
+                    , Cmd.none
+                    )
         TogglePlayback ->
             ( { model | playing = not model.playing }
             , if model.playing then
@@ -206,14 +212,25 @@ update message model =
             )
         Next ->
             let
-                newCurrentTrack =
+                nextTrackInCustomQueue =
+                    List.head model.customQueue
+                nextTrackInQueue =
                     List.head model.queue
+                model' =
+                    case nextTrackInCustomQueue of
+                        Just trackId ->
+                            { model
+                            | currentTrack = Just trackId
+                            , customQueue = List.drop 1 model.customQueue
+                            }
+                        Nothing ->
+                            { model
+                            | currentTrack = nextTrackInQueue
+                            , queue = List.drop 1 model.queue
+                            }
             in
-                ( { model
-                    | currentTrack = newCurrentTrack
-                    , queue = List.drop 1 model.queue
-                  }
-                , case newCurrentTrack of
+                ( model'
+                , case model'.currentTrack of
                     Nothing ->
                         pause model.currentTrack
                     Just trackId ->
@@ -464,6 +481,7 @@ view model =
             []
             [ viewGlobalPlayer currentTrack model.playing
             , viewNavigation navigation model.currentPage model.currentPlaylist
+            , viewCustomQueue model.tracks model.customQueue
             , div
                 [ class "playlist-container" ]
                 [ case model.currentPage of
@@ -549,6 +567,26 @@ viewGlobalPlayer track playing =
                     [ class "actions" ]
                     []
                 ]
+
+
+viewCustomQueue : Dict TrackId Track -> List TrackId -> Html Msg
+viewCustomQueue tracks queue =
+    queue
+        |> List.filterMap (\trackId ->  Dict.get trackId tracks )
+        |> List.map ( viewCustomPlaylistItem )
+        |> div [ class "custom-queue" ]
+
+
+viewCustomPlaylistItem : Track -> Html Msg
+viewCustomPlaylistItem track =
+    div [ class "custom-queue-track" ]
+        [ img [ src track.artwork_url ] []
+        , div
+            [ class "track-info" ]
+            [ div [] [ text track.artist ]
+            , div [] [ text track.title ]
+            ]
+        ]
 
 
 type alias NavigationItem =

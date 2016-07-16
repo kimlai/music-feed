@@ -5,7 +5,7 @@ import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, text, div, img)
 import Html.Attributes exposing (class, href, src, style)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onWithOptions)
 import Json.Decode
 import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
@@ -58,11 +58,13 @@ type Msg
     | OnTrackClicked Int Track
     | RemoveTrack TrackId
     | AddTrack TrackId
+    | OnAddTrackToCustomQueueClicked TrackId
 
 
 type Event
     = NewTracksWereFetched ( List Track, String )
     | TrackWasClicked Int Track
+    | TrackWasAddedToCustomQueue TrackId
 
 
 update : Msg -> Model -> ( Model, Cmd Msg, Maybe Event )
@@ -87,11 +89,6 @@ update message model =
             , fetchMore model.nextLink
             , Nothing
             )
-        OnTrackClicked position track ->
-            ( model
-            , Cmd.none
-            , Just ( TrackWasClicked position track )
-            )
         RemoveTrack trackId ->
             ( { model | trackIds = List.filter ((/=) trackId) model.trackIds }
             , Cmd.none
@@ -101,6 +98,16 @@ update message model =
             ( { model | trackIds = trackId :: model.trackIds }
             , Cmd.none
             , Nothing
+            )
+        OnTrackClicked position track ->
+            ( model
+            , Cmd.none
+            , Just ( TrackWasClicked position track )
+            )
+        OnAddTrackToCustomQueueClicked trackId ->
+            ( model
+            , Cmd.none
+            , Just ( TrackWasAddedToCustomQueue trackId )
             )
 
 
@@ -134,13 +141,27 @@ viewTrack currentTime position track =
         ]
         [ div
             [ class "track-info-container" ]
-            [ img
-                [ src track.artwork_url ]
+            [ img [ src track.artwork_url ]
                 []
             , div
-                [ class "track-info" ]
-                [ div [] [ text track.artist ]
-                , div [] [ text track.title ]
+                []
+                [ div
+                    [ class "track-info" ]
+                    [ div [] [ text track.artist ]
+                    , div [] [ text track.title ]
+                    ]
+                , div
+                    [ class "actions" ]
+                    [ div
+                        [ onWithOptions
+                            "click"
+                            { stopPropagation = True
+                            , preventDefault = True
+                            }
+                            ( Json.Decode.succeed (OnAddTrackToCustomQueueClicked track.id ) )
+                        ]
+                        [ text "Add to queue" ]
+                    ]
                 ]
             , div
                 [ class "time-ago" ]
