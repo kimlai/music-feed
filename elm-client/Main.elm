@@ -114,6 +114,9 @@ type Msg
     | Blacklist TrackId
     | BlacklistFail Http.Error
     | BlacklistSuccess
+    | SaveTrack TrackId
+    | SaveTrackFail Http.Error
+    | SaveTrackSuccess
     | ChangePage String
     | KeyPressed Keyboard.KeyCode
 
@@ -221,7 +224,10 @@ update message model =
                         , Cmd.none
                         )
                 ( newModel', commands' ) =
-                    applyMessageToAllPlaylists ( Playlist.RemoveTrack trackId ) newModel
+                    applyMessageToPlaylists
+                        ( Playlist.RemoveTrack trackId )
+                        newModel
+                        [ Feed, SavedTracks, PublishedTracks ]
             in
                 ( { newModel'
                     | queue = List.filter ((/=) trackId) newModel.queue
@@ -233,6 +239,24 @@ update message model =
             , Cmd.none
             )
         BlacklistSuccess ->
+            ( model
+            , Cmd.none
+            )
+        SaveTrack trackId ->
+            let
+                ( newModel, command ) =
+                    applyMessageToPlaylists ( Playlist.RemoveTrack trackId ) model [ Feed, PublishedTracks ]
+                ( newModel', command' ) =
+                    applyMessageToPlaylists ( Playlist.AddTrack trackId ) newModel [ SavedTracks ]
+            in
+                ( newModel'
+                , Cmd.batch [ command, command', save trackId ]
+                )
+        SaveTrackFail error ->
+            ( model
+            , Cmd.none
+            )
+        SaveTrackSuccess ->
             ( model
             , Cmd.none
             )
@@ -260,6 +284,14 @@ update message model =
                             )
                         Just trackId ->
                             update ( Blacklist trackId ) model
+                's' ->
+                    case model.currentTrack of
+                        Nothing ->
+                            ( model
+                            , Cmd.none
+                            )
+                        Just trackId ->
+                            update ( SaveTrack trackId ) model
                 'j' ->
                     ( model
                     , scroll 120
@@ -325,8 +357,8 @@ handlePlaylistMsg playlistId playlistMsg model =
                     )
 
 
-applyMessageToAllPlaylists : Playlist.Msg -> Model -> ( Model, Cmd Msg )
-applyMessageToAllPlaylists  playlistMsg model =
+applyMessageToPlaylists : Playlist.Msg -> Model -> List PlaylistId -> ( Model, Cmd Msg )
+applyMessageToPlaylists  playlistMsg model playlistIds =
     List.foldr
         ( \playlistId (m, c) ->
             let
@@ -336,7 +368,7 @@ applyMessageToAllPlaylists  playlistMsg model =
                 ( m', Cmd.batch [c, c'] )
         )
         ( model, Cmd.none )
-        [ Feed, SavedTracks, PublishedTracks ]
+        playlistIds
 
 
 
@@ -508,3 +540,9 @@ blacklist : TrackId -> Cmd Msg
 blacklist trackId =
     FeedApi.blacklist trackId
         |> Task.perform BlacklistFail ( \_ -> BlacklistSuccess )
+
+
+save : TrackId -> Cmd Msg
+save trackId =
+    FeedApi.save trackId
+        |> Task.perform SaveTrackFail ( \_ -> SaveTrackSuccess )

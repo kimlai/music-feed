@@ -54,6 +54,7 @@ type Msg
     | FetchMore
     | OnTrackClicked Int Track
     | RemoveTrack TrackId
+    | AddTrack TrackId
 
 
 type Event
@@ -90,6 +91,11 @@ update message model =
             )
         RemoveTrack trackId ->
             ( { model | trackIds = List.filter ((/=) trackId) model.trackIds }
+            , Cmd.none
+            , Nothing
+            )
+        AddTrack trackId ->
+            ( { model | trackIds = trackId :: model.trackIds }
             , Cmd.none
             , Nothing
             )
