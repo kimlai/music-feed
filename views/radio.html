@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Document</title>
+        <link rel="stylesheet" href="/style.css">
+        <script src="//use.typekit.net/ztf8rcq.js"></script>
+        <script>try{Typekit.load({ async: false });}catch(e){}</script>
+        <script src="/radio.js"></script>
+    </head>
+    <body>
+        <script>
+            var playlist = <%=playlist%>;
+            var app = Elm.Radio.fullscreen(JSON.stringify(playlist));
+
+            var soundcloudClientId = '<%=client_id%>';
+            var audio = new Audio();
+            var currentTrackId;
+
+            audio.addEventListener('timeupdate', function (e) {
+                app.ports.trackProgress.send([
+                    currentTrackId,
+                    e.target.currentTime / e.target.duration * 100,
+                    e.target.currentTime
+                ]);
+            });
+            audio.addEventListener('ended', function (e) {
+                app.ports.trackEnd.send(currentTrackId);
+            });
+            audio.addEventListener('error', function (e) {
+                app.ports.trackError.send(currentTrackId);
+            });
+            app.ports.playTrack.subscribe(function(track) {
+                currentTrackId = track.id;
+                audio.src = track.streamUrl + '?client_id=' + soundcloudClientId;
+                audio.currentTime = track.currentTime;
+                audio.play();
+            });
+            app.ports.changeCurrentTime.subscribe(function(amount) {
+                audio.currentTime = audio.currentTime + amount;
+            });
+            app.ports.pause.subscribe(function(trackId) {
+                audio.pause();
+            });
+            app.ports.resume.subscribe(function(trackId) {
+                audio.play();
+            });
+        </script>
+    </body>
+</html>

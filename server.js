@@ -10,6 +10,7 @@ var bodyParser = require('koa-bodyparser');
 var feedApi = require('./server/feed');
 var savedTracksApi = require('./server/savedTracks');
 var publishedTracksApi = require('./server/publishedTracks');
+var radioApi = require('./server/radio');
 var _ = require('lodash');
 
 var app = koa();
@@ -26,6 +27,8 @@ app.use(bodyParser());
 
 router.get('/connect', connect);
 router.get('/callback', callback);
+router.get('/radio', radio);
+router.get('/radio_playlist', radioPlaylist);
 router.get('/', requireAuthentication, index);
 router.get('/feed', requireAuthentication, feed);
 router.get('/saved_tracks', requireAuthentication, savedTracks);
@@ -58,6 +61,20 @@ function *index() {
     yield this.render('feed', {
         client_id: process.env.SOUNDCLOUD_CLIENT_ID,
     });
+}
+
+function *radio() {
+    var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
+    var playlist = yield radioApi(soundcloudUserId);
+    yield this.render('radio', {
+        client_id: process.env.SOUNDCLOUD_CLIENT_ID,
+        playlist: JSON.stringify(playlist)
+    });
+}
+
+function *radioPlaylist() {
+    var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
+    this.body = yield radioApi(soundcloudUserId);
 }
 
 function *feed() {
