@@ -60,9 +60,7 @@ urlUpdate page model =
 
 type alias Model =
     { tracks : Dict TrackId Track
-    , feed : Playlist.Model
-    , savedTracks : Playlist.Model
-    , publishedTracks : Playlist.Model
+    , playlists : List Playlist
     , queue : List TrackId
     , customQueue : List TrackId
     , playing : Bool
@@ -71,6 +69,12 @@ type alias Model =
     , currentPage : Page
     , lastKeyPressed : Maybe Char
     , currentTime : Maybe Time
+    }
+
+
+type alias Playlist =
+    { id : PlaylistId
+    , model : Playlist.Model
     }
 
 
@@ -85,10 +89,15 @@ type alias Page = PlaylistId
 
 init : Page -> ( Model, Cmd Msg )
 init page =
+    let
+        playlists =
+            [ Playlist Feed ( Playlist.initialModel "/feed" )
+            , Playlist SavedTracks ( Playlist.initialModel "/saved-tracks" )
+            , Playlist PublishedTracks ( Playlist.initialModel "/published-tracks" )
+            ]
+    in
     ( { tracks = Dict.empty
-      , feed = Playlist.initialModel "/feed"
-      , savedTracks = Playlist.initialModel "/saved-tracks"
-      , publishedTracks = Playlist.initialModel "/published-tracks"
+      , playlists = playlists
       , queue = []
       , customQueue = []
       , playing = False
@@ -176,13 +185,11 @@ update message model =
                 Playlist.TrackWasClicked position track ->
                     let
                         playlistTracks =
-                            case playlistId of
-                                Feed ->
-                                    model.feed.trackIds
-                                SavedTracks ->
-                                    model.savedTracks.trackIds
-                                PublishedTracks ->
-                                    model.publishedTracks.trackIds
+                            model.playlists
+                                |> List.filter ( (==) playlistId << .id )
+                                |> List.head
+                                |> Maybe.map ( .trackIds << .model )
+                                |> Maybe.withDefault []
                         newModel =
                             { model | currentPlaylist = Just playlistId }
                     in
@@ -310,7 +317,7 @@ update message model =
                     applyMessageToPlaylists
                         ( Playlist.RemoveTrack trackId )
                         model
-                        ( List.filter ( (/=) playlistId ) [ Feed, SavedTracks, PublishedTracks ] )
+                        ( List.filter ( (/=) playlistId ) ( List.map .id model.playlists ) )
                 ( newModel', command' ) =
                     applyMessageToPlaylists
                         ( Playlist.AddTrack trackId )
@@ -411,56 +418,55 @@ update message model =
                     )
 
 
-handlePlaylistMsg : PlaylistId -> Playlist.Msg -> Model -> ( Model, Cmd Msg )
-handlePlaylistMsg playlistId playlistMsg model =
+handlePlaylistMsg : Playlist -> Playlist.Msg -> Model -> ( Model, Cmd Msg )
+handlePlaylistMsg playlist playlistMsg model =
     let
         ( updatedPlaylist, command, event ) =
-            case playlistId of
-                Feed ->
-                    Playlist.update playlistMsg model.feed
-                SavedTracks ->
-                    Playlist.update playlistMsg model.savedTracks
-                PublishedTracks ->
-                    Playlist.update playlistMsg model.publishedTracks
+            Playlist.update playlistMsg playlist.model
         updatedModel =
-            case playlistId of
-                Feed ->
-                    { model | feed = updatedPlaylist }
-                SavedTracks ->
-                    { model | savedTracks = updatedPlaylist }
-                PublishedTracks ->
-                    { model | publishedTracks = updatedPlaylist }
+            { model
+                | playlists =
+                    model.playlists
+                        |> List.filter ( (/=) playlist.id << .id )
+                        |> List.append [ Playlist playlist.id updatedPlaylist ]
+            }
     in
         case event of
             Nothing ->
                 ( updatedModel
-                , Cmd.map ( PlaylistMsg playlistId ) command
+                , Cmd.map ( PlaylistMsg playlist.id ) command
                 )
             Just event ->
                 let
                     ( modelAfterEvent, eventCommand )  =
-                        update ( PlaylistEvent playlistId event ) updatedModel
+                        update ( PlaylistEvent playlist.id event ) updatedModel
                 in
                     ( modelAfterEvent
                     , Cmd.batch
-                        [ Cmd.map ( PlaylistMsg playlistId ) command
+                        [ Cmd.map ( PlaylistMsg playlist.id ) command
                         , eventCommand
                         ]
                     )
 
 
 applyMessageToPlaylists : Playlist.Msg -> Model -> List PlaylistId -> ( Model, Cmd Msg )
-applyMessageToPlaylists  playlistMsg model playlistIds =
+applyMessageToPlaylists playlistMsg model playlistIds =
+    let
+        playlists =
+            List.filter
+                ( \playlist -> List.member playlist.id playlistIds )
+            model.playlists
+    in
     List.foldr
-        ( \playlistId (m, c) ->
+        ( \playlist (m, c) ->
             let
                 ( m', c' ) =
-                    handlePlaylistMsg playlistId  playlistMsg m
+                    handlePlaylistMsg playlist playlistMsg m
             in
                 ( m', Cmd.batch [c, c'] )
         )
         ( model, Cmd.none )
-        playlistIds
+        playlists
 
 
 
@@ -490,6 +496,9 @@ view model =
             model.currentTrack
                 `Maybe.andThen`
                 ( \trackId -> Dict.get trackId model.tracks )
+        currentPagePlaylist =
+            List.filter ( (==) model.currentPage << .id ) model.playlists
+                |> List.head
     in
         div
             []
@@ -498,19 +507,13 @@ view model =
             , viewCustomQueue model.tracks model.customQueue
             , div
                 [ class "playlist-container" ]
-                [ case model.currentPage of
-                    Feed ->
+                [ case currentPagePlaylist of
+                    Nothing ->
+                        div [] [ text "Well, this is awkward..." ]
+                    Just playlist ->
                         Html.map
-                            ( PlaylistMsg Feed )
-                            ( Playlist.view model.currentTime model.tracks model.feed )
-                    SavedTracks ->
-                        Html.map
-                            ( PlaylistMsg SavedTracks )
-                            ( Playlist.view model.currentTime model.tracks model.savedTracks )
-                    PublishedTracks ->
-                        Html.map
-                            ( PlaylistMsg PublishedTracks )
-                            ( Playlist.view model.currentTime model.tracks model.publishedTracks )
+                            ( PlaylistMsg playlist.id )
+                            ( Playlist.view model.currentTime model.tracks playlist.model )
                 ]
             ]
 
