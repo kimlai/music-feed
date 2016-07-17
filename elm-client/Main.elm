@@ -601,14 +601,10 @@ viewGlobalPlayer track playing =
                 [ div
                     [ class "controls" ]
                     [ div
-                        [ class
-                            ("playback-button"
-                                ++ (if playing then
-                                        " playing"
-                                    else
-                                        ""
-                                   )
-                            )
+                        [ classList
+                            [ ( "playback-button", True )
+                            , ( "playing", playing )
+                            ]
                         , onClick (TogglePlayback)
                         ]
                         [ text "Play" ]
