@@ -9386,7 +9386,7 @@ var _user$project$Playlist$timeAgo = F2(
 			var timeAgo = _p0._0 - _elm_lang$core$Date$toTime(date);
 			return A2(
 				_elm_lang$core$Maybe$withDefault,
-				'more than a week ago',
+				'Just now',
 				_elm_lang$core$Maybe$oneOf(
 					A2(
 						_elm_lang$core$List$map,

@@ -257,7 +257,7 @@ timeAgo currentTime date =
                         , ( "minute", Time.minute )
                         ]
                     )
-                    |> Maybe.withDefault "more than a week ago"
+                    |> Maybe.withDefault "Just now"
 
 
 viewTrackPlaceHolder : Html Msg
