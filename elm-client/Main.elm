@@ -6,7 +6,6 @@ import Html.App as Html
 import Html.Attributes exposing (class, classList, href, src, style)
 import Html.Events exposing (onClick, onWithOptions)
 import Http
-import FeedApi
 import Playlist exposing (Track, TrackId)
 import Task
 import Keyboard
@@ -82,6 +81,7 @@ type PlaylistId
     = Feed
     | SavedTracks
     | PublishedTracks
+    | Blacklist
 
 
 type alias Page = PlaylistId
@@ -91,9 +91,10 @@ init : Page -> ( Model, Cmd Msg )
 init page =
     let
         playlists =
-            [ Playlist Feed ( Playlist.initialModel "/feed" )
-            , Playlist SavedTracks ( Playlist.initialModel "/saved-tracks" )
-            , Playlist PublishedTracks ( Playlist.initialModel "/published-tracks" )
+            [ Playlist Feed ( Playlist.initialModel "/feed" "fake-url" )
+            , Playlist SavedTracks ( Playlist.initialModel "/saved-tracks" "save_track" )
+            , Playlist PublishedTracks ( Playlist.initialModel "/published-tracks" "publish_track" )
+            , Playlist Blacklist ( Playlist.initialModel "/blacklist" "blacklist" )
             ]
     in
     ( { tracks = Dict.empty
@@ -131,9 +132,7 @@ type Msg
     | MoveToPlaylist PlaylistId TrackId
     | MoveToPlaylistFail Http.Error
     | MoveToPlaylistSuccess
-    | Blacklist TrackId
-    | BlacklistFail Http.Error
-    | BlacklistSuccess
+    | BlacklistTrack TrackId
     | ChangePage String
     | KeyPressed Keyboard.KeyCode
     | UpdateCurrentTime Time
@@ -283,34 +282,6 @@ update message model =
               }
             , Cmd.none
             )
-        Blacklist trackId ->
-            let
-                ( newModel, commands ) =
-                    if model.currentTrack == Just trackId then
-                        update Next model
-                    else
-                        ( model
-                        , Cmd.none
-                        )
-                ( newModel', commands' ) =
-                    applyMessageToPlaylists
-                        ( Playlist.RemoveTrack trackId )
-                        newModel
-                        [ Feed, SavedTracks, PublishedTracks ]
-            in
-                ( { newModel'
-                    | queue = List.filter ((/=) trackId) newModel.queue
-                  }
-                , Cmd.batch [ commands, commands', blacklist trackId ]
-                )
-        BlacklistFail error ->
-            ( model
-            , Cmd.none
-            )
-        BlacklistSuccess ->
-            ( model
-            , Cmd.none
-            )
         MoveToPlaylist playlistId trackId ->
             let
                 ( newModel, command ) =
@@ -325,7 +296,7 @@ update message model =
                         [ playlistId ]
             in
                 ( newModel'
-                , Cmd.batch [ command, command', moveToPlaylist playlistId trackId ]
+                , Cmd.batch [ command, command' ]
                 )
         MoveToPlaylistFail error ->
             ( model
@@ -335,6 +306,15 @@ update message model =
             ( model
             , Cmd.none
             )
+        BlacklistTrack trackId ->
+            let
+                ( newModel, command ) =
+                    update Next model
+                ( newModel', command' ) =
+                    update ( MoveToPlaylist Blacklist trackId ) newModel
+
+            in
+                ( newModel', Cmd.batch [ command, command' ] )
         ChangePage url ->
             ( model
             , Navigation.newUrl url
@@ -357,6 +337,8 @@ update message model =
                             update ( ChangePage "/published-tracks" ) model
                         PublishedTracks ->
                             update ( ChangePage "/" ) model
+                        Blacklist ->
+                            update ( ChangePage "/" ) model
                 'H' ->
                     case model.currentPage of
                         Feed ->
@@ -365,6 +347,8 @@ update message model =
                             update ( ChangePage "/" ) model
                         PublishedTracks ->
                             update ( ChangePage "/saved-tracks" ) model
+                        Blacklist ->
+                            update ( ChangePage "/" ) model
                 'm' ->
                     update ( PlaylistMsg model.currentPage Playlist.FetchMore ) model
                 'b' ->
@@ -374,7 +358,7 @@ update message model =
                             , Cmd.none
                             )
                         Just trackId ->
-                            update ( Blacklist trackId ) model
+                            update ( BlacklistTrack trackId ) model
                 's' ->
                     case model.currentTrack of
                         Nothing ->
@@ -654,26 +638,3 @@ viewNavigationItem currentPage currentPlaylist navigationItem =
                 ( classes :: [ href navigationItem.href ] )
                 [ text navigationItem.displayName ]
             ]
-
-
-
--- HTTP
-
-
-blacklist : TrackId -> Cmd Msg
-blacklist trackId =
-    FeedApi.blacklist trackId
-        |> Task.perform BlacklistFail ( \_ -> BlacklistSuccess )
-
-
-moveToPlaylist : PlaylistId -> TrackId -> Cmd Msg
-moveToPlaylist playlistId trackId =
-    case playlistId of
-        Feed ->
-            Cmd.none
-        SavedTracks ->
-            FeedApi.save trackId
-                |> Task.perform MoveToPlaylistFail ( \_ -> MoveToPlaylistSuccess )
-        PublishedTracks ->
-            FeedApi.publish trackId
-                |> Task.perform MoveToPlaylistFail ( \_ -> MoveToPlaylistSuccess )

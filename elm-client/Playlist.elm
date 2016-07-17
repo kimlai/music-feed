@@ -6,10 +6,11 @@ import Dict exposing (Dict)
 import Html exposing (Html, text, div, img)
 import Html.Attributes exposing (class, href, src, style)
 import Html.Events exposing (onClick, onWithOptions)
+import Http
 import Json.Decode
 import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
-import Http
+import Json.Encode
 import Task exposing (Task)
 import Time exposing (Time)
 
@@ -33,14 +34,16 @@ type alias Model =
     { trackIds : List TrackId
     , loading : Bool
     , nextLink : String
+    , addTrackUrl : String
     }
 
 
-initialModel : String -> Model
-initialModel initialUrl =
+initialModel : String -> String -> Model
+initialModel initialUrl addTrackUrl =
     { trackIds = []
     , loading = True
     , nextLink = initialUrl
+    , addTrackUrl = addTrackUrl
     }
 
 
@@ -58,6 +61,8 @@ type Msg
     | OnTrackClicked Int Track
     | RemoveTrack TrackId
     | AddTrack TrackId
+    | AddTrackFail Http.Error
+    | AddTrackSuccess
     | OnAddTrackToCustomQueueClicked TrackId
 
 
@@ -96,6 +101,16 @@ update message model =
             )
         AddTrack trackId ->
             ( { model | trackIds = trackId :: model.trackIds }
+            , addTrack model.addTrackUrl trackId
+            , Nothing
+            )
+        AddTrackFail error ->
+            ( model
+            , Cmd.none
+            , Nothing
+            )
+        AddTrackSuccess ->
+            ( model
             , Cmd.none
             , Nothing
             )
@@ -251,13 +266,8 @@ viewMoreButton =
 
 fetchMore : String -> Cmd Msg
 fetchMore nextLink =
-    fetch nextLink
-        |> Task.perform FetchFail FetchSuccess
-
-
-fetch : String -> Task Http.Error ( List Track, String )
-fetch nextLink =
     Http.get decodeFeed nextLink
+        |> Task.perform FetchFail FetchSuccess
 
 
 decodeFeed : Json.Decode.Decoder ( List Track, String )
@@ -278,3 +288,24 @@ decodeTrack =
         |: ("created_at" := Json.Decode.Extra.date)
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed 0
+
+
+addTrack : String -> Int -> Cmd Msg
+addTrack addTrackUrl trackId =
+    Http.send
+        Http.defaultSettings
+        { verb = "POST"
+        , headers = [ ( "Content-Type", "application/json" ) ]
+        , url = addTrackUrl
+        , body = ( addTrackBody trackId )
+        }
+        |> Http.fromJson ( Json.Decode.succeed "ok" )
+        |> Task.perform AddTrackFail ( \_ -> AddTrackSuccess )
+
+
+addTrackBody : Int -> Http.Body
+addTrackBody trackId =
+    Json.Encode.object
+        [ ( "soundcloudTrackId", Json.Encode.int trackId ) ]
+        |> Json.Encode.encode 0
+        |> Http.string
