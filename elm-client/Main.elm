@@ -1,4 +1,4 @@
-port module Main exposing(..)
+port module Main exposing (..)
 
 import Dict exposing (Dict)
 import Html exposing (Html, a, nav, li, ul, text, div, img)
@@ -37,10 +37,13 @@ urlParser =
             case location.pathname of
                 "/feed" ->
                     Feed
+
                 "/saved-tracks" ->
                     SavedTracks
+
                 "/published-tracks" ->
                     PublishedTracks
+
                 _ ->
                     Feed
         )
@@ -84,37 +87,38 @@ type PlaylistId
     | Blacklist
 
 
-type alias Page = PlaylistId
+type alias Page =
+    PlaylistId
 
 
 init : Page -> ( Model, Cmd Msg )
 init page =
     let
         playlists =
-            [ Playlist Feed ( Playlist.initialModel "/feed" "fake-url" )
-            , Playlist SavedTracks ( Playlist.initialModel "/saved-tracks" "save_track" )
-            , Playlist PublishedTracks ( Playlist.initialModel "/published-tracks" "publish_track" )
-            , Playlist Blacklist ( Playlist.initialModel "/blacklist" "blacklist" )
+            [ Playlist Feed (Playlist.initialModel "/feed" "fake-url")
+            , Playlist SavedTracks (Playlist.initialModel "/saved-tracks" "save_track")
+            , Playlist PublishedTracks (Playlist.initialModel "/published-tracks" "publish_track")
+            , Playlist Blacklist (Playlist.initialModel "/blacklist" "blacklist")
             ]
     in
-    ( { tracks = Dict.empty
-      , playlists = playlists
-      , queue = []
-      , customQueue = []
-      , playing = False
-      , currentTrack = Nothing
-      , currentPlaylist = Nothing
-      , currentPage = page
-      , lastKeyPressed = Nothing
-      , currentTime = Nothing
-      }
-    , Cmd.batch
-        [ Cmd.map ( PlaylistMsg Feed ) ( Playlist.initialCmd "/feed" )
-        , Cmd.map ( PlaylistMsg SavedTracks ) ( Playlist.initialCmd "/saved_tracks" )
-        , Cmd.map ( PlaylistMsg PublishedTracks ) ( Playlist.initialCmd "/published_tracks" )
-        , Time.now |> Task.perform ( \_ -> UpdateCurrentTimeFail ) UpdateCurrentTime
-        ]
-    )
+        ( { tracks = Dict.empty
+          , playlists = playlists
+          , queue = []
+          , customQueue = []
+          , playing = False
+          , currentTrack = Nothing
+          , currentPlaylist = Nothing
+          , currentPage = page
+          , lastKeyPressed = Nothing
+          , currentTime = Nothing
+          }
+        , Cmd.batch
+            [ Cmd.map (PlaylistMsg Feed) (Playlist.initialCmd "/feed")
+            , Cmd.map (PlaylistMsg SavedTracks) (Playlist.initialCmd "/saved_tracks")
+            , Cmd.map (PlaylistMsg PublishedTracks) (Playlist.initialCmd "/published_tracks")
+            , Time.now |> Task.perform (\_ -> UpdateCurrentTimeFail) UpdateCurrentTime
+            ]
+        )
 
 
 
@@ -141,9 +145,17 @@ type Msg
 
 
 port playTrack : { id : Int, streamUrl : String, currentTime : Float } -> Cmd msg
+
+
 port resume : Maybe TrackId -> Cmd msg
+
+
 port pause : Maybe TrackId -> Cmd msg
+
+
 port changeCurrentTime : Int -> Cmd msg
+
+
 port scroll : Int -> Cmd msg
 
 
@@ -154,12 +166,15 @@ update message model =
             ( model
             , Cmd.none
             )
+
         UpdateCurrentTime newTime ->
             ( { model | currentTime = Just newTime }
             , Cmd.none
             )
+
         PlaylistMsg playlistId playlistMsg ->
             applyMessageToPlaylists playlistMsg model [ playlistId ]
+
         PlaylistEvent playlistId event ->
             case event of
                 Playlist.NewTracksWereFetched ( tracks, nextLink ) ->
@@ -169,26 +184,29 @@ update message model =
                                 |> List.map (\track -> ( track.id, track ))
                                 |> Dict.fromList
                                 |> Dict.union model.tracks
+
                         updatedQueue =
-                            if ( model.currentPage == playlistId ) then
+                            if (model.currentPage == playlistId) then
                                 model.queue
                             else
-                                List.append model.queue ( List.map .id tracks )
+                                List.append model.queue (List.map .id tracks)
                     in
-                    ( { model
-                        | tracks = updatedTrackDict
-                        , queue = updatedQueue
-                      }
-                    , Cmd.none
-                    )
+                        ( { model
+                            | tracks = updatedTrackDict
+                            , queue = updatedQueue
+                          }
+                        , Cmd.none
+                        )
+
                 Playlist.TrackWasClicked position track ->
                     let
                         playlistTracks =
                             model.playlists
-                                |> List.filter ( (==) playlistId << .id )
+                                |> List.filter ((==) playlistId << .id)
                                 |> List.head
-                                |> Maybe.map ( .trackIds << .model )
+                                |> Maybe.map (.trackIds << .model)
                                 |> Maybe.withDefault []
+
                         newModel =
                             { model | currentPlaylist = Just playlistId }
                     in
@@ -198,18 +216,20 @@ update message model =
                             ( { newModel
                                 | currentTrack = Just track.id
                                 , playing = True
-                                , queue = List.drop ( position + 1 ) playlistTracks
+                                , queue = List.drop (position + 1) playlistTracks
                               }
-                              , playTrack
-                                  { id = track.id
-                                  , streamUrl = track.streamUrl
-                                  , currentTime = track.currentTime
-                                  }
+                            , playTrack
+                                { id = track.id
+                                , streamUrl = track.streamUrl
+                                , currentTime = track.currentTime
+                                }
                             )
+
                 Playlist.TrackWasAddedToCustomQueue trackId ->
-                    ( { model | customQueue = List.append model.customQueue [trackId] }
+                    ( { model | customQueue = List.append model.customQueue [ trackId ] }
                     , Cmd.none
                     )
+
         TogglePlayback ->
             ( { model | playing = not model.playing }
             , if model.playing then
@@ -217,40 +237,47 @@ update message model =
               else
                 resume model.currentTrack
             )
+
         Next ->
             let
                 nextTrackInCustomQueue =
                     List.head model.customQueue
+
                 nextTrackInQueue =
                     List.head model.queue
+
                 model' =
                     case nextTrackInCustomQueue of
                         Just trackId ->
                             { model
-                            | currentTrack = Just trackId
-                            , customQueue = List.drop 1 model.customQueue
+                                | currentTrack = Just trackId
+                                , customQueue = List.drop 1 model.customQueue
                             }
+
                         Nothing ->
                             { model
-                            | currentTrack = nextTrackInQueue
-                            , queue = List.drop 1 model.queue
+                                | currentTrack = nextTrackInQueue
+                                , queue = List.drop 1 model.queue
                             }
             in
                 ( model'
                 , case model'.currentTrack of
                     Nothing ->
                         pause model.currentTrack
+
                     Just trackId ->
                         case Dict.get trackId model.tracks of
                             Nothing ->
                                 Cmd.none
+
                             Just track ->
-                              playTrack
-                                  { id = track.id
-                                  , streamUrl = track.streamUrl
-                                  , currentTime = track.currentTime
-                                  }
+                                playTrack
+                                    { id = track.id
+                                    , streamUrl = track.streamUrl
+                                    , currentTime = track.currentTime
+                                    }
                 )
+
         PlayFromCustomQueue track ->
             ( { model
                 | playing = True
@@ -268,121 +295,151 @@ update message model =
             ( model
             , changeCurrentTime 10
             )
+
         Rewind ->
             ( model
             , changeCurrentTime -10
             )
+
         TrackProgress ( trackId, progress, currentTime ) ->
             ( { model
                 | tracks =
                     Dict.update
                         trackId
-                        ( Maybe.map ( \track -> { track | progress = progress, currentTime = currentTime } ) )
+                        (Maybe.map (\track -> { track | progress = progress, currentTime = currentTime }))
                         model.tracks
               }
             , Cmd.none
             )
+
         MoveToPlaylist playlistId trackId ->
             let
                 ( newModel, command ) =
                     applyMessageToPlaylists
-                        ( Playlist.RemoveTrack trackId )
+                        (Playlist.RemoveTrack trackId)
                         model
-                        ( List.filter ( (/=) playlistId ) ( List.map .id model.playlists ) )
+                        (List.filter ((/=) playlistId) (List.map .id model.playlists))
+
                 ( newModel', command' ) =
                     applyMessageToPlaylists
-                        ( Playlist.AddTrack trackId )
+                        (Playlist.AddTrack trackId)
                         newModel
                         [ playlistId ]
             in
                 ( newModel'
                 , Cmd.batch [ command, command' ]
                 )
+
         MoveToPlaylistFail error ->
             ( model
             , Cmd.none
             )
+
         MoveToPlaylistSuccess ->
             ( model
             , Cmd.none
             )
+
         BlacklistTrack trackId ->
             let
                 ( newModel, command ) =
                     update Next model
-                ( newModel', command' ) =
-                    update ( MoveToPlaylist Blacklist trackId ) newModel
 
+                ( newModel', command' ) =
+                    update (MoveToPlaylist Blacklist trackId) newModel
             in
                 ( newModel', Cmd.batch [ command, command' ] )
+
         ChangePage url ->
             ( model
             , Navigation.newUrl url
             )
+
         KeyPressed keyCode ->
-            case ( Char.fromCode keyCode ) of
+            case (Char.fromCode keyCode) of
                 'n' ->
                     update Next model
+
                 'p' ->
                     update TogglePlayback model
+
                 'l' ->
                     update FastForward model
+
                 'h' ->
                     update Rewind model
+
                 'L' ->
                     case model.currentPage of
                         Feed ->
-                            update ( ChangePage "/saved-tracks" ) model
+                            update (ChangePage "/saved-tracks") model
+
                         SavedTracks ->
-                            update ( ChangePage "/published-tracks" ) model
+                            update (ChangePage "/published-tracks") model
+
                         PublishedTracks ->
-                            update ( ChangePage "/" ) model
+                            update (ChangePage "/") model
+
                         Blacklist ->
-                            update ( ChangePage "/" ) model
+                            update (ChangePage "/") model
+
                 'H' ->
                     case model.currentPage of
                         Feed ->
-                            update ( ChangePage "/published-tracks" ) model
+                            update (ChangePage "/published-tracks") model
+
                         SavedTracks ->
-                            update ( ChangePage "/" ) model
+                            update (ChangePage "/") model
+
                         PublishedTracks ->
-                            update ( ChangePage "/saved-tracks" ) model
+                            update (ChangePage "/saved-tracks") model
+
                         Blacklist ->
-                            update ( ChangePage "/" ) model
+                            update (ChangePage "/") model
+
                 'm' ->
-                    update ( PlaylistMsg model.currentPage Playlist.FetchMore ) model
+                    update (PlaylistMsg model.currentPage Playlist.FetchMore) model
+
                 'b' ->
                     case model.currentTrack of
                         Nothing ->
                             ( model
                             , Cmd.none
                             )
+
                         Just trackId ->
-                            update ( BlacklistTrack trackId ) model
+                            update (BlacklistTrack trackId) model
+
                 's' ->
                     case model.currentTrack of
                         Nothing ->
                             ( model
                             , Cmd.none
                             )
+
                         Just trackId ->
-                            update ( MoveToPlaylist SavedTracks trackId ) model
+                            update (MoveToPlaylist SavedTracks trackId) model
+
                 'P' ->
                     case model.currentTrack of
                         Nothing ->
                             ( model
                             , Cmd.none
                             )
+
                         Just trackId ->
-                            update ( MoveToPlaylist PublishedTracks trackId ) model
+                            update (MoveToPlaylist PublishedTracks trackId) model
+
                 'j' ->
                     ( model
                     , scroll 120
                     )
+
                 'k' ->
                     ( model
                     , scroll -120
                     )
+
                 'g' ->
                     if model.lastKeyPressed == Just 'g' then
                         ( { model | lastKeyPressed = Nothing }
@@ -392,10 +449,12 @@ update message model =
                         ( { model | lastKeyPressed = Just 'g' }
                         , Cmd.none
                         )
+
                 'G' ->
                     ( model
                     , scroll 99999999
                     )
+
                 _ ->
                     ( model
                     , Cmd.none
@@ -407,27 +466,29 @@ handlePlaylistMsg playlist playlistMsg model =
     let
         ( updatedPlaylist, command, event ) =
             Playlist.update playlistMsg playlist.model
+
         updatedModel =
             { model
                 | playlists =
                     model.playlists
-                        |> List.filter ( (/=) playlist.id << .id )
+                        |> List.filter ((/=) playlist.id << .id)
                         |> List.append [ Playlist playlist.id updatedPlaylist ]
             }
     in
         case event of
             Nothing ->
                 ( updatedModel
-                , Cmd.map ( PlaylistMsg playlist.id ) command
+                , Cmd.map (PlaylistMsg playlist.id) command
                 )
+
             Just event ->
                 let
-                    ( modelAfterEvent, eventCommand )  =
-                        update ( PlaylistEvent playlist.id event ) updatedModel
+                    ( modelAfterEvent, eventCommand ) =
+                        update (PlaylistEvent playlist.id event) updatedModel
                 in
                     ( modelAfterEvent
                     , Cmd.batch
-                        [ Cmd.map ( PlaylistMsg playlist.id ) command
+                        [ Cmd.map (PlaylistMsg playlist.id) command
                         , eventCommand
                         ]
                     )
@@ -438,36 +499,39 @@ applyMessageToPlaylists playlistMsg model playlistIds =
     let
         playlists =
             List.filter
-                ( \playlist -> List.member playlist.id playlistIds )
-            model.playlists
+                (\playlist -> List.member playlist.id playlistIds)
+                model.playlists
     in
-    List.foldr
-        ( \playlist (m, c) ->
-            let
-                ( m', c' ) =
-                    handlePlaylistMsg playlist playlistMsg m
-            in
-                ( m', Cmd.batch [c, c'] )
-        )
-        ( model, Cmd.none )
-        playlists
+        List.foldr
+            (\playlist ( m, c ) ->
+                let
+                    ( m', c' ) =
+                        handlePlaylistMsg playlist playlistMsg m
+                in
+                    ( m', Cmd.batch [ c, c' ] )
+            )
+            ( model, Cmd.none )
+            playlists
 
 
 
 -- SUBSCRIPTIONS
 
 
-port trackProgress : ( ( TrackId, Float, Float ) -> msg ) -> Sub msg
-port trackEnd : ( TrackId -> msg ) -> Sub msg
+port trackProgress : (( TrackId, Float, Float ) -> msg) -> Sub msg
+
+
+port trackEnd : (TrackId -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ trackProgress TrackProgress
-        , trackEnd ( \_ -> Next )
+        , trackEnd (\_ -> Next)
         , Keyboard.presses KeyPressed
         ]
+
 
 
 -- VIEW
@@ -478,10 +542,10 @@ view model =
     let
         currentTrack =
             model.currentTrack
-                `Maybe.andThen`
-                ( \trackId -> Dict.get trackId model.tracks )
+                `Maybe.andThen` (\trackId -> Dict.get trackId model.tracks)
+
         currentPagePlaylist =
-            List.filter ( (==) model.currentPage << .id ) model.playlists
+            List.filter ((==) model.currentPage << .id) model.playlists
                 |> List.head
     in
         div
@@ -494,10 +558,11 @@ view model =
                 [ case currentPagePlaylist of
                     Nothing ->
                         div [] [ text "Well, this is awkward..." ]
+
                     Just playlist ->
                         Html.map
-                            ( PlaylistMsg playlist.id )
-                            ( Playlist.view model.currentTime model.tracks playlist.model )
+                            (PlaylistMsg playlist.id)
+                            (Playlist.view model.currentTime model.tracks playlist.model)
                 ]
             ]
 
@@ -529,14 +594,22 @@ viewGlobalPlayer track playing =
                     [ class "actions" ]
                     []
                 ]
+
         Just track ->
             div
                 [ class "global-player" ]
                 [ div
                     [ class "controls" ]
                     [ div
-                        [ class ( "playback-button" ++ ( if playing then " playing" else "" ) )
-                        , onClick ( TogglePlayback )
+                        [ class
+                            ("playback-button"
+                                ++ (if playing then
+                                        " playing"
+                                    else
+                                        ""
+                                   )
+                            )
+                        , onClick (TogglePlayback)
                         ]
                         [ text "Play" ]
                     , div
@@ -559,7 +632,7 @@ viewGlobalPlayer track playing =
                         [ class "outer" ]
                         [ div
                             [ class "inner"
-                            , style [ ("width", ( toString track.progress ) ++ "%" ) ]
+                            , style [ ( "width", (toString track.progress) ++ "%" ) ]
                             ]
                             []
                         ]
@@ -573,15 +646,16 @@ viewGlobalPlayer track playing =
 viewCustomQueue : Dict TrackId Track -> List TrackId -> Html Msg
 viewCustomQueue tracks queue =
     queue
-        |> List.filterMap (\trackId ->  Dict.get trackId tracks )
-        |> List.map ( viewCustomPlaylistItem )
+        |> List.filterMap (\trackId -> Dict.get trackId tracks)
+        |> List.map (viewCustomPlaylistItem)
         |> div [ class "custom-queue" ]
 
 
 viewCustomPlaylistItem : Track -> Html Msg
 viewCustomPlaylistItem track =
-    div [ class "custom-queue-track"
-        , onClick ( PlayFromCustomQueue track )
+    div
+        [ class "custom-queue-track"
+        , onClick (PlayFromCustomQueue track)
         ]
         [ img [ src track.artwork_url ] []
         , div
@@ -607,11 +681,10 @@ navigation =
     ]
 
 
-
 viewNavigation : List NavigationItem -> Page -> Maybe PlaylistId -> Html Msg
 viewNavigation navigationItems currentPage currentPlaylist =
     navigationItems
-        |> List.map ( viewNavigationItem currentPage currentPlaylist )
+        |> List.map (viewNavigationItem currentPage currentPlaylist)
         |> ul []
         |> List.repeat 1
         |> nav [ class "navigation" ]
@@ -632,9 +705,9 @@ viewNavigationItem currentPage currentPlaylist navigationItem =
                 { stopPropagation = False
                 , preventDefault = True
                 }
-                ( Json.Decode.succeed ( ChangePage navigationItem.href ) )
+                (Json.Decode.succeed (ChangePage navigationItem.href))
             ]
             [ a
-                ( classes :: [ href navigationItem.href ] )
+                (classes :: [ href navigationItem.href ])
                 [ text navigationItem.displayName ]
             ]

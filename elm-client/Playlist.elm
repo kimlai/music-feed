@@ -1,6 +1,5 @@
 module Playlist exposing (..)
 
-
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, text, div, img)
@@ -27,7 +26,8 @@ type alias Track =
     }
 
 
-type alias TrackId = Int
+type alias TrackId =
+    Int
 
 
 type alias Model =
@@ -50,6 +50,8 @@ initialModel initialUrl addTrackUrl =
 initialCmd : String -> Cmd Msg
 initialCmd initialUrl =
     fetchMore initialUrl
+
+
 
 -- UPDATE
 
@@ -77,52 +79,60 @@ update message model =
     case message of
         FetchSuccess ( tracks, nextLink ) ->
             ( { model
-                | trackIds = List.append model.trackIds ( List.map .id tracks )
+                | trackIds = List.append model.trackIds (List.map .id tracks)
                 , nextLink = nextLink
                 , loading = False
               }
             , Cmd.none
-            , Just ( NewTracksWereFetched ( tracks, nextLink ) )
+            , Just (NewTracksWereFetched ( tracks, nextLink ))
             )
+
         FetchFail error ->
             ( { model | loading = False }
             , Cmd.none
             , Nothing
             )
+
         FetchMore ->
             ( { model | loading = True }
             , fetchMore model.nextLink
             , Nothing
             )
+
         RemoveTrack trackId ->
             ( { model | trackIds = List.filter ((/=) trackId) model.trackIds }
             , Cmd.none
             , Nothing
             )
+
         AddTrack trackId ->
             ( { model | trackIds = trackId :: model.trackIds }
             , addTrack model.addTrackUrl trackId
             , Nothing
             )
+
         AddTrackFail error ->
             ( model
             , Cmd.none
             , Nothing
             )
+
         AddTrackSuccess ->
             ( model
             , Cmd.none
             , Nothing
             )
+
         OnTrackClicked position track ->
             ( model
             , Cmd.none
-            , Just ( TrackWasClicked position track )
+            , Just (TrackWasClicked position track)
             )
+
         OnAddTrackToCustomQueueClicked trackId ->
             ( model
             , Cmd.none
-            , Just ( TrackWasAddedToCustomQueue trackId )
+            , Just (TrackWasAddedToCustomQueue trackId)
             )
 
 
@@ -134,9 +144,10 @@ view : Maybe Time -> Dict TrackId Track -> Model -> Html Msg
 view currentTime tracks model =
     let
         feedTracks =
-            List.filterMap ( \trackId -> Dict.get trackId tracks ) model.trackIds
+            List.filterMap (\trackId -> Dict.get trackId tracks) model.trackIds
+
         tracksView =
-            List.indexedMap ( viewTrack currentTime ) feedTracks
+            List.indexedMap (viewTrack currentTime) feedTracks
     in
         if model.loading == True then
             List.repeat 10 viewTrackPlaceHolder
@@ -152,7 +163,7 @@ viewTrack : Maybe Time -> Int -> Track -> Html Msg
 viewTrack currentTime position track =
     div
         [ class "track"
-        , onClick ( OnTrackClicked position track )
+        , onClick (OnTrackClicked position track)
         ]
         [ div
             [ class "track-info-container" ]
@@ -173,14 +184,14 @@ viewTrack currentTime position track =
                             { stopPropagation = True
                             , preventDefault = True
                             }
-                            ( Json.Decode.succeed (OnAddTrackToCustomQueueClicked track.id ) )
+                            (Json.Decode.succeed (OnAddTrackToCustomQueueClicked track.id))
                         ]
                         [ text "Add to queue" ]
                     ]
                 ]
             , div
                 [ class "time-ago" ]
-                [ text ( timeAgo currentTime track.createdAt ) ]
+                [ text (timeAgo currentTime track.createdAt) ]
             ]
         , div
             [ class "progress-bar" ]
@@ -188,7 +199,7 @@ viewTrack currentTime position track =
                 [ class "outer" ]
                 [ div
                     [ class "inner"
-                    , style [ ("width", ( toString track.progress ) ++ "%" ) ]
+                    , style [ ( "width", (toString track.progress) ++ "%" ) ]
                     ]
                     []
                 ]
@@ -201,37 +212,49 @@ timeAgo currentTime date =
     case currentTime of
         Nothing ->
             ""
+
         Just time ->
             let
-                timeAgo = time - Date.toTime date
-                day = 24 * Time.hour
-                week = 7 * day
-                month = 30 * day
-                year = 365 * day
+                timeAgo =
+                    time - Date.toTime date
+
+                day =
+                    24 * Time.hour
+
+                week =
+                    7 * day
+
+                month =
+                    30 * day
+
+                year =
+                    365 * day
+
                 inUnitAgo value ( unitName, unit ) =
                     let
                         valueInUnit =
                             value / unit |> floor
+
                         pluralize value string =
                             if value > 1 then
                                 string ++ "s"
                             else
                                 string ++ ""
                     in
-                    if valueInUnit == 0 then
-                        Nothing
-                    else
-                        Just ( toString valueInUnit ++ " " ++ ( pluralize valueInUnit unitName ) ++ " ago" )
+                        if valueInUnit == 0 then
+                            Nothing
+                        else
+                            Just (toString valueInUnit ++ " " ++ (pluralize valueInUnit unitName) ++ " ago")
             in
                 Maybe.oneOf
-                    ( List.map
-                        ( inUnitAgo timeAgo )
+                    (List.map
+                        (inUnitAgo timeAgo)
                         [ ( "year", year )
                         , ( "month", month )
                         , ( "week", week )
                         , ( "day", day )
                         , ( "hour", Time.hour )
-                        , ( "minute" , Time.minute )
+                        , ( "minute", Time.minute )
                         ]
                     )
                     |> Maybe.withDefault "more than a week ago"
@@ -260,7 +283,6 @@ viewMoreButton =
 
 
 
-
 -- HTTP
 
 
@@ -273,8 +295,8 @@ fetchMore nextLink =
 decodeFeed : Json.Decode.Decoder ( List Track, String )
 decodeFeed =
     Json.Decode.object2 (,)
-        ( "tracks" := Json.Decode.list decodeTrack )
-        ( "next_href" := Json.Decode.string )
+        ("tracks" := Json.Decode.list decodeTrack)
+        ("next_href" := Json.Decode.string)
 
 
 decodeTrack : Json.Decode.Decoder Track
@@ -297,10 +319,10 @@ addTrack addTrackUrl trackId =
         { verb = "POST"
         , headers = [ ( "Content-Type", "application/json" ) ]
         , url = addTrackUrl
-        , body = ( addTrackBody trackId )
+        , body = (addTrackBody trackId)
         }
-        |> Http.fromJson ( Json.Decode.succeed "ok" )
-        |> Task.perform AddTrackFail ( \_ -> AddTrackSuccess )
+        |> Http.fromJson (Json.Decode.succeed "ok")
+        |> Task.perform AddTrackFail (\_ -> AddTrackSuccess)
 
 
 addTrackBody : Int -> Http.Body
