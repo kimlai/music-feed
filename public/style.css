@@ -36,6 +36,8 @@ body {
       width: 46px; }
       .global-player .controls .playback-button.playing {
         background: url("/images/pause.svg") no-repeat 55% center; }
+      .global-player .controls .playback-button.error {
+        background: url("/images/error.svg") no-repeat 55% center; }
     .global-player .controls .next-button {
       background: url("/images/next.svg") no-repeat 55% center;
       width: 33px; }
@@ -128,6 +130,8 @@ body {
         padding: 10px;
         color: #777;
         font-size: 14px; }
+    .playlist-container .track.error {
+      opacity: 0.5; }
 
 .progress-bar .outer {
   background: #e5e5e5;

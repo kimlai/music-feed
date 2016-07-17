@@ -41,6 +41,9 @@ body {
             &.playing {
                 background: url('/images/pause.svg') no-repeat 55% center;
             }
+            &.error {
+                background: url('/images/error.svg') no-repeat 55% center;
+            }
         }
         .next-button {
             background: url('/images/next.svg') no-repeat 55% center;
@@ -154,6 +157,9 @@ body {
                 color: #777;
                 font-size: 14px;
             }
+        }
+        &.error {
+            opacity: 0.5;
         }
     }
 }

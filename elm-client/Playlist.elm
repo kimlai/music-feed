@@ -3,7 +3,7 @@ module Playlist exposing (..)
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, text, div, img)
-import Html.Attributes exposing (class, href, src, style)
+import Html.Attributes exposing (class, classList, href, src, style)
 import Html.Events exposing (onClick, onWithOptions)
 import Http
 import Json.Decode
@@ -23,6 +23,7 @@ type alias Track =
     , createdAt : Date
     , progress : Float
     , currentTime : Float
+    , error : Bool
     }
 
 
@@ -162,7 +163,10 @@ view currentTime tracks model =
 viewTrack : Maybe Time -> Int -> Track -> Html Msg
 viewTrack currentTime position track =
     div
-        [ class "track"
+        [ classList
+            [ ("track", True)
+            , ("error", track.error)
+            ]
         , onClick (OnTrackClicked position track)
         ]
         [ div
@@ -310,6 +314,7 @@ decodeTrack =
         |: ("created_at" := Json.Decode.Extra.date)
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed 0
+        |: Json.Decode.succeed False
 
 
 addTrack : String -> Int -> Cmd Msg

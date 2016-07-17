@@ -131,6 +131,7 @@ type Msg
     | TogglePlayback
     | Next
     | TrackProgress ( TrackId, Float, Float )
+    | TrackError TrackId
     | FastForward
     | Rewind
     | MoveToPlaylist PlaylistId TrackId
@@ -229,6 +230,18 @@ update message model =
                     ( { model | customQueue = List.append model.customQueue [ trackId ] }
                     , Cmd.none
                     )
+
+        TrackError trackId ->
+            let _ = Debug.log "error with " trackId in
+            ( { model
+                | tracks =
+                    Dict.update
+                        trackId
+                        (Maybe.map (\track -> { track | error = True }))
+                        model.tracks
+                }
+            , Cmd.none
+            )
 
         TogglePlayback ->
             ( { model | playing = not model.playing }
@@ -524,11 +537,16 @@ port trackProgress : (( TrackId, Float, Float ) -> msg) -> Sub msg
 port trackEnd : (TrackId -> msg) -> Sub msg
 
 
+port trackError : (TrackId -> msg) -> Sub msg
+
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ trackProgress TrackProgress
         , trackEnd (\_ -> Next)
+        , trackError TrackError
         , Keyboard.presses KeyPressed
         ]
 
@@ -603,7 +621,8 @@ viewGlobalPlayer track playing =
                     [ div
                         [ classList
                             [ ( "playback-button", True )
-                            , ( "playing", playing )
+                            , ( "playing", playing && not track.error )
+                            , ( "error", track.error )
                             ]
                         , onClick (TogglePlayback)
                         ]
