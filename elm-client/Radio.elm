@@ -190,13 +190,6 @@ update message model =
 
                 Playlist.TrackWasClicked previousTrackId track ->
                     let
-                        playlistTracks =
-                            model.playlists
-                                |> List.filter ((==) playlistId << .id)
-                                |> List.head
-                                |> Maybe.map (PlaylistStructure.toList << .items << .model)
-                                |> Maybe.withDefault []
-
                         newModel =
                             { model | currentPlaylist = Just playlistId }
                     in
