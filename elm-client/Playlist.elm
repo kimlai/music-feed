@@ -21,6 +21,7 @@ type alias Track =
     , artwork_url : String
     , title : String
     , streamUrl : String
+    , sourceUrl : String
     , createdAt : Date
     , progress : Float
     , currentTime : Float
@@ -321,6 +322,7 @@ decodeTrack =
         |: ("artwork_url" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
         |: ("title" := Json.Decode.string)
         |: ("stream_url" := Json.Decode.string)
+        |: ("permalink_url" := Json.Decode.string)
         |: ("created_at" := Json.Decode.Extra.date)
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed 0

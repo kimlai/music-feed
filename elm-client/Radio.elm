@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Regex
 import Html exposing (Html, a, nav, li, ul, text, div, img)
 import Html.App as Html
-import Html.Attributes exposing (class, classList, href, src, style)
+import Html.Attributes exposing (class, classList, href, src, style, target)
 import Html.Events exposing (onClick, onWithOptions)
 import Playlist exposing (Track, TrackId)
 import PlaylistStructure
@@ -452,6 +452,12 @@ viewRadioTrack track =
                     [ class "track-info" ]
                     [ div [ class "artist" ] [ text track.artist ]
                     , div [ class "title" ] [ text track.title ]
+                    , a
+                        [ class "source"
+                        , href track.sourceUrl
+                        , target "_blank"
+                        ]
+                        [ text "Source" ]
                     ]
                 ]
 

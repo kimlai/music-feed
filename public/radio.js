@@ -9456,10 +9456,27 @@ var _user$project$Playlist$initialModel = F2(
 	function (initialUrl, addTrackUrl) {
 		return {loading: true, nextLink: initialUrl, addTrackUrl: addTrackUrl, items: _user$project$PlaylistStructure$empty};
 	});
-var _user$project$Playlist$Track = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {id: a, artist: b, artwork_url: c, title: d, streamUrl: e, createdAt: f, progress: g, currentTime: h, error: i};
-	});
+var _user$project$Playlist$Track = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {id: a, artist: b, artwork_url: c, title: d, streamUrl: e, sourceUrl: f, createdAt: g, progress: h, currentTime: i, error: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var _user$project$Playlist$decodeTrack = A2(
 	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
 	A2(
@@ -9478,19 +9495,22 @@ var _user$project$Playlist$decodeTrack = A2(
 								_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
 								A2(
 									_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
-									_elm_lang$core$Json_Decode$succeed(_user$project$Playlist$Track),
-									A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
+									A2(
+										_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+										_elm_lang$core$Json_Decode$succeed(_user$project$Playlist$Track),
+										A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
+									A2(
+										_elm_lang$core$Json_Decode$at,
+										_elm_lang$core$Native_List.fromArray(
+											['user', 'username']),
+										_elm_lang$core$Json_Decode$string)),
 								A2(
-									_elm_lang$core$Json_Decode$at,
-									_elm_lang$core$Native_List.fromArray(
-										['user', 'username']),
-									_elm_lang$core$Json_Decode$string)),
-							A2(
-								_elm_lang$core$Json_Decode_ops[':='],
-								'artwork_url',
-								A2(_elm_community$elm_json_extra$Json_Decode_Extra$withDefault, '/images/placeholder.jpg', _elm_lang$core$Json_Decode$string))),
-						A2(_elm_lang$core$Json_Decode_ops[':='], 'title', _elm_lang$core$Json_Decode$string)),
-					A2(_elm_lang$core$Json_Decode_ops[':='], 'stream_url', _elm_lang$core$Json_Decode$string)),
+									_elm_lang$core$Json_Decode_ops[':='],
+									'artwork_url',
+									A2(_elm_community$elm_json_extra$Json_Decode_Extra$withDefault, '/images/placeholder.jpg', _elm_lang$core$Json_Decode$string))),
+							A2(_elm_lang$core$Json_Decode_ops[':='], 'title', _elm_lang$core$Json_Decode$string)),
+						A2(_elm_lang$core$Json_Decode_ops[':='], 'stream_url', _elm_lang$core$Json_Decode$string)),
+					A2(_elm_lang$core$Json_Decode_ops[':='], 'permalink_url', _elm_lang$core$Json_Decode$string)),
 				A2(_elm_lang$core$Json_Decode_ops[':='], 'created_at', _elm_community$elm_json_extra$Json_Decode_Extra$date)),
 			_elm_lang$core$Json_Decode$succeed(0)),
 		_elm_lang$core$Json_Decode$succeed(0)),
@@ -9936,6 +9956,18 @@ var _user$project$Radio$viewRadioTrack = function (track) {
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html$text(_p2.title)
+								])),
+							A2(
+							_elm_lang$html$Html$a,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$class('source'),
+									_elm_lang$html$Html_Attributes$href(_p2.sourceUrl),
+									_elm_lang$html$Html_Attributes$target('_blank')
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html$text('Source')
 								]))
 						]))
 				]));

@@ -186,7 +186,8 @@ body {
     height: 400px; }
   .radio-track .track-info {
     padding: 36px;
-    max-width: 500px; }
+    max-width: 500px;
+    line-height: 42px; }
   .radio-track .artist {
     font-size: 36px;
     text-transform: uppercase; }
