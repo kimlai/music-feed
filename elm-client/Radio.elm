@@ -380,7 +380,7 @@ view model =
     let
         currentTrack =
             currentTrackId model
-                `Maybe.andThen` \trackId -> Dict.get trackId model.tracks
+                `Maybe.andThen` (flip Dict.get) model.tracks
 
         currentPagePlaylist =
             List.filter ((==) model.currentPage << .id) model.playlists
@@ -402,12 +402,8 @@ view model =
                             Radio ->
                                 let
                                     currentRadioTrack =
-                                        case PlaylistStructure.currentItem playlist.model.items of
-                                            Nothing ->
-                                                Nothing
-
-                                            Just id ->
-                                                Dict.get id model.tracks
+                                        PlaylistStructure.currentItem playlist.model.items
+                                            `Maybe.andThen` (flip Dict.get) model.tracks
                                 in
                                     viewRadioTrack currentRadioTrack
 
@@ -525,7 +521,7 @@ viewGlobalPlayer track playing =
 viewCustomQueue : Dict TrackId Track -> List TrackId -> Html Msg
 viewCustomQueue tracks queue =
     queue
-        |> List.filterMap (\trackId -> Dict.get trackId tracks)
+        |> List.filterMap ((flip Dict.get) tracks)
         |> List.map (viewCustomPlaylistItem)
         |> div [ class "custom-queue" ]
 

@@ -10143,9 +10143,7 @@ var _user$project$Radio$viewCustomQueue = F2(
 				_user$project$Radio$viewCustomPlaylistItem,
 				A2(
 					_elm_lang$core$List$filterMap,
-					function (trackId) {
-						return A2(_elm_lang$core$Dict$get, trackId, tracks);
-					},
+					A2(_elm_lang$core$Basics$flip, _elm_lang$core$Dict$get, tracks),
 					queue)));
 	});
 var _user$project$Radio$UpdateCurrentTimeFail = {ctor: 'UpdateCurrentTimeFail'};
@@ -10516,19 +10514,17 @@ var _user$project$Radio$handlePlaylistMsg = F3(
 				updatedModel);
 			var modelAfterEvent = _p12._0;
 			var eventCommand = _p12._1;
-			return {
-				ctor: '_Tuple2',
-				_0: modelAfterEvent,
-				_1: _elm_lang$core$Platform_Cmd$batch(
-					_elm_lang$core$Native_List.fromArray(
-						[
-							A2(
-							_elm_lang$core$Platform_Cmd$map,
-							_user$project$Radio$PlaylistMsg(playlist.id),
-							command),
-							eventCommand
-						]))
-			};
+			return A2(
+				_elm_lang$core$Platform_Cmd_ops['!'],
+				modelAfterEvent,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$core$Platform_Cmd$map,
+						_user$project$Radio$PlaylistMsg(playlist.id),
+						command),
+						eventCommand
+					]));
 		}
 	});
 var _user$project$Radio$update = F2(
@@ -10557,7 +10553,6 @@ var _user$project$Radio$update = F2(
 						_elm_lang$core$Native_List.fromArray(
 							[_p13._0]));
 				case 'PlaylistEvent':
-					var _p18 = _p13._0;
 					var _p14 = _p13._1;
 					switch (_p14.ctor) {
 						case 'NewTracksWereFetched':
@@ -10579,45 +10574,15 @@ var _user$project$Radio$update = F2(
 								_1: _elm_lang$core$Platform_Cmd$none
 							};
 						case 'TrackWasClicked':
-							var _p17 = _p14._1;
+							var _p15 = _p14._1;
 							var newModel = _elm_lang$core$Native_Utils.update(
 								model,
 								{
-									currentPlaylist: _elm_lang$core$Maybe$Just(_p18)
+									currentPlaylist: _elm_lang$core$Maybe$Just(_p13._0)
 								});
-							var playlistTracks = A2(
-								_elm_lang$core$Maybe$withDefault,
-								_elm_lang$core$Native_List.fromArray(
-									[]),
-								A2(
-									_elm_lang$core$Maybe$map,
-									function (_p15) {
-										return _user$project$PlaylistStructure$toList(
-											function (_) {
-												return _.items;
-											}(
-												function (_) {
-													return _.model;
-												}(_p15)));
-									},
-									_elm_lang$core$List$head(
-										A2(
-											_elm_lang$core$List$filter,
-											function (_p16) {
-												return A2(
-													F2(
-														function (x, y) {
-															return _elm_lang$core$Native_Utils.eq(x, y);
-														}),
-													_p18,
-													function (_) {
-														return _.id;
-													}(_p16));
-											},
-											model.playlists))));
 							if (_elm_lang$core$Native_Utils.eq(
 								_p14._0,
-								_elm_lang$core$Maybe$Just(_p17.id))) {
+								_elm_lang$core$Maybe$Just(_p15.id))) {
 								var _v6 = _user$project$Radio$TogglePlayback,
 									_v7 = newModel;
 								message = _v6;
@@ -10630,7 +10595,7 @@ var _user$project$Radio$update = F2(
 										newModel,
 										{playing: true}),
 									_1: _user$project$Radio$playTrack(
-										{id: _p17.id, streamUrl: _p17.streamUrl, currentTime: _p17.currentTime})
+										{id: _p15.id, streamUrl: _p15.streamUrl, currentTime: _p15.currentTime})
 								};
 							}
 						default:
@@ -10663,9 +10628,9 @@ var _user$project$Radio$update = F2(
 									}),
 								model.tracks)
 						});
-					var _p19 = A2(_user$project$Radio$update, _user$project$Radio$Next, newModel);
-					var newModel$ = _p19._0;
-					var command = _p19._1;
+					var _p16 = A2(_user$project$Radio$update, _user$project$Radio$Next, newModel);
+					var newModel$ = _p16._0;
+					var command = _p16._1;
 					return {ctor: '_Tuple2', _0: newModel$, _1: command};
 				case 'TogglePlayback':
 					return {
@@ -10680,9 +10645,9 @@ var _user$project$Radio$update = F2(
 							_user$project$Radio$currentTrackId(model))
 					};
 				case 'Next':
-					var _p20 = function () {
-						var _p21 = model.currentPlaylist;
-						if (_p21.ctor === 'Nothing') {
+					var _p17 = function () {
+						var _p18 = model.currentPlaylist;
+						if (_p18.ctor === 'Nothing') {
 							return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 						} else {
 							return A3(
@@ -10690,33 +10655,33 @@ var _user$project$Radio$update = F2(
 								_user$project$Playlist$Next,
 								model,
 								_elm_lang$core$Native_List.fromArray(
-									[_p21._0]));
+									[_p18._0]));
 						}
 					}();
-					var model$ = _p20._0;
-					var command = _p20._1;
+					var model$ = _p17._0;
+					var command = _p17._1;
 					return {
 						ctor: '_Tuple2',
 						_0: model$,
 						_1: function () {
-							var _p22 = _user$project$Radio$currentTrackId(model$);
-							if (_p22.ctor === 'Nothing') {
+							var _p19 = _user$project$Radio$currentTrackId(model$);
+							if (_p19.ctor === 'Nothing') {
 								return _user$project$Radio$pause(
 									_user$project$Radio$currentTrackId(model));
 							} else {
-								var _p23 = A2(_elm_lang$core$Dict$get, _p22._0, model.tracks);
-								if (_p23.ctor === 'Nothing') {
+								var _p20 = A2(_elm_lang$core$Dict$get, _p19._0, model.tracks);
+								if (_p20.ctor === 'Nothing') {
 									return _elm_lang$core$Platform_Cmd$none;
 								} else {
-									var _p24 = _p23._0;
+									var _p21 = _p20._0;
 									return _user$project$Radio$playTrack(
-										{id: _p24.id, streamUrl: _p24.streamUrl, currentTime: _p24.currentTime});
+										{id: _p21.id, streamUrl: _p21.streamUrl, currentTime: _p21.currentTime});
 								}
 							}
 						}()
 					};
 				case 'PlayFromCustomQueue':
-					var _p25 = _p13._0;
+					var _p22 = _p13._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -10728,11 +10693,11 @@ var _user$project$Radio$update = F2(
 									F2(
 										function (x, y) {
 											return !_elm_lang$core$Native_Utils.eq(x, y);
-										})(_p25.id),
+										})(_p22.id),
 									model.customQueue)
 							}),
 						_1: _user$project$Radio$playTrack(
-							{id: _p25.id, streamUrl: _p25.streamUrl, currentTime: _p25.currentTime})
+							{id: _p22.id, streamUrl: _p22.streamUrl, currentTime: _p22.currentTime})
 					};
 				case 'TrackProgress':
 					return {
@@ -10773,17 +10738,17 @@ var _user$project$Radio$applyMessageToPlaylists = F3(
 		return A3(
 			_elm_lang$core$List$foldr,
 			F2(
-				function (playlist, _p26) {
-					var _p27 = _p26;
-					var _p28 = A3(_user$project$Radio$handlePlaylistMsg, playlist, playlistMsg, _p27._0);
-					var m$ = _p28._0;
-					var c$ = _p28._1;
+				function (playlist, _p23) {
+					var _p24 = _p23;
+					var _p25 = A3(_user$project$Radio$handlePlaylistMsg, playlist, playlistMsg, _p24._0);
+					var m$ = _p25._0;
+					var c$ = _p25._1;
 					return {
 						ctor: '_Tuple2',
 						_0: m$,
 						_1: _elm_lang$core$Platform_Cmd$batch(
 							_elm_lang$core$Native_List.fromArray(
-								[_p27._1, c$]))
+								[_p24._1, c$]))
 					};
 				}),
 			{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none},
@@ -10824,14 +10789,14 @@ var _user$project$Radio$init = F2(
 			lastKeyPressed: _elm_lang$core$Maybe$Nothing,
 			currentTime: _elm_lang$core$Maybe$Nothing
 		};
-		var _p29 = A3(
+		var _p26 = A3(
 			_user$project$Radio$applyMessageToPlaylists,
 			_user$project$Playlist$FetchSuccess(decodedRadioPayload),
 			emptyModel,
 			_elm_lang$core$Native_List.fromArray(
 				[_user$project$Radio$Radio]));
-		var initializedModel = _p29._0;
-		var command = _p29._1;
+		var initializedModel = _p26._0;
+		var command = _p26._1;
 		return {
 			ctor: '_Tuple2',
 			_0: _elm_lang$core$Native_Utils.update(
@@ -10844,13 +10809,13 @@ var _user$project$Radio$init = F2(
 				_elm_lang$core$Native_List.fromArray(
 					[
 						function () {
-						var _p30 = firstTrack;
-						if (_p30.ctor === 'Nothing') {
+						var _p27 = firstTrack;
+						if (_p27.ctor === 'Nothing') {
 							return _elm_lang$core$Platform_Cmd$none;
 						} else {
-							var _p31 = _p30._0;
+							var _p28 = _p27._0;
 							return _user$project$Radio$playTrack(
-								{id: _p31.id, streamUrl: _p31.streamUrl, currentTime: _p31.currentTime});
+								{id: _p28.id, streamUrl: _p28.streamUrl, currentTime: _p28.currentTime});
 						}
 					}(),
 						A2(
@@ -10859,7 +10824,7 @@ var _user$project$Radio$init = F2(
 						_user$project$Playlist$initialCmd('/published_tracks')),
 						A3(
 						_elm_lang$core$Task$perform,
-						function (_p32) {
+						function (_p29) {
 							return _user$project$Radio$UpdateCurrentTimeFail;
 						},
 						_user$project$Radio$UpdateCurrentTime,
@@ -10871,7 +10836,7 @@ var _user$project$Radio$view = function (model) {
 	var currentPagePlaylist = _elm_lang$core$List$head(
 		A2(
 			_elm_lang$core$List$filter,
-			function (_p33) {
+			function (_p30) {
 				return A2(
 					F2(
 						function (x, y) {
@@ -10880,15 +10845,13 @@ var _user$project$Radio$view = function (model) {
 					model.currentPage,
 					function (_) {
 						return _.id;
-					}(_p33));
+					}(_p30));
 			},
 			model.playlists));
 	var currentTrack = A2(
 		_elm_lang$core$Maybe$andThen,
 		_user$project$Radio$currentTrackId(model),
-		function (trackId) {
-			return A2(_elm_lang$core$Dict$get, trackId, model.tracks);
-		});
+		A2(_elm_lang$core$Basics$flip, _elm_lang$core$Dict$get, model.tracks));
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -10905,8 +10868,8 @@ var _user$project$Radio$view = function (model) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						function () {
-						var _p34 = currentPagePlaylist;
-						if (_p34.ctor === 'Nothing') {
+						var _p31 = currentPagePlaylist;
+						if (_p31.ctor === 'Nothing') {
 							return A2(
 								_elm_lang$html$Html$div,
 								_elm_lang$core$Native_List.fromArray(
@@ -10916,17 +10879,13 @@ var _user$project$Radio$view = function (model) {
 										_elm_lang$html$Html$text('Well, this is awkward...')
 									]));
 						} else {
-							var _p37 = _p34._0;
-							var _p35 = _p37.id;
-							if (_p35.ctor === 'Radio') {
-								var currentRadioTrack = function () {
-									var _p36 = _user$project$PlaylistStructure$currentItem(_p37.model.items);
-									if (_p36.ctor === 'Nothing') {
-										return _elm_lang$core$Maybe$Nothing;
-									} else {
-										return A2(_elm_lang$core$Dict$get, _p36._0, model.tracks);
-									}
-								}();
+							var _p33 = _p31._0;
+							var _p32 = _p33.id;
+							if (_p32.ctor === 'Radio') {
+								var currentRadioTrack = A2(
+									_elm_lang$core$Maybe$andThen,
+									_user$project$PlaylistStructure$currentItem(_p33.model.items),
+									A2(_elm_lang$core$Basics$flip, _elm_lang$core$Dict$get, model.tracks));
 								return _user$project$Radio$viewRadioTrack(currentRadioTrack);
 							} else {
 								return A2(
@@ -10939,8 +10898,8 @@ var _user$project$Radio$view = function (model) {
 										[
 											A2(
 											_elm_lang$html$Html_App$map,
-											_user$project$Radio$PlaylistMsg(_p37.id),
-											A3(_user$project$Playlist$view, model.currentTime, model.tracks, _p37.model))
+											_user$project$Radio$PlaylistMsg(_p33.id),
+											A3(_user$project$Playlist$view, model.currentTime, model.tracks, _p33.model))
 										]));
 							}
 						}
