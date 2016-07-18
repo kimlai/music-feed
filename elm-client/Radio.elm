@@ -39,6 +39,7 @@ urlParser =
 
                 "/latest" ->
                     LatestTracks
+
                 _ ->
                     Radio
         )
@@ -82,16 +83,18 @@ type alias Page =
     PlaylistId
 
 
-init : String -> Page -> (Model, Cmd Msg)
+init : String -> Page -> ( Model, Cmd Msg )
 init radioPlaylistJsonString page =
     let
         playlists =
             [ Playlist Radio (Playlist.initialModel "/radio_playlist" "radio")
             , Playlist LatestTracks (Playlist.initialModel "/published_tracks" "publish_track")
             ]
+
         decodedRadioPayload =
             Json.Decode.decodeString Playlist.decodeFeed radioPlaylistJsonString
                 |> Result.withDefault ( [], "/radio_playlist" )
+
         emptyModel =
             { tracks = Dict.empty
             , playlists = playlists
@@ -102,8 +105,10 @@ init radioPlaylistJsonString page =
             , lastKeyPressed = Nothing
             , currentTime = Nothing
             }
+
         ( initializedModel, command ) =
-            applyMessageToPlaylists (Playlist.FetchSuccess decodedRadioPayload) emptyModel [Radio]
+            applyMessageToPlaylists (Playlist.FetchSuccess decodedRadioPayload) emptyModel [ Radio ]
+
         firstTrack =
             List.head (fst decodedRadioPayload)
     in
@@ -115,6 +120,7 @@ init radioPlaylistJsonString page =
             [ case firstTrack of
                 Nothing ->
                     Cmd.none
+
                 Just track ->
                     playTrack
                         { id = track.id
@@ -160,10 +166,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
         UpdateCurrentTimeFail ->
-            ( model , Cmd.none )
+            ( model, Cmd.none )
 
         UpdateCurrentTime newTime ->
-            ( { model | currentTime = Just newTime } , Cmd.none )
+            ( { model | currentTime = Just newTime }, Cmd.none )
 
         PlaylistMsg playlistId playlistMsg ->
             applyMessageToPlaylists playlistMsg model [ playlistId ]
@@ -220,10 +226,11 @@ update message model =
                                 (Maybe.map (\track -> { track | error = True }))
                                 model.tracks
                     }
+
                 ( newModel', command ) =
                     update Next newModel
             in
-            ( newModel' , command )
+                ( newModel', command )
 
         TogglePlayback ->
             ( { model | playing = not model.playing }
@@ -235,12 +242,13 @@ update message model =
 
         Next ->
             let
-                ( model', command) =
+                ( model', command ) =
                     case model.currentPlaylist of
                         Nothing ->
                             ( model, Cmd.none )
+
                         Just playlistId ->
-                            applyMessageToPlaylists Playlist.Next model [playlistId]
+                            applyMessageToPlaylists Playlist.Next model [ playlistId ]
             in
                 ( model'
                 , case currentTrackId model' of
@@ -284,7 +292,7 @@ update message model =
             )
 
         ChangePage url ->
-            ( model , Navigation.newUrl url )
+            ( model, Navigation.newUrl url )
 
 
 handlePlaylistMsg : Playlist -> Playlist.Msg -> Model -> ( Model, Cmd Msg )
@@ -312,7 +320,7 @@ handlePlaylistMsg playlist playlistMsg model =
                     ( modelAfterEvent, eventCommand ) =
                         update (PlaylistEvent playlist.id event) updatedModel
                 in
-                    ( modelAfterEvent ! [ Cmd.map (PlaylistMsg playlist.id) command , eventCommand ] )
+                    (modelAfterEvent ! [ Cmd.map (PlaylistMsg playlist.id) command, eventCommand ])
 
 
 applyMessageToPlaylists : Playlist.Msg -> Model -> List PlaylistId -> ( Model, Cmd Msg )
@@ -348,7 +356,6 @@ port trackEnd : (TrackId -> msg) -> Sub msg
 port trackError : (TrackId -> msg) -> Sub msg
 
 
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
@@ -365,10 +372,11 @@ currentTrackId model =
             List.filter ((==) id << .id) model.playlists
                 |> List.head
     in
-    model.currentPlaylist
-        `Maybe.andThen` findPlaylist
-        `Maybe.andThen` (.model >> .items >> Just)
-        `Maybe.andThen` PlaylistStructure.currentItem
+        model.currentPlaylist
+            `Maybe.andThen` findPlaylist
+            `Maybe.andThen` (.model >> .items >> Just)
+            `Maybe.andThen` PlaylistStructure.currentItem
+
 
 
 -- VIEW
@@ -404,16 +412,18 @@ view model =
                                         case PlaylistStructure.currentItem playlist.model.items of
                                             Nothing ->
                                                 Nothing
+
                                             Just id ->
                                                 Dict.get id model.tracks
                                 in
                                     viewRadioTrack currentRadioTrack
+
                             _ ->
                                 div [ class "playlist-container" ]
-                                [ Html.map
-                                    (PlaylistMsg playlist.id)
-                                    (Playlist.view model.currentTime model.tracks playlist.model)
-                                ]
+                                    [ Html.map
+                                        (PlaylistMsg playlist.id)
+                                        (Playlist.view model.currentTime model.tracks playlist.model)
+                                    ]
                 ]
             ]
 
@@ -423,6 +433,7 @@ viewRadioTrack track =
     case track of
         Nothing ->
             div [] [ text "..." ]
+
         Just track ->
             div
                 [ class "radio-track" ]
