@@ -217,3 +217,24 @@ body {
         }
     }
 }
+
+.radio-track {
+    display: flex;
+    justify-content: center;
+    margin-top: 120px;
+    .cover {
+        width: 400px;
+        height: 400px;
+    }
+    .track-info {
+        padding: 36px;
+        max-width: 500px;
+    }
+    .artist {
+        font-size: 36px;
+        text-transform: uppercase;
+    }
+    .title {
+        font-size: 32px;
+    }
+}

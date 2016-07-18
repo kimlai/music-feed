@@ -1,11 +1,13 @@
 port module Radio exposing (..)
 
 import Dict exposing (Dict)
+import Regex
 import Html exposing (Html, a, nav, li, ul, text, div, img)
 import Html.App as Html
 import Html.Attributes exposing (class, classList, href, src, style)
 import Html.Events exposing (onClick, onWithOptions)
 import Playlist exposing (Track, TrackId)
+import PlaylistStructure
 import Task
 import Json.Decode
 import Navigation
@@ -56,10 +58,8 @@ urlUpdate page model =
 type alias Model =
     { tracks : Dict TrackId Track
     , playlists : List Playlist
-    , queue : List TrackId
     , customQueue : List TrackId
     , playing : Bool
-    , currentTrack : Maybe TrackId
     , currentPlaylist : Maybe PlaylistId
     , currentPage : Page
     , lastKeyPressed : Maybe Char
@@ -95,10 +95,8 @@ init radioPlaylistJsonString page =
         emptyModel =
             { tracks = Dict.empty
             , playlists = playlists
-            , queue = []
             , customQueue = []
             , playing = False
-            , currentTrack = Nothing
             , currentPlaylist = Nothing
             , currentPage = page
             , lastKeyPressed = Nothing
@@ -110,9 +108,7 @@ init radioPlaylistJsonString page =
             List.head (fst decodedRadioPayload)
     in
         ( { initializedModel
-            | currentTrack = Maybe.map .id firstTrack
-            , queue = List.map .id (fst decodedRadioPayload)
-            , currentPlaylist = Just Radio
+            | currentPlaylist = Just Radio
             , playing = firstTrack /= Nothing
           }
         , Cmd.batch
@@ -185,39 +181,30 @@ update message model =
                                 |> List.map (\track -> ( track.id, track ))
                                 |> Dict.fromList
                                 |> Dict.union model.tracks
-
-                        updatedQueue =
-                            if (model.currentPage == playlistId) then
-                                model.queue
-                            else
-                                List.append model.queue (List.map .id tracks)
                     in
                         ( { model
                             | tracks = updatedTrackDict
-                            , queue = updatedQueue
                           }
                         , Cmd.none
                         )
 
-                Playlist.TrackWasClicked position track ->
+                Playlist.TrackWasClicked previousTrackId track ->
                     let
                         playlistTracks =
                             model.playlists
                                 |> List.filter ((==) playlistId << .id)
                                 |> List.head
-                                |> Maybe.map (.trackIds << .model)
+                                |> Maybe.map (PlaylistStructure.toList << .items << .model)
                                 |> Maybe.withDefault []
 
                         newModel =
                             { model | currentPlaylist = Just playlistId }
                     in
-                        if model.currentTrack == Just track.id then
+                        if previousTrackId == Just track.id then
                             update TogglePlayback newModel
                         else
                             ( { newModel
-                                | currentTrack = Just track.id
-                                , playing = True
-                                , queue = List.drop (position + 1) playlistTracks
+                                | playing = True
                               }
                             , playTrack
                                 { id = track.id
@@ -251,37 +238,24 @@ update message model =
         TogglePlayback ->
             ( { model | playing = not model.playing }
             , if model.playing then
-                pause model.currentTrack
+                pause (currentTrackId model)
               else
-                resume model.currentTrack
+                resume (currentTrackId model)
             )
 
         Next ->
             let
-                nextTrackInCustomQueue =
-                    List.head model.customQueue
-
-                nextTrackInQueue =
-                    List.head model.queue
-
-                model' =
-                    case nextTrackInCustomQueue of
-                        Just trackId ->
-                            { model
-                                | currentTrack = Just trackId
-                                , customQueue = List.drop 1 model.customQueue
-                            }
-
+                ( model', command) =
+                    case model.currentPlaylist of
                         Nothing ->
-                            { model
-                                | currentTrack = nextTrackInQueue
-                                , queue = List.drop 1 model.queue
-                            }
+                            ( model, Cmd.none )
+                        Just playlistId ->
+                            applyMessageToPlaylists Playlist.Next model [playlistId]
             in
                 ( model'
-                , case model'.currentTrack of
+                , case currentTrackId model' of
                     Nothing ->
-                        pause model.currentTrack
+                        pause (currentTrackId model)
 
                     Just trackId ->
                         case Dict.get trackId model.tracks of
@@ -299,7 +273,6 @@ update message model =
         PlayFromCustomQueue track ->
             ( { model
                 | playing = True
-                , currentTrack = Just track.id
                 , customQueue = List.filter ((/=) track.id) model.customQueue
               }
             , playTrack
@@ -402,6 +375,18 @@ subscriptions model =
         ]
 
 
+currentTrackId : Model -> Maybe TrackId
+currentTrackId model =
+    let
+        findPlaylist id =
+            List.filter ((==) id << .id) model.playlists
+                |> List.head
+    in
+    model.currentPlaylist
+        `Maybe.andThen` findPlaylist
+        `Maybe.andThen` (.model >> .items >> Just)
+        `Maybe.andThen` PlaylistStructure.currentItem
+
 
 -- VIEW
 
@@ -410,8 +395,8 @@ view : Model -> Html Msg
 view model =
     let
         currentTrack =
-            model.currentTrack
-                `Maybe.andThen` (\trackId -> Dict.get trackId model.tracks)
+            currentTrackId model
+                `Maybe.andThen` \trackId -> Dict.get trackId model.tracks
 
         currentPagePlaylist =
             List.filter ((==) model.currentPage << .id) model.playlists
@@ -423,17 +408,52 @@ view model =
             , viewNavigation navigation model.currentPage model.currentPlaylist
             , viewCustomQueue model.tracks model.customQueue
             , div
-                [ class "playlist-container" ]
+                []
                 [ case currentPagePlaylist of
                     Nothing ->
                         div [] [ text "Well, this is awkward..." ]
 
                     Just playlist ->
-                        Html.map
-                            (PlaylistMsg playlist.id)
-                            (Playlist.view model.currentTime model.tracks playlist.model)
+                        case playlist.id of
+                            Radio ->
+                                let
+                                    currentRadioTrack =
+                                        case PlaylistStructure.currentItem playlist.model.items of
+                                            Nothing ->
+                                                Nothing
+                                            Just id ->
+                                                Dict.get id model.tracks
+                                in
+                                    viewRadioTrack currentRadioTrack
+                            _ ->
+                                div [ class "playlist-container" ]
+                                [ Html.map
+                                    (PlaylistMsg playlist.id)
+                                    (Playlist.view model.currentTime model.tracks playlist.model)
+                                ]
                 ]
             ]
+
+
+viewRadioTrack : Maybe Track -> Html Msg
+viewRadioTrack track =
+    case track of
+        Nothing ->
+            div [] [ text "..." ]
+        Just track ->
+            div
+                [ class "radio-track" ]
+                [ img
+                    [ class "cover"
+                    , src (Regex.replace Regex.All (Regex.regex "large") (\_ -> "t500x500") track.artwork_url)
+                    ]
+                    []
+                , div
+                    [ class "track-info" ]
+                    [ div [ class "artist" ] [ text track.artist ]
+                    , div [ class "title" ] [ text track.title ]
+                    ]
+                ]
 
 
 viewGlobalPlayer : Maybe Track -> Bool -> Html Msg

@@ -12,6 +12,7 @@ import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Task exposing (Task)
 import Time exposing (Time)
+import PlaylistStructure exposing (Playlist)
 
 
 type alias Track =
@@ -32,19 +33,19 @@ type alias TrackId =
 
 
 type alias Model =
-    { trackIds : List TrackId
-    , loading : Bool
+    { loading : Bool
     , nextLink : String
     , addTrackUrl : String
+    , items : Playlist TrackId
     }
 
 
 initialModel : String -> String -> Model
 initialModel initialUrl addTrackUrl =
-    { trackIds = []
-    , loading = True
+    { loading = True
     , nextLink = initialUrl
     , addTrackUrl = addTrackUrl
+    , items = PlaylistStructure.empty
     }
 
 
@@ -67,11 +68,12 @@ type Msg
     | AddTrackFail Http.Error
     | AddTrackSuccess
     | OnAddTrackToCustomQueueClicked TrackId
+    | Next
 
 
 type Event
     = NewTracksWereFetched ( List Track, String )
-    | TrackWasClicked Int Track
+    | TrackWasClicked (Maybe TrackId) Track
     | TrackWasAddedToCustomQueue TrackId
 
 
@@ -80,7 +82,7 @@ update message model =
     case message of
         FetchSuccess ( tracks, nextLink ) ->
             ( { model
-                | trackIds = List.append model.trackIds (List.map .id tracks)
+                | items = PlaylistStructure.append (List.map .id tracks) model.items
                 , nextLink = nextLink
                 , loading = False
               }
@@ -101,13 +103,13 @@ update message model =
             )
 
         RemoveTrack trackId ->
-            ( { model | trackIds = List.filter ((/=) trackId) model.trackIds }
+            ( { model | items = PlaylistStructure.remove trackId model.items }
             , Cmd.none
             , Nothing
             )
 
         AddTrack trackId ->
-            ( { model | trackIds = trackId :: model.trackIds }
+            ( { model | items = PlaylistStructure.prepend trackId model.items }
             , addTrack model.addTrackUrl trackId
             , Nothing
             )
@@ -125,15 +127,21 @@ update message model =
             )
 
         OnTrackClicked position track ->
-            ( model
+            ( { model | items = PlaylistStructure.select position model.items }
             , Cmd.none
-            , Just (TrackWasClicked position track)
+            , Just (TrackWasClicked (PlaylistStructure.currentItem model.items) track)
             )
 
         OnAddTrackToCustomQueueClicked trackId ->
             ( model
             , Cmd.none
             , Just (TrackWasAddedToCustomQueue trackId)
+            )
+
+        Next ->
+            ( { model | items = PlaylistStructure.next model.items }
+            , Cmd.none
+            , Nothing
             )
 
 
@@ -145,7 +153,9 @@ view : Maybe Time -> Dict TrackId Track -> Model -> Html Msg
 view currentTime tracks model =
     let
         feedTracks =
-            List.filterMap (\trackId -> Dict.get trackId tracks) model.trackIds
+            model.items
+                |> PlaylistStructure.toList
+                |> List.filterMap (\trackId -> Dict.get trackId tracks)
 
         tracksView =
             List.indexedMap (viewTrack currentTime) feedTracks
