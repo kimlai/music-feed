@@ -22,7 +22,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --harmony server.js",
-    "postinstall": "uglifyjs public/elm-client.js --compress --mangle --output public/elm-client.js"
+    "postinstall": "uglifyjs public/radio.js --compress --mangle --output public/radio.js"
   },
   "author": "kimlai",
   "license": "ISC"
