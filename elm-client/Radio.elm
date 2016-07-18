@@ -160,14 +160,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
         UpdateCurrentTimeFail ->
-            ( model
-            , Cmd.none
-            )
+            ( model , Cmd.none )
 
         UpdateCurrentTime newTime ->
-            ( { model | currentTime = Just newTime }
-            , Cmd.none
-            )
+            ( { model | currentTime = Just newTime } , Cmd.none )
 
         PlaylistMsg playlistId playlistMsg ->
             applyMessageToPlaylists playlistMsg model [ playlistId ]
@@ -182,9 +178,7 @@ update message model =
                                 |> Dict.fromList
                                 |> Dict.union model.tracks
                     in
-                        ( { model
-                            | tracks = updatedTrackDict
-                          }
+                        ( { model | tracks = updatedTrackDict }
                         , Cmd.none
                         )
 
@@ -203,9 +197,7 @@ update message model =
                         if previousTrackId == Just track.id then
                             update TogglePlayback newModel
                         else
-                            ( { newModel
-                                | playing = True
-                              }
+                            ( { newModel | playing = True }
                             , playTrack
                                 { id = track.id
                                 , streamUrl = track.streamUrl
@@ -231,9 +223,7 @@ update message model =
                 ( newModel', command ) =
                     update Next newModel
             in
-            ( newModel'
-            , command
-            )
+            ( newModel' , command )
 
         TogglePlayback ->
             ( { model | playing = not model.playing }
@@ -294,9 +284,7 @@ update message model =
             )
 
         ChangePage url ->
-            ( model
-            , Navigation.newUrl url
-            )
+            ( model , Navigation.newUrl url )
 
 
 handlePlaylistMsg : Playlist -> Playlist.Msg -> Model -> ( Model, Cmd Msg )
@@ -324,12 +312,7 @@ handlePlaylistMsg playlist playlistMsg model =
                     ( modelAfterEvent, eventCommand ) =
                         update (PlaylistEvent playlist.id event) updatedModel
                 in
-                    ( modelAfterEvent
-                    , Cmd.batch
-                        [ Cmd.map (PlaylistMsg playlist.id) command
-                        , eventCommand
-                        ]
-                    )
+                    ( modelAfterEvent ! [ Cmd.map (PlaylistMsg playlist.id) command , eventCommand ] )
 
 
 applyMessageToPlaylists : Playlist.Msg -> Model -> List PlaylistId -> ( Model, Cmd Msg )
