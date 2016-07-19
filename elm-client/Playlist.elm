@@ -74,7 +74,7 @@ type Msg
 
 type Event
     = NewTracksWereFetched ( List Track, String )
-    | TrackWasClicked (Maybe TrackId) Track
+    | TrackWasClicked (Maybe TrackId)
     | TrackWasAddedToCustomQueue TrackId
 
 
@@ -130,7 +130,7 @@ update message model =
         OnTrackClicked position track ->
             ( { model | items = PlaylistStructure.select position model.items }
             , Cmd.none
-            , Just (TrackWasClicked (PlaylistStructure.currentItem model.items) track)
+            , Just (TrackWasClicked (PlaylistStructure.currentItem model.items))
             )
 
         OnAddTrackToCustomQueueClicked trackId ->
