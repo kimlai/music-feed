@@ -7,6 +7,7 @@ import Html.Attributes exposing (class, classList, href, src, style)
 import Html.Events exposing (onClick, onWithOptions)
 import Http
 import Playlist exposing (Track, TrackId)
+import PlaylistStructure
 import Task
 import Keyboard
 import Char
@@ -66,7 +67,6 @@ type alias Model =
     , queue : List TrackId
     , customQueue : List TrackId
     , playing : Bool
-    , currentTrack : Maybe TrackId
     , currentPlaylist : Maybe PlaylistId
     , currentPage : Page
     , lastKeyPressed : Maybe Char
@@ -106,7 +106,6 @@ init page =
           , queue = []
           , customQueue = []
           , playing = False
-          , currentTrack = Nothing
           , currentPlaylist = Nothing
           , currentPage = page
           , lastKeyPressed = Nothing
@@ -131,6 +130,8 @@ type Msg
     | TogglePlayback
     | Next
     | TrackProgress ( TrackId, Float, Float )
+    | Play
+    | Pause
     | TrackError TrackId
     | FastForward
     | Rewind
@@ -164,14 +165,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
         UpdateCurrentTimeFail ->
-            ( model
-            , Cmd.none
-            )
+            ( model, Cmd.none )
 
         UpdateCurrentTime newTime ->
-            ( { model | currentTime = Just newTime }
-            , Cmd.none
-            )
+            ( { model | currentTime = Just newTime }, Cmd.none )
 
         PlaylistMsg playlistId playlistMsg ->
             applyMessageToPlaylists playlistMsg model [ playlistId ]
@@ -185,116 +182,89 @@ update message model =
                                 |> List.map (\track -> ( track.id, track ))
                                 |> Dict.fromList
                                 |> Dict.union model.tracks
-
-                        updatedQueue =
-                            if (model.currentPage == playlistId) then
-                                model.queue
-                            else
-                                List.append model.queue (List.map .id tracks)
                     in
-                        ( { model
-                            | tracks = updatedTrackDict
-                            , queue = updatedQueue
-                          }
+                        ( { model | tracks = updatedTrackDict }
                         , Cmd.none
                         )
 
-                Playlist.TrackWasClicked position track ->
+                Playlist.TrackWasClicked previousTrackId ->
                     let
-                        playlistTracks =
-                            model.playlists
-                                |> List.filter ((==) playlistId << .id)
-                                |> List.head
-                                |> Maybe.map (.trackIds << .model)
-                                |> Maybe.withDefault []
-
-                        newModel =
+                        model' =
                             { model | currentPlaylist = Just playlistId }
                     in
-                        if model.currentTrack == Just track.id then
-                            update TogglePlayback newModel
+                        if (currentTrackId model') == previousTrackId then
+                            update TogglePlayback model'
                         else
-                            ( { newModel
-                                | currentTrack = Just track.id
-                                , playing = True
-                                , queue = List.drop (position + 1) playlistTracks
-                              }
-                            , playTrack
-                                { id = track.id
-                                , streamUrl = track.streamUrl
-                                , currentTime = track.currentTime
-                                }
-                            )
+                            update Play model'
+
 
                 Playlist.TrackWasAddedToCustomQueue trackId ->
                     ( { model | customQueue = List.append model.customQueue [ trackId ] }
                     , Cmd.none
                     )
 
-        TrackError trackId ->
-            let _ = Debug.log "error with " trackId in
-            ( { model
-                | tracks =
-                    Dict.update
-                        trackId
-                        (Maybe.map (\track -> { track | error = True }))
-                        model.tracks
-                }
-            , Cmd.none
+        Play ->
+            case currentTrack model of
+                Nothing ->
+                    ( model, Cmd.none )
+                Just track ->
+                    ( { model | playing = True }
+                    , playTrack
+                        { id = track.id
+                        , streamUrl = track.streamUrl
+                        , currentTime = track.currentTime
+                        }
+                    )
+
+        Pause ->
+            ( { model | playing = False }
+            , pause (currentTrackId model)
             )
 
+        TrackError trackId ->
+            let
+                newModel =
+                    { model
+                        | tracks =
+                            Dict.update
+                                trackId
+                                (Maybe.map (\track -> { track | error = True }))
+                                model.tracks
+                    }
+
+                ( newModel', command ) =
+                    update Next newModel
+            in
+                ( newModel', command )
+
         TogglePlayback ->
-            ( { model | playing = not model.playing }
-            , if model.playing then
-                pause model.currentTrack
-              else
-                resume model.currentTrack
-            )
+            if model.playing then
+                update Pause model
+            else
+                update Play model
 
         Next ->
             let
-                nextTrackInCustomQueue =
-                    List.head model.customQueue
-
-                nextTrackInQueue =
-                    List.head model.queue
-
-                model' =
-                    case nextTrackInCustomQueue of
-                        Just trackId ->
-                            { model
-                                | currentTrack = Just trackId
-                                , customQueue = List.drop 1 model.customQueue
-                            }
-
+                ( model', command ) =
+                    case model.currentPlaylist of
                         Nothing ->
-                            { model
-                                | currentTrack = nextTrackInQueue
-                                , queue = List.drop 1 model.queue
-                            }
+                            ( model, Cmd.none )
+
+                        Just playlistId ->
+                            applyMessageToPlaylists Playlist.Next model [ playlistId ]
+                ( model'', command') =
+                    case currentTrack model' of
+                        Nothing ->
+                            update Pause model'
+
+                        Just track ->
+                            update Play model'
             in
-                ( model'
-                , case model'.currentTrack of
-                    Nothing ->
-                        pause model.currentTrack
-
-                    Just trackId ->
-                        case Dict.get trackId model.tracks of
-                            Nothing ->
-                                Cmd.none
-
-                            Just track ->
-                                playTrack
-                                    { id = track.id
-                                    , streamUrl = track.streamUrl
-                                    , currentTime = track.currentTime
-                                    }
-                )
+                model'' ! [ command, command' ]
 
         PlayFromCustomQueue track ->
             ( { model
                 | playing = True
-                , currentTrack = Just track.id
                 , customQueue = List.filter ((/=) track.id) model.customQueue
               }
             , playTrack
@@ -302,16 +272,6 @@ update message model =
                 , streamUrl = track.streamUrl
                 , currentTime = track.currentTime
                 }
-            )
-
-        FastForward ->
-            ( model
-            , changeCurrentTime 10
-            )
-
-        Rewind ->
-            ( model
-            , changeCurrentTime -10
             )
 
         TrackProgress ( trackId, progress, currentTime ) ->
@@ -323,6 +283,19 @@ update message model =
                         model.tracks
               }
             , Cmd.none
+            )
+
+        ChangePage url ->
+            ( model, Navigation.newUrl url )
+
+        FastForward ->
+            ( model
+            , changeCurrentTime 10
+            )
+
+        Rewind ->
+            ( model
+            , changeCurrentTime -10
             )
 
         MoveToPlaylist playlistId trackId ->
@@ -362,11 +335,6 @@ update message model =
                     update (MoveToPlaylist Blacklist trackId) newModel
             in
                 ( newModel', Cmd.batch [ command, command' ] )
-
-        ChangePage url ->
-            ( model
-            , Navigation.newUrl url
-            )
 
         KeyPressed keyCode ->
             case (Char.fromCode keyCode) of
@@ -414,7 +382,7 @@ update message model =
                     update (PlaylistMsg model.currentPage Playlist.FetchMore) model
 
                 'b' ->
-                    case model.currentTrack of
+                    case currentTrackId model of
                         Nothing ->
                             ( model
                             , Cmd.none
@@ -424,7 +392,7 @@ update message model =
                             update (BlacklistTrack trackId) model
 
                 's' ->
-                    case model.currentTrack of
+                    case currentTrackId model of
                         Nothing ->
                             ( model
                             , Cmd.none
@@ -434,7 +402,7 @@ update message model =
                             update (MoveToPlaylist SavedTracks trackId) model
 
                 'P' ->
-                    case model.currentTrack of
+                    case currentTrackId model of
                         Nothing ->
                             ( model
                             , Cmd.none
@@ -540,6 +508,25 @@ port trackEnd : (TrackId -> msg) -> Sub msg
 port trackError : (TrackId -> msg) -> Sub msg
 
 
+currentTrack : Model -> Maybe Track
+currentTrack model =
+    currentTrackId model
+        `Maybe.andThen` (flip Dict.get) model.tracks
+
+
+currentTrackId : Model -> Maybe TrackId
+currentTrackId model =
+    let
+        findPlaylist id =
+            List.filter ((==) id << .id) model.playlists
+                |> List.head
+    in
+        model.currentPlaylist
+            `Maybe.andThen` findPlaylist
+            `Maybe.andThen` (.model >> .items >> Just)
+            `Maybe.andThen` PlaylistStructure.currentItem
+
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -558,17 +545,13 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
-        currentTrack =
-            model.currentTrack
-                `Maybe.andThen` (\trackId -> Dict.get trackId model.tracks)
-
         currentPagePlaylist =
             List.filter ((==) model.currentPage << .id) model.playlists
                 |> List.head
     in
         div
             []
-            [ viewGlobalPlayer currentTrack model.playing
+            [ viewGlobalPlayer (currentTrack model) model.playing
             , viewNavigation navigation model.currentPage model.currentPlaylist
             , viewCustomQueue model.tracks model.customQueue
             , div

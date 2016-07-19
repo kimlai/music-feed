@@ -10716,16 +10716,6 @@ var _user$project$Radio$update = F2(
 						model$$,
 						_elm_lang$core$Native_List.fromArray(
 							[command, command$]));
-				case 'ResumeRadio':
-					var _v17 = _user$project$Radio$Play,
-						_v18 = _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							currentPlaylist: _elm_lang$core$Maybe$Just(_user$project$Radio$Radio)
-						});
-					message = _v17;
-					model = _v18;
-					continue update;
 				case 'PlayFromCustomQueue':
 					var _p22 = _p13._0;
 					return {
@@ -10764,12 +10754,22 @@ var _user$project$Radio$update = F2(
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
-				default:
+				case 'ChangePage':
 					return {
 						ctor: '_Tuple2',
 						_0: model,
 						_1: _elm_lang$navigation$Navigation$newUrl(_p13._0)
 					};
+				default:
+					var _v17 = _user$project$Radio$Play,
+						_v18 = _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							currentPlaylist: _elm_lang$core$Maybe$Just(_user$project$Radio$Radio)
+						});
+					message = _v17;
+					model = _v18;
+					continue update;
 			}
 		}
 	});

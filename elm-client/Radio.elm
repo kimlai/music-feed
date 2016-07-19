@@ -252,9 +252,6 @@ update message model =
             in
                 model'' ! [ command, command' ]
 
-        ResumeRadio ->
-            update Play ( { model | currentPlaylist = Just Radio } )
-
         PlayFromCustomQueue track ->
             ( { model
                 | playing = True
@@ -280,6 +277,9 @@ update message model =
 
         ChangePage url ->
             ( model, Navigation.newUrl url )
+
+        ResumeRadio ->
+            update Play ( { model | currentPlaylist = Just Radio } )
 
 
 handlePlaylistMsg : Playlist -> Playlist.Msg -> Model -> ( Model, Cmd Msg )
