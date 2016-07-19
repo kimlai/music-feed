@@ -9888,94 +9888,12 @@ var _user$project$Playlist$update = F2(
 		}
 	});
 
-var _user$project$Radio$viewRadioTrack = function (track) {
-	var _p0 = track;
-	if (_p0.ctor === 'Nothing') {
-		return A2(
-			_elm_lang$html$Html$div,
-			_elm_lang$core$Native_List.fromArray(
-				[]),
-			_elm_lang$core$Native_List.fromArray(
-				[
-					_elm_lang$html$Html$text('...')
-				]));
-	} else {
-		var _p2 = _p0._0;
-		return A2(
-			_elm_lang$html$Html$div,
-			_elm_lang$core$Native_List.fromArray(
-				[
-					_elm_lang$html$Html_Attributes$class('radio-track')
-				]),
-			_elm_lang$core$Native_List.fromArray(
-				[
-					A2(
-					_elm_lang$html$Html$img,
-					_elm_lang$core$Native_List.fromArray(
-						[
-							_elm_lang$html$Html_Attributes$class('cover'),
-							_elm_lang$html$Html_Attributes$src(
-							A4(
-								_elm_lang$core$Regex$replace,
-								_elm_lang$core$Regex$All,
-								_elm_lang$core$Regex$regex('large'),
-								function (_p1) {
-									return 't500x500';
-								},
-								_p2.artwork_url))
-						]),
-					_elm_lang$core$Native_List.fromArray(
-						[])),
-					A2(
-					_elm_lang$html$Html$div,
-					_elm_lang$core$Native_List.fromArray(
-						[
-							_elm_lang$html$Html_Attributes$class('track-info')
-						]),
-					_elm_lang$core$Native_List.fromArray(
-						[
-							A2(
-							_elm_lang$html$Html$div,
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html_Attributes$class('artist')
-								]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html$text(_p2.artist)
-								])),
-							A2(
-							_elm_lang$html$Html$div,
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html_Attributes$class('title')
-								]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html$text(_p2.title)
-								])),
-							A2(
-							_elm_lang$html$Html$a,
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html_Attributes$class('source'),
-									_elm_lang$html$Html_Attributes$href(_p2.sourceUrl),
-									_elm_lang$html$Html_Attributes$target('_blank')
-								]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html$text('Source')
-								]))
-						]))
-				]));
-	}
-};
 var _user$project$Radio$currentTrackId = function (model) {
 	var findPlaylist = function (id) {
 		return _elm_lang$core$List$head(
 			A2(
 				_elm_lang$core$List$filter,
-				function (_p3) {
+				function (_p0) {
 					return A2(
 						F2(
 							function (x, y) {
@@ -9984,7 +9902,7 @@ var _user$project$Radio$currentTrackId = function (model) {
 						id,
 						function (_) {
 							return _.id;
-						}(_p3));
+						}(_p0));
 				},
 				model.playlists));
 	};
@@ -9993,14 +9911,14 @@ var _user$project$Radio$currentTrackId = function (model) {
 		A2(
 			_elm_lang$core$Maybe$andThen,
 			A2(_elm_lang$core$Maybe$andThen, model.currentPlaylist, findPlaylist),
-			function (_p4) {
+			function (_p1) {
 				return _elm_lang$core$Maybe$Just(
 					function (_) {
 						return _.items;
 					}(
 						function (_) {
 							return _.model;
-						}(_p4)));
+						}(_p1)));
 			}),
 		_user$project$PlaylistStructure$currentItem);
 };
@@ -10064,8 +9982,8 @@ var _user$project$Radio$LatestTracks = {ctor: 'LatestTracks'};
 var _user$project$Radio$Radio = {ctor: 'Radio'};
 var _user$project$Radio$urlParser = _elm_lang$navigation$Navigation$makeParser(
 	function (location) {
-		var _p5 = location.pathname;
-		switch (_p5) {
+		var _p2 = location.pathname;
+		switch (_p2) {
 			case '/radio':
 				return _user$project$Radio$Radio;
 			case '/latest':
@@ -10079,6 +9997,107 @@ var _user$project$Radio$navigation = _elm_lang$core$Native_List.fromArray(
 		A3(_user$project$Radio$NavigationItem, 'radio', '/radio', _user$project$Radio$Radio),
 		A3(_user$project$Radio$NavigationItem, 'latest tracks', '/latest', _user$project$Radio$LatestTracks)
 	]);
+var _user$project$Radio$ResumeRadio = {ctor: 'ResumeRadio'};
+var _user$project$Radio$viewRadioTrack = F2(
+	function (track, currentPlaylist) {
+		var _p3 = track;
+		if (_p3.ctor === 'Nothing') {
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('...')
+					]));
+		} else {
+			var _p5 = _p3._0;
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class('radio-track')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$img,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('cover'),
+								_elm_lang$html$Html_Attributes$src(
+								A4(
+									_elm_lang$core$Regex$replace,
+									_elm_lang$core$Regex$All,
+									_elm_lang$core$Regex$regex('large'),
+									function (_p4) {
+										return 't500x500';
+									},
+									_p5.artwork_url))
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('track-info')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('artist')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text(_p5.artist)
+									])),
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('title')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text(_p5.title)
+									])),
+								A2(
+								_elm_lang$html$Html$a,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('source'),
+										_elm_lang$html$Html_Attributes$href(_p5.sourceUrl),
+										_elm_lang$html$Html_Attributes$target('_blank')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('Source')
+									])),
+								(!_elm_lang$core$Native_Utils.eq(
+								currentPlaylist,
+								_elm_lang$core$Maybe$Just(_user$project$Radio$Radio))) ? A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Events$onClick(_user$project$Radio$ResumeRadio)
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('Resume Radio')
+									])) : A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[]),
+								_elm_lang$core$Native_List.fromArray(
+									[]))
+							]))
+					]));
+		}
+	});
 var _user$project$Radio$PlayFromCustomQueue = function (a) {
 	return {ctor: 'PlayFromCustomQueue', _0: a};
 };
@@ -10697,6 +10716,16 @@ var _user$project$Radio$update = F2(
 						model$$,
 						_elm_lang$core$Native_List.fromArray(
 							[command, command$]));
+				case 'ResumeRadio':
+					var _v17 = _user$project$Radio$Play,
+						_v18 = _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							currentPlaylist: _elm_lang$core$Maybe$Just(_user$project$Radio$Radio)
+						});
+					message = _v17;
+					model = _v18;
+					continue update;
 				case 'PlayFromCustomQueue':
 					var _p22 = _p13._0;
 					return {
@@ -10887,7 +10916,7 @@ var _user$project$Radio$view = function (model) {
 									_elm_lang$core$Maybe$andThen,
 									_user$project$PlaylistStructure$currentItem(_p32.model.items),
 									A2(_elm_lang$core$Basics$flip, _elm_lang$core$Dict$get, model.tracks));
-								return _user$project$Radio$viewRadioTrack(currentRadioTrack);
+								return A2(_user$project$Radio$viewRadioTrack, currentRadioTrack, model.currentPlaylist);
 							} else {
 								return A2(
 									_elm_lang$html$Html$div,

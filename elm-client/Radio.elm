@@ -139,6 +139,7 @@ type Msg
     | UpdateCurrentTime Time
     | UpdateCurrentTimeFail
     | PlayFromCustomQueue Track
+    | ResumeRadio
 
 
 port playTrack : { id : Int, streamUrl : String, currentTime : Float } -> Cmd msg
@@ -250,6 +251,9 @@ update message model =
                             update Play model'
             in
                 model'' ! [ command, command' ]
+
+        ResumeRadio ->
+            update Play ( { model | currentPlaylist = Just Radio } )
 
         PlayFromCustomQueue track ->
             ( { model
@@ -397,7 +401,7 @@ view model =
                                         PlaylistStructure.currentItem playlist.model.items
                                             `Maybe.andThen` (flip Dict.get) model.tracks
                                 in
-                                    viewRadioTrack currentRadioTrack
+                                    viewRadioTrack currentRadioTrack model.currentPlaylist
 
                             _ ->
                                 div [ class "playlist-container" ]
@@ -409,8 +413,8 @@ view model =
             ]
 
 
-viewRadioTrack : Maybe Track -> Html Msg
-viewRadioTrack track =
+viewRadioTrack : Maybe Track -> Maybe PlaylistId -> Html Msg
+viewRadioTrack track currentPlaylist =
     case track of
         Nothing ->
             div [] [ text "..." ]
@@ -433,6 +437,12 @@ viewRadioTrack track =
                         , target "_blank"
                         ]
                         [ text "Source" ]
+                    , if currentPlaylist /= Just Radio then
+                        div
+                            [ onClick ResumeRadio ]
+                            [ text "Resume Radio" ]
+                        else
+                            div [] []
                     ]
                 ]
 
