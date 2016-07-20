@@ -34,19 +34,11 @@ main =
 urlParser : Navigation.Parser Page
 urlParser =
     Navigation.makeParser
-        (\location ->
-            case location.pathname of
-                "/feed" ->
-                    Feed
-
-                "/saved-tracks" ->
-                    SavedTracks
-
-                "/published-tracks" ->
-                    PublishedTracks
-
-                _ ->
-                    Feed
+        (\{ pathname } ->
+            pages
+                |> List.filter ((==) pathname << .url)
+                |> List.head
+                |> Maybe.withDefault (Page "/" (Just Feed))
         )
 
 
@@ -88,7 +80,18 @@ type PlaylistId
 
 
 type alias Page =
-    PlaylistId
+    { url : String
+    , playlist : Maybe PlaylistId
+    }
+
+
+pages : List Page
+pages =
+    [ Page "/feed" (Just Feed)
+    , Page "/saved-tracks" (Just SavedTracks)
+    , Page "/published-tracks" (Just PublishedTracks)
+    , Page "/publish-track" Nothing
+    ]
 
 
 init : Page -> ( Model, Cmd Msg )
@@ -351,35 +354,47 @@ update message model =
                     update Rewind model
 
                 'L' ->
-                    case model.currentPage of
-                        Feed ->
-                            update (ChangePage "/saved-tracks") model
+                    case model.currentPage.playlist of
+                        Just playlistId ->
+                            case playlistId of
+                                Feed ->
+                                    update (ChangePage "/saved-tracks") model
 
-                        SavedTracks ->
-                            update (ChangePage "/published-tracks") model
+                                SavedTracks ->
+                                    update (ChangePage "/published-tracks") model
 
-                        PublishedTracks ->
-                            update (ChangePage "/") model
+                                PublishedTracks ->
+                                    update (ChangePage "/") model
 
-                        Blacklist ->
-                            update (ChangePage "/") model
+                                Blacklist ->
+                                    update (ChangePage "/") model
+                        Nothing ->
+                            (model, Cmd.none)
 
                 'H' ->
-                    case model.currentPage of
-                        Feed ->
-                            update (ChangePage "/published-tracks") model
+                    case model.currentPage.playlist of
+                        Just playlistId ->
+                            case playlistId of
+                                Feed ->
+                                    update (ChangePage "/published-tracks") model
 
-                        SavedTracks ->
-                            update (ChangePage "/") model
+                                SavedTracks ->
+                                    update (ChangePage "/") model
 
-                        PublishedTracks ->
-                            update (ChangePage "/saved-tracks") model
+                                PublishedTracks ->
+                                    update (ChangePage "/saved-tracks") model
 
-                        Blacklist ->
-                            update (ChangePage "/") model
+                                Blacklist ->
+                                    update (ChangePage "/") model
+                        Nothing ->
+                            (model, Cmd.none)
 
                 'm' ->
-                    update (PlaylistMsg model.currentPage Playlist.FetchMore) model
+                    case model.currentPage.playlist of
+                        Just id ->
+                            update (PlaylistMsg id Playlist.FetchMore) model
+                        Nothing ->
+                            ( model, Cmd.none )
 
                 'b' ->
                     case currentTrackId model of
@@ -544,28 +559,36 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    let
-        currentPagePlaylist =
-            List.filter ((==) model.currentPage << .id) model.playlists
-                |> List.head
-    in
-        div
-            []
-            [ viewGlobalPlayer (currentTrack model) model.playing
-            , viewNavigation navigation model.currentPage model.currentPlaylist
-            , viewCustomQueue model.tracks model.customQueue
-            , div
-                [ class "playlist-container" ]
-                [ case currentPagePlaylist of
-                    Nothing ->
-                        div [] [ text "Well, this is awkward..." ]
+    div
+        []
+        [ viewGlobalPlayer (currentTrack model) model.playing
+        , viewNavigation navigation model.currentPage model.currentPlaylist
+        , viewCustomQueue model.tracks model.customQueue
+        , div
+            [ class "playlist-container" ]
+            [ case model.currentPage.playlist of
+                Just id ->
+                    let
+                        currentPagePlaylist =
+                            List.filter ((==) id << .id) model.playlists
+                                |> List.head
+                    in
+                        case currentPagePlaylist of
+                            Just playlist ->
+                                Html.map
+                                    (PlaylistMsg playlist.id)
+                                    (Playlist.view model.currentTime model.tracks playlist.model)
+                            Nothing ->
+                                div [] [ text "Well, this is awkward..." ]
+                Nothing ->
+                    case model.currentPage.url of
+                        "/publish-track" ->
+                            div [] [ text "Publish Track" ]
+                        _ ->
+                            div [] [ text "404" ]
 
-                    Just playlist ->
-                        Html.map
-                            (PlaylistMsg playlist.id)
-                            (Playlist.view model.currentTime model.tracks playlist.model)
-                ]
             ]
+        ]
 
 
 viewGlobalPlayer : Maybe Track -> Bool -> Html Msg
@@ -667,45 +690,49 @@ viewCustomPlaylistItem track =
 type alias NavigationItem =
     { displayName : String
     , href : String
-    , page : Page
     }
 
 
 navigation : List NavigationItem
 navigation =
-    [ NavigationItem "feed" "/" Feed
-    , NavigationItem "saved tracks" "/saved-tracks" SavedTracks
-    , NavigationItem "published tracks" "/published-tracks" PublishedTracks
+    [ NavigationItem "Feed" "/"
+    , NavigationItem "saved tracks" "/saved-tracks"
+    , NavigationItem "published tracks" "/published-tracks"
+    , NavigationItem "+" "/publish-track"
     ]
 
 
 viewNavigation : List NavigationItem -> Page -> Maybe PlaylistId -> Html Msg
 viewNavigation navigationItems currentPage currentPlaylist =
-    navigationItems
-        |> List.map (viewNavigationItem currentPage currentPlaylist)
-        |> ul []
-        |> List.repeat 1
-        |> nav [ class "navigation" ]
-
-
-viewNavigationItem : Page -> Maybe PlaylistId -> NavigationItem -> Html Msg
-viewNavigationItem currentPage currentPlaylist navigationItem =
     let
-        classes =
-            classList
-                [ ( "active", navigationItem.page == currentPage )
-                , ( "playing", Just navigationItem.page == currentPlaylist )
-                ]
+        currentPlaylistPage =
+            pages
+                |> List.filter ((==) currentPlaylist << .playlist)
+                |> List.head
     in
-        li
-            [ onWithOptions
-                "click"
-                { stopPropagation = False
-                , preventDefault = True
-                }
-                (Json.Decode.succeed (ChangePage navigationItem.href))
-            ]
-            [ a
-                (classes :: [ href navigationItem.href ])
-                [ text navigationItem.displayName ]
-            ]
+        navigationItems
+            |> List.map (viewNavigationItem currentPage currentPlaylistPage)
+            |> ul []
+            |> List.repeat 1
+            |> nav [ class "navigation" ]
+
+
+viewNavigationItem : Page -> Maybe Page -> NavigationItem -> Html Msg
+viewNavigationItem currentPage currentPlaylistPage navigationItem =
+    li
+        [ onWithOptions
+            "click"
+            { stopPropagation = False
+            , preventDefault = True
+            }
+            (Json.Decode.succeed (ChangePage navigationItem.href))
+        ]
+        [ a
+            ( classList
+                [ ( "active", navigationItem.href == currentPage.url )
+                , ( "paying", Just navigationItem.href == Maybe.map .url currentPlaylistPage )
+                ]
+            :: [ href navigationItem.href ]
+            )
+            [ text navigationItem.displayName ]
+        ]
