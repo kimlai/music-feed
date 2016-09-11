@@ -9538,21 +9538,33 @@ var _user$project$Model$emptyPlaylist = F3(
 	function (id, fetchUrl, addTrackUrl) {
 		return {id: id, loading: true, nextLink: fetchUrl, addTrackUrl: addTrackUrl};
 	});
-var _user$project$Model$Model = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {tracks: a, playlists: b, queue: c, customQueue: d, playing: e, currentPage: f, lastKeyPressed: g, currentTime: h, player: i};
-	});
+var _user$project$Model$Model = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return function (k) {
+											return {tracks: a, playlists: b, queue: c, customQueue: d, playing: e, currentPage: f, lastKeyPressed: g, currentTime: h, player: i, pages: j, navigation: k};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var _user$project$Model$NavigationItem = F2(
 	function (a, b) {
 		return {displayName: a, href: b};
 	});
-var _user$project$Model$navigation = _elm_lang$core$Native_List.fromArray(
-	[
-		A2(_user$project$Model$NavigationItem, 'Feed', '/'),
-		A2(_user$project$Model$NavigationItem, 'saved tracks', '/saved-tracks'),
-		A2(_user$project$Model$NavigationItem, 'published tracks', '/published-tracks'),
-		A2(_user$project$Model$NavigationItem, '+', '/publish-track')
-	]);
 var _user$project$Model$Page = F2(
 	function (a, b) {
 		return {url: a, playlist: b};
@@ -9586,22 +9598,6 @@ var _user$project$Model$Blacklist = {ctor: 'Blacklist'};
 var _user$project$Model$PublishedTracks = {ctor: 'PublishedTracks'};
 var _user$project$Model$SavedTracks = {ctor: 'SavedTracks'};
 var _user$project$Model$Feed = {ctor: 'Feed'};
-var _user$project$Model$pages = _elm_lang$core$Native_List.fromArray(
-	[
-		A2(
-		_user$project$Model$Page,
-		'/',
-		_elm_lang$core$Maybe$Just(_user$project$Model$Feed)),
-		A2(
-		_user$project$Model$Page,
-		'/saved-tracks',
-		_elm_lang$core$Maybe$Just(_user$project$Model$SavedTracks)),
-		A2(
-		_user$project$Model$Page,
-		'/published-tracks',
-		_elm_lang$core$Maybe$Just(_user$project$Model$PublishedTracks)),
-		A2(_user$project$Model$Page, '/publish-track', _elm_lang$core$Maybe$Nothing)
-	]);
 
 var _user$project$Ports$playTrack = _elm_lang$core$Native_Platform.outgoingPort(
 	'playTrack',
@@ -10578,8 +10574,8 @@ var _user$project$View$viewNavigationItem = F3(
 						]))
 				]));
 	});
-var _user$project$View$viewNavigation = F3(
-	function (navigationItems, currentPage, currentPlaylist) {
+var _user$project$View$viewNavigation = F4(
+	function (navigationItems, pages, currentPage, currentPlaylist) {
 		var currentPlaylistPage = _elm_lang$core$List$head(
 			A2(
 				_elm_lang$core$List$filter,
@@ -10607,7 +10603,7 @@ var _user$project$View$viewNavigation = F3(
 								return _.playlist;
 							}(_p4));
 					},
-					_user$project$Model$pages)));
+					pages)));
 		return A2(
 			_elm_lang$html$Html$nav,
 			_elm_lang$core$Native_List.fromArray(
@@ -10921,9 +10917,10 @@ var _user$project$View$view = function (model) {
 				_user$project$View$viewGlobalPlayer,
 				_user$project$Model$currentTrack(model),
 				model.playing),
-				A3(
+				A4(
 				_user$project$View$viewNavigation,
-				_user$project$Model$navigation,
+				model.navigation,
+				model.pages,
 				model.currentPage,
 				_user$project$Player$currentPlaylist(model.player)),
 				A2(_user$project$View$viewCustomQueue, model.tracks, model.customQueue),
@@ -10999,6 +10996,36 @@ var _user$project$View$view = function (model) {
 			]));
 };
 
+var _user$project$Main$navigation = _elm_lang$core$Native_List.fromArray(
+	[
+		A2(_user$project$Model$NavigationItem, 'Feed', '/'),
+		A2(_user$project$Model$NavigationItem, 'saved tracks', '/saved-tracks'),
+		A2(_user$project$Model$NavigationItem, 'published tracks', '/published-tracks'),
+		A2(_user$project$Model$NavigationItem, '+', '/publish-track')
+	]);
+var _user$project$Main$pages = _elm_lang$core$Native_List.fromArray(
+	[
+		A2(
+		_user$project$Model$Page,
+		'/',
+		_elm_lang$core$Maybe$Just(_user$project$Model$Feed)),
+		A2(
+		_user$project$Model$Page,
+		'/saved-tracks',
+		_elm_lang$core$Maybe$Just(_user$project$Model$SavedTracks)),
+		A2(
+		_user$project$Model$Page,
+		'/published-tracks',
+		_elm_lang$core$Maybe$Just(_user$project$Model$PublishedTracks)),
+		A2(_user$project$Model$Page, '/publish-track', _elm_lang$core$Maybe$Nothing)
+	]);
+var _user$project$Main$playlists = _elm_lang$core$Native_List.fromArray(
+	[
+		A3(_user$project$Model$emptyPlaylist, _user$project$Model$Feed, '/feed', 'fake-url'),
+		A3(_user$project$Model$emptyPlaylist, _user$project$Model$SavedTracks, '/saved_tracks', 'save_track'),
+		A3(_user$project$Model$emptyPlaylist, _user$project$Model$PublishedTracks, '/published_tracks', 'publish_track'),
+		A3(_user$project$Model$emptyPlaylist, _user$project$Model$Blacklist, '/blacklist', 'blacklist')
+	]);
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
 		_elm_lang$core$Native_List.fromArray(
@@ -11013,18 +11040,11 @@ var _user$project$Main$subscriptions = function (model) {
 			]));
 };
 var _user$project$Main$init = function (page) {
-	var playlists = _elm_lang$core$Native_List.fromArray(
-		[
-			A3(_user$project$Model$emptyPlaylist, _user$project$Model$Feed, '/feed', 'fake-url'),
-			A3(_user$project$Model$emptyPlaylist, _user$project$Model$SavedTracks, '/saved_tracks', 'save_track'),
-			A3(_user$project$Model$emptyPlaylist, _user$project$Model$PublishedTracks, '/published_tracks', 'publish_track'),
-			A3(_user$project$Model$emptyPlaylist, _user$project$Model$Blacklist, '/blacklist', 'blacklist')
-		]);
 	return {
 		ctor: '_Tuple2',
 		_0: {
 			tracks: _elm_lang$core$Dict$empty,
-			playlists: playlists,
+			playlists: _user$project$Main$playlists,
 			queue: _elm_lang$core$Native_List.fromArray(
 				[]),
 			customQueue: _elm_lang$core$Native_List.fromArray(
@@ -11035,12 +11055,14 @@ var _user$project$Main$init = function (page) {
 			currentTime: _elm_lang$core$Maybe$Nothing,
 			player: _user$project$Player$initialize(
 				_elm_lang$core$Native_List.fromArray(
-					[_user$project$Model$Feed, _user$project$Model$SavedTracks, _user$project$Model$PublishedTracks, _user$project$Model$Blacklist]))
+					[_user$project$Model$Feed, _user$project$Model$SavedTracks, _user$project$Model$PublishedTracks, _user$project$Model$Blacklist])),
+			pages: _user$project$Main$pages,
+			navigation: _user$project$Main$navigation
 		},
 		_1: _elm_lang$core$Platform_Cmd$batch(
 			A2(
 				_elm_lang$core$List$append,
-				A2(_elm_lang$core$List$map, _user$project$Update$fetchMore, playlists),
+				A2(_elm_lang$core$List$map, _user$project$Update$fetchMore, _user$project$Main$playlists),
 				_elm_lang$core$Native_List.fromArray(
 					[
 						A3(
@@ -11086,7 +11108,7 @@ var _user$project$Main$urlParser = _elm_lang$navigation$Navigation$makeParser(
 								return _.url;
 							}(_p4));
 					},
-					_user$project$Model$pages)));
+					_user$project$Main$pages)));
 	});
 var _user$project$Main$main = {
 	main: A2(

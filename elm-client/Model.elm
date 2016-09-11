@@ -17,6 +17,8 @@ type alias Model =
     , lastKeyPressed : Maybe Char
     , currentTime : Maybe Time
     , player : Player PlaylistId TrackId
+    , pages : List Page
+    , navigation : List NavigationItem
     }
 
 
@@ -25,28 +27,10 @@ type alias NavigationItem =
     , href : String
     }
 
-
-navigation : List NavigationItem
-navigation =
-    [ NavigationItem "Feed" "/"
-    , NavigationItem "saved tracks" "/saved-tracks"
-    , NavigationItem "published tracks" "/published-tracks"
-    , NavigationItem "+" "/publish-track"
-    ]
-
 type alias Page =
     { url : String
     , playlist : Maybe PlaylistId
     }
-
-
-pages : List Page
-pages =
-    [ Page "/" (Just Feed)
-    , Page "/saved-tracks" (Just SavedTracks)
-    , Page "/published-tracks" (Just PublishedTracks)
-    , Page "/publish-track" Nothing
-    ]
 
 
 type alias Track =

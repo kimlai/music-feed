@@ -17,7 +17,11 @@ view model =
     div
         []
         [ viewGlobalPlayer (Model.currentTrack model) model.playing
-        , viewNavigation Model.navigation model.currentPage (Player.currentPlaylist model.player)
+        , viewNavigation
+            model.navigation
+            model.pages
+            model.currentPage
+            (Player.currentPlaylist model.player)
         , viewCustomQueue model.tracks model.customQueue
         , div
             [ class "playlist-container" ]
@@ -143,11 +147,11 @@ viewCustomPlaylistItem track =
         ]
 
 
-viewNavigation : List NavigationItem -> Model.Page -> Maybe Model.PlaylistId -> Html Msg
-viewNavigation navigationItems currentPage currentPlaylist =
+viewNavigation : List NavigationItem -> List Model.Page -> Model.Page -> Maybe Model.PlaylistId -> Html Msg
+viewNavigation navigationItems pages currentPage currentPlaylist =
     let
         currentPlaylistPage =
-            Model.pages
+            pages
                 |> List.filter ((/=) Nothing << .playlist)
                 |> List.filter ((==) currentPlaylist << .playlist)
                 |> List.head

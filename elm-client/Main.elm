@@ -31,7 +31,7 @@ urlParser : Navigation.Parser Model.Page
 urlParser =
     Navigation.makeParser
         (\{ pathname } ->
-            Model.pages
+            pages
                 |> List.filter ((==) pathname << .url)
                 |> List.head
                 |> Maybe.withDefault (Model.Page "/" (Just Feed))
@@ -48,30 +48,24 @@ urlUpdate page model =
 
 init : Model.Page -> ( Model, Cmd Msg )
 init page =
-    let
-        playlists =
-            [ Model.emptyPlaylist Feed "/feed" "fake-url"
-            , Model.emptyPlaylist SavedTracks "/saved_tracks" "save_track"
-            , Model.emptyPlaylist PublishedTracks "/published_tracks" "publish_track"
-            , Model.emptyPlaylist Blacklist "/blacklist" "blacklist"
-            ]
-    in
-        ( { tracks = Dict.empty
-          , playlists = playlists
-          , queue = []
-          , customQueue = []
-          , playing = False
-          , currentPage = page
-          , lastKeyPressed = Nothing
-          , currentTime = Nothing
-          , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist ]
-          }
-        , Cmd.batch
-            (List.append
-                (List.map Update.fetchMore playlists)
-                [Time.now |> Task.perform (\_ -> UpdateCurrentTimeFail) UpdateCurrentTime]
-            )
+    ( { tracks = Dict.empty
+      , playlists = playlists
+      , queue = []
+      , customQueue = []
+      , playing = False
+      , currentPage = page
+      , lastKeyPressed = Nothing
+      , currentTime = Nothing
+      , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist ]
+      , pages = pages
+      , navigation = navigation
+      }
+    , Cmd.batch
+        (List.append
+            (List.map Update.fetchMore playlists)
+            [Time.now |> Task.perform (\_ -> UpdateCurrentTimeFail) UpdateCurrentTime]
         )
+    )
 
 
 
@@ -86,3 +80,30 @@ subscriptions model =
         , Ports.trackError TrackError
         , Keyboard.presses KeyPressed
         ]
+
+
+playlists : List Model.Playlist
+playlists =
+    [ Model.emptyPlaylist Feed "/feed" "fake-url"
+    , Model.emptyPlaylist SavedTracks "/saved_tracks" "save_track"
+    , Model.emptyPlaylist PublishedTracks "/published_tracks" "publish_track"
+    , Model.emptyPlaylist Blacklist "/blacklist" "blacklist"
+    ]
+
+
+pages : List Model.Page
+pages =
+    [ Model.Page "/" (Just Feed)
+    , Model.Page "/saved-tracks" (Just SavedTracks)
+    , Model.Page "/published-tracks" (Just PublishedTracks)
+    , Model.Page "/publish-track" Nothing
+    ]
+
+
+navigation : List Model.NavigationItem
+navigation =
+    [ Model.NavigationItem "Feed" "/"
+    , Model.NavigationItem "saved tracks" "/saved-tracks"
+    , Model.NavigationItem "published tracks" "/published-tracks"
+    , Model.NavigationItem "+" "/publish-track"
+    ]
