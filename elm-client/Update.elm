@@ -390,12 +390,12 @@ update message model =
 
 fetchMore : Model.Playlist -> Cmd Msg
 fetchMore playlist =
-    Http.get decodeFeed playlist.nextLink
+    Http.get decodePlaylist playlist.nextLink
         |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
 
 
-decodeFeed : Json.Decode.Decoder ( List Track, String )
-decodeFeed =
+decodePlaylist : Json.Decode.Decoder ( List Track, String )
+decodePlaylist =
     Json.Decode.object2 (,)
         ("tracks" := Json.Decode.list decodeTrack)
         ("next_href" := Json.Decode.string)
