@@ -42,7 +42,7 @@ type alias Page =
 
 pages : List Page
 pages =
-    [ Page "/feed" (Just Feed)
+    [ Page "/" (Just Feed)
     , Page "/saved-tracks" (Just SavedTracks)
     , Page "/published-tracks" (Just PublishedTracks)
     , Page "/publish-track" Nothing

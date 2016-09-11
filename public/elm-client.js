@@ -9590,7 +9590,7 @@ var _user$project$Model$pages = _elm_lang$core$Native_List.fromArray(
 	[
 		A2(
 		_user$project$Model$Page,
-		'/feed',
+		'/',
 		_elm_lang$core$Maybe$Just(_user$project$Model$Feed)),
 		A2(
 		_user$project$Model$Page,
@@ -10554,7 +10554,7 @@ var _user$project$View$viewNavigationItem = F3(
 								},
 									{
 									ctor: '_Tuple2',
-									_0: 'paying',
+									_0: 'playing',
 									_1: _elm_lang$core$Native_Utils.eq(
 										_elm_lang$core$Maybe$Just(navigationItem.href),
 										A2(
@@ -10591,7 +10591,20 @@ var _user$project$View$viewNavigation = F3(
 							return _.playlist;
 						}(_p3));
 				},
-				_user$project$Model$pages));
+				A2(
+					_elm_lang$core$List$filter,
+					function (_p4) {
+						return A2(
+							F2(
+								function (x, y) {
+									return !_elm_lang$core$Native_Utils.eq(x, y);
+								}),
+							_elm_lang$core$Maybe$Nothing,
+							function (_) {
+								return _.playlist;
+							}(_p4));
+					},
+					_user$project$Model$pages)));
 		return A2(
 			_elm_lang$html$Html$nav,
 			_elm_lang$core$Native_List.fromArray(
@@ -10676,8 +10689,8 @@ var _user$project$View$viewCustomQueue = F2(
 	});
 var _user$project$View$viewGlobalPlayer = F2(
 	function (track, playing) {
-		var _p4 = track;
-		if (_p4.ctor === 'Nothing') {
+		var _p5 = track;
+		if (_p5.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -10758,7 +10771,7 @@ var _user$project$View$viewGlobalPlayer = F2(
 							[]))
 					]));
 		} else {
-			var _p5 = _p4._0;
+			var _p6 = _p5._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -10786,9 +10799,9 @@ var _user$project$View$viewGlobalPlayer = F2(
 												{
 												ctor: '_Tuple2',
 												_0: 'playing',
-												_1: playing && _elm_lang$core$Basics$not(_p5.error)
+												_1: playing && _elm_lang$core$Basics$not(_p6.error)
 											},
-												{ctor: '_Tuple2', _0: 'error', _1: _p5.error}
+												{ctor: '_Tuple2', _0: 'error', _1: _p6.error}
 											])),
 										_elm_lang$html$Html_Events$onClick(_user$project$Update$TogglePlayback)
 									]),
@@ -10812,7 +10825,7 @@ var _user$project$View$viewGlobalPlayer = F2(
 						_elm_lang$html$Html$img,
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html_Attributes$src(_p5.artwork_url)
+								_elm_lang$html$Html_Attributes$src(_p6.artwork_url)
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[])),
@@ -10832,7 +10845,7 @@ var _user$project$View$viewGlobalPlayer = F2(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p5.artist)
+										_elm_lang$html$Html$text(_p6.artist)
 									])),
 								A2(
 								_elm_lang$html$Html$div,
@@ -10842,7 +10855,7 @@ var _user$project$View$viewGlobalPlayer = F2(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p5.title)
+										_elm_lang$html$Html$text(_p6.title)
 									]))
 							])),
 						A2(
@@ -10874,7 +10887,7 @@ var _user$project$View$viewGlobalPlayer = F2(
 														_0: 'width',
 														_1: A2(
 															_elm_lang$core$Basics_ops['++'],
-															_elm_lang$core$Basics$toString(_p5.progress),
+															_elm_lang$core$Basics$toString(_p6.progress),
 															'%')
 													}
 													]))
@@ -10920,32 +10933,32 @@ var _user$project$View$view = function (model) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						function () {
-						var _p6 = model.currentPage.playlist;
-						if (_p6.ctor === 'Just') {
-							var _p9 = _p6._0;
+						var _p7 = model.currentPage.playlist;
+						if (_p7.ctor === 'Just') {
+							var _p10 = _p7._0;
 							var currentPagePlaylist = _elm_lang$core$List$head(
 								A2(
 									_elm_lang$core$List$filter,
-									function (_p7) {
+									function (_p8) {
 										return A2(
 											F2(
 												function (x, y) {
 													return _elm_lang$core$Native_Utils.eq(x, y);
 												}),
-											_p9,
+											_p10,
 											function (_) {
 												return _.id;
-											}(_p7));
+											}(_p8));
 									},
 									model.playlists));
-							var _p8 = currentPagePlaylist;
-							if (_p8.ctor === 'Just') {
+							var _p9 = currentPagePlaylist;
+							if (_p9.ctor === 'Just') {
 								return A4(
 									_user$project$View$viewPlaylist,
 									model.currentTime,
 									model.tracks,
-									_p8._0,
-									A2(_user$project$Player$playlistContent, _p9, model.player));
+									_p9._0,
+									A2(_user$project$Player$playlistContent, _p10, model.player));
 							} else {
 								return A2(
 									_elm_lang$html$Html$div,
@@ -10957,8 +10970,8 @@ var _user$project$View$view = function (model) {
 										]));
 							}
 						} else {
-							var _p10 = model.currentPage.url;
-							if (_p10 === '/publish-track') {
+							var _p11 = model.currentPage.url;
+							if (_p11 === '/publish-track') {
 								return A2(
 									_elm_lang$html$Html$div,
 									_elm_lang$core$Native_List.fromArray(

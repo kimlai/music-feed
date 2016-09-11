@@ -148,6 +148,7 @@ viewNavigation navigationItems currentPage currentPlaylist =
     let
         currentPlaylistPage =
             Model.pages
+                |> List.filter ((/=) Nothing << .playlist)
                 |> List.filter ((==) currentPlaylist << .playlist)
                 |> List.head
     in
@@ -171,7 +172,7 @@ viewNavigationItem currentPage currentPlaylistPage navigationItem =
         [ a
             ( classList
                 [ ( "active", navigationItem.href == currentPage.url )
-                , ( "paying", Just navigationItem.href == Maybe.map .url currentPlaylistPage )
+                , ( "playing", Just navigationItem.href == Maybe.map .url currentPlaylistPage )
                 ]
             :: [ href navigationItem.href ]
             )
