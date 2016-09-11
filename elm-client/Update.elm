@@ -35,7 +35,7 @@ type Msg
     | UpdateCurrentTime Time
     | UpdateCurrentTimeFail
     | PlayFromCustomQueue Track
-    | OnTrackClicked Int Track
+    | PlayFromPlaylist PlaylistId Int Track
     | OnAddTrackToCustomQueueClicked TrackId
     | FetchMore PlaylistId
     | FetchFail PlaylistId Http.Error
@@ -81,8 +81,22 @@ update message model =
         AddTrackFail error ->
             ( model, Cmd.none )
 
-        OnTrackClicked position trackId ->
-            ( model, Cmd.none )
+        PlayFromPlaylist playlistId position track ->
+            let
+                updatePlaylist playlist =
+                    if playlist.id == playlistId then
+                        { playlist | items = PlaylistStructure.select position playlist.items }
+                    else
+                        playlist
+                updatedPlaylists =
+                    List.map updatePlaylist model.playlists
+                updatedModel =
+                    { model
+                    | playlists = updatedPlaylists
+                    , currentPlaylist = Just playlistId
+                    }
+            in
+                update Play updatedModel
 
         OnAddTrackToCustomQueueClicked trackId ->
             ( model, Cmd.none )

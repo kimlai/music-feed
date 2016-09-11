@@ -186,7 +186,7 @@ viewPlaylist currentTime tracks playlist =
                 |> List.filterMap (\trackId -> Dict.get trackId tracks)
 
         tracksView =
-            List.indexedMap (viewTrack currentTime) playlistTracks
+            List.indexedMap (viewTrack currentTime playlist.id) playlistTracks
     in
         if playlist.loading == True then
             List.repeat 10 viewTrackPlaceHolder
@@ -198,14 +198,14 @@ viewPlaylist currentTime tracks playlist =
                 |> div []
 
 
-viewTrack : Maybe Time -> Int -> Track -> Html Msg
-viewTrack currentTime position track =
+viewTrack : Maybe Time -> PlaylistId -> Int -> Track -> Html Msg
+viewTrack currentTime playlistId position track =
     div
         [ classList
             [ ("track", True)
             , ("error", track.error)
             ]
-        , onClick (OnTrackClicked position track)
+        , onClick (PlayFromPlaylist playlistId position track)
         ]
         [ div
             [ class "track-info-container" ]
