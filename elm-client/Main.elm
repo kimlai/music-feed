@@ -9,6 +9,7 @@ import Task
 import Time exposing (Time)
 import Update exposing (Msg(..))
 import View
+import Player
 
 
 main : Program Never
@@ -60,11 +61,10 @@ init page =
           , queue = []
           , customQueue = []
           , playing = False
-          , currentPlaylistId = Nothing
-          , currentTrackId = Nothing
           , currentPage = page
           , lastKeyPressed = Nothing
           , currentTime = Nothing
+          , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist ]
           }
         , Cmd.batch
             (List.append

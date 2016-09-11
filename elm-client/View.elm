@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, classList, href, src, style)
 import Json.Decode
 import Html.Events exposing (onClick, onWithOptions)
 import Model exposing (Model, Track, TrackId, Playlist, PlaylistId, NavigationItem)
-import PlaylistStructure
+import Player
 import Time exposing (Time)
 import Update exposing (Msg(..))
 
@@ -17,7 +17,7 @@ view model =
     div
         []
         [ viewGlobalPlayer (Model.currentTrack model) model.playing
-        , viewNavigation Model.navigation model.currentPage model.currentPlaylistId
+        , viewNavigation Model.navigation model.currentPage (Player.currentPlaylist model.player)
         , viewCustomQueue model.tracks model.customQueue
         , div
             [ class "playlist-container" ]
@@ -30,7 +30,10 @@ view model =
                     in
                         case currentPagePlaylist of
                             Just playlist ->
-                                viewPlaylist model.currentTime model.tracks playlist
+                                viewPlaylist
+                                    model.currentTime
+                                    model.tracks playlist
+                                    (Player.playlistContent id model.player)
                             Nothing ->
                                 div [] [ text "Well, this is awkward..." ]
                 Nothing ->
@@ -177,12 +180,11 @@ viewNavigationItem currentPage currentPlaylistPage navigationItem =
 
 
 
-viewPlaylist : Maybe Time -> Dict TrackId Track -> Playlist -> Html Msg
-viewPlaylist currentTime tracks playlist =
+viewPlaylist : Maybe Time -> Dict TrackId Track -> Playlist -> List TrackId -> Html Msg
+viewPlaylist currentTime tracks playlist playlistContent=
     let
         playlistTracks =
-            playlist.items
-                |> PlaylistStructure.toList
+            playlistContent
                 |> List.filterMap (\trackId -> Dict.get trackId tracks)
 
         tracksView =

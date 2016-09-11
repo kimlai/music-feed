@@ -11,10 +11,10 @@ import Json.Encode
 import Keyboard
 import Model exposing (Model, PlaylistId(..), TrackId, Track)
 import Navigation
+import Player
 import Ports
 import Task exposing (Task)
 import Time exposing (Time)
-import PlaylistStructure
 
 
 type Msg
@@ -51,8 +51,8 @@ update message model =
             let
                 updatePlaylist playlist =
                     if playlist.id == playlistId then
-                        { playlist | items = PlaylistStructure.append (List.map .id tracks) playlist.items
-                        , nextLink = nextLink
+                        { playlist
+                        | nextLink = nextLink
                         , loading = False
                         }
                     else
@@ -68,6 +68,7 @@ update message model =
                 ( { model
                   | playlists = updatedPlaylists
                   , tracks = updatedTracks
+                  , player = Player.appendTracksToPlaylist playlistId (List.map .id tracks) model.player
                   }
                 , Cmd.none
                 )
@@ -82,22 +83,9 @@ update message model =
             ( model, Cmd.none )
 
         PlayFromPlaylist playlistId position track ->
-            let
-                updatePlaylist playlist =
-                    if playlist.id == playlistId then
-                        { playlist | items = PlaylistStructure.select position playlist.items }
-                    else
-                        playlist
-                updatedPlaylists =
-                    List.map updatePlaylist model.playlists
-                updatedModel =
-                    { model
-                    | playlists = updatedPlaylists
-                    , currentPlaylistId = Just playlistId
-                    , currentTrackId = Just track.id
-                    }
-            in
-                update Play updatedModel
+            update
+                Play
+                { model | player = Player.select playlistId position model.player }
 
         OnAddTrackToCustomQueueClicked trackId ->
             ( model, Cmd.none )
@@ -142,7 +130,7 @@ update message model =
 
         Pause ->
             ( { model | playing = False }
-            , Ports.pause (model.currentTrackId)
+            , Ports.pause (Player.currentTrack model.player)
             )
 
         TrackError trackId ->
@@ -168,23 +156,9 @@ update message model =
                 update Play model
 
         Next ->
-            let
-                updatePlaylist playlist =
-                    if model.currentPlaylistId == Just playlist.id then
-                        { playlist | items = PlaylistStructure.next playlist.items }
-                    else playlist
-                updatedPlaylists =
-                    List.map updatePlaylist model.playlists
-                model' =
-                    { model | playlists = updatedPlaylists }
-                currentTrack =
-                    case Model.currentPlaylist model' of
-                        Just playlist ->
-                            PlaylistStructure.currentItem playlist.items
-                        Nothing ->
-                            Nothing
-            in
-                update Play { model' | currentTrackId = currentTrack }
+            update
+                Play
+                { model | player = Player.next model.player }
 
         PlayFromCustomQueue track ->
             ( { model
@@ -224,13 +198,8 @@ update message model =
 
         MoveToPlaylist playlistId trackId ->
             let
-                updatePlaylist playlist =
-                    if playlist.id == playlistId then
-                        { playlist | items = PlaylistStructure.prepend trackId playlist.items }
-                    else
-                        { playlist | items = PlaylistStructure.remove trackId playlist.items }
-                updatedPlaylists =
-                    List.map updatePlaylist model.playlists
+                player =
+                    Player.moveTrack playlistId trackId model.player
                 targetPlaylist =
                     model.playlists
                         |> List.filter ((==) playlistId << .id)
@@ -242,7 +211,7 @@ update message model =
                         Just playlist ->
                             addTrack playlist.addTrackUrl trackId
             in
-                ( { model | playlists = updatedPlaylists }
+                ( { model | player = player }
                 , cmd
                 )
 
@@ -324,7 +293,7 @@ update message model =
                             ( model, Cmd.none )
 
                 'b' ->
-                    case model.currentTrackId of
+                    case Player.currentTrack model.player of
                         Nothing ->
                             ( model
                             , Cmd.none
@@ -334,7 +303,7 @@ update message model =
                             update (BlacklistTrack trackId) model
 
                 's' ->
-                    case model.currentTrackId of
+                    case Player.currentTrack model.player of
                         Nothing ->
                             ( model
                             , Cmd.none
@@ -344,7 +313,7 @@ update message model =
                             update (MoveToPlaylist SavedTracks trackId) model
 
                 'P' ->
-                    case model.currentTrackId  of
+                    case Player.currentTrack model.player of
                         Nothing ->
                             ( model
                             , Cmd.none

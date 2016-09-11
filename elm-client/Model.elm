@@ -3,7 +3,7 @@ module Model exposing (..)
 
 import Date exposing (Date)
 import Dict exposing (Dict)
-import PlaylistStructure
+import Player exposing (Player)
 import Time exposing (Time)
 
 
@@ -13,11 +13,10 @@ type alias Model =
     , queue : List TrackId
     , customQueue : List TrackId
     , playing : Bool
-    , currentPlaylistId : Maybe PlaylistId
-    , currentTrackId : Maybe TrackId
     , currentPage : Page
     , lastKeyPressed : Maybe Char
     , currentTime : Maybe Time
+    , player : Player PlaylistId TrackId
     }
 
 
@@ -73,7 +72,6 @@ type alias Playlist =
     , loading : Bool
     , nextLink : String
     , addTrackUrl : String
-    , items : PlaylistStructure.Playlist TrackId
     }
 
 
@@ -83,7 +81,6 @@ emptyPlaylist id fetchUrl addTrackUrl =
     , loading = True
     , nextLink = fetchUrl
     , addTrackUrl = addTrackUrl
-    , items = PlaylistStructure.empty
     }
 
 
@@ -96,11 +93,11 @@ type PlaylistId
 
 currentPlaylist : Model -> Maybe Playlist
 currentPlaylist model =
-    List.filter ((==) model.currentPlaylistId << Just << .id) model.playlists
+    List.filter ((==) (Player.currentPlaylist model.player) << Just << .id) model.playlists
         |> List.head
 
 
 currentTrack : Model -> Maybe Track
 currentTrack model =
-    model.currentTrackId
+    Player.currentTrack model.player
         `Maybe.andThen` (flip Dict.get) model.tracks

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="UTF-8"><title>PlaylistStructure</title><style>html,head,body { padding:0; margin:0; }
+<html><head><meta charset="UTF-8"><title>Player</title><style>html,head,body { padding:0; margin:0; }
 body { font-family: calibri, helvetica, arial, sans-serif; }</style><script type="text/javascript">
 (function() {
 'use strict';
@@ -3530,13 +3530,13 @@ var _elm_lang$core$Array$repeat = F2(
 			_elm_lang$core$Basics$always(e));
 	});
 var _elm_lang$core$Array$Array = {ctor: 'Array'};
-var _user$project$PlaylistStructure$toList = function (_p0) {
+var _user$project$PlaylistStructure$currentItem = function (_p0) {
 	var _p1 = _p0;
-	return _elm_lang$core$Array$toList(_p1._0.items);
+	return A2(_elm_lang$core$Array$get, _p1._0.position, _p1._0.items);
 };
-var _user$project$PlaylistStructure$currentItem = function (_p2) {
+var _user$project$PlaylistStructure$toList = function (_p2) {
 	var _p3 = _p2;
-	return A2(_elm_lang$core$Array$get, _p3._0.position, _p3._0.items);
+	return _elm_lang$core$Array$toList(_p3._0.items);
 };
 var _user$project$PlaylistStructure$Playlist = function (a) {
 	return {ctor: 'Playlist', _0: a};
@@ -3551,26 +3551,21 @@ var _user$project$PlaylistStructure$fromList = function (items) {
 var _user$project$PlaylistStructure$empty = _user$project$PlaylistStructure$fromList(
 	_elm_lang$core$Native_List.fromArray(
 		[]));
-var _user$project$PlaylistStructure$next = function (_p4) {
-	var _p5 = _p4;
-	return _user$project$PlaylistStructure$Playlist(
-		{items: _p5._0.items, position: _p5._0.position + 1});
-};
 var _user$project$PlaylistStructure$append = F2(
-	function (newItems, _p6) {
-		var _p7 = _p6;
+	function (newItems, _p4) {
+		var _p5 = _p4;
 		return _user$project$PlaylistStructure$Playlist(
 			{
 				items: A2(
 					_elm_lang$core$Array$append,
-					_p7._0.items,
+					_p5._0.items,
 					_elm_lang$core$Array$fromList(newItems)),
-				position: _p7._0.position
+				position: _p5._0.position
 			});
 	});
 var _user$project$PlaylistStructure$prepend = F2(
-	function (item, _p8) {
-		var _p9 = _p8;
+	function (item, _p6) {
+		var _p7 = _p6;
 		return _user$project$PlaylistStructure$Playlist(
 			{
 				items: A2(
@@ -3578,22 +3573,16 @@ var _user$project$PlaylistStructure$prepend = F2(
 					_elm_lang$core$Array$fromList(
 						_elm_lang$core$Native_List.fromArray(
 							[item])),
-					_p9._0.items),
-				position: _p9._0.position + 1
+					_p7._0.items),
+				position: _p7._0.position + 1
 			});
-	});
-var _user$project$PlaylistStructure$select = F2(
-	function (newPosition, _p10) {
-		var _p11 = _p10;
-		return _user$project$PlaylistStructure$Playlist(
-			{items: _p11._0.items, position: newPosition});
 	});
 var _user$project$PlaylistStructure$remove = F2(
 	function (item, playlist) {
 		var current = _user$project$PlaylistStructure$currentItem(playlist);
-		var _p12 = playlist;
-		var items = _p12._0.items;
-		var position = _p12._0.position;
+		var _p8 = playlist;
+		var items = _p8._0.items;
+		var position = _p8._0.position;
 		var matchCountBeforePosition = _elm_lang$core$Array$length(
 			A2(
 				_elm_lang$core$Array$filter,
@@ -3614,9 +3603,53 @@ var _user$project$PlaylistStructure$remove = F2(
 				position: position - matchCountBeforePosition
 			});
 	});
+var _user$project$PlaylistStructure$next = function (_p9) {
+	var _p10 = _p9;
+	return _user$project$PlaylistStructure$Playlist(
+		{items: _p10._0.items, position: _p10._0.position + 1});
+};
+var _user$project$PlaylistStructure$select = F2(
+	function (newPosition, _p11) {
+		var _p12 = _p11;
+		return _user$project$PlaylistStructure$Playlist(
+			{items: _p12._0.items, position: newPosition});
+	});
+var _user$project$Player$Playlist = F2(
+	function (a, b) {
+		return {id: a, items: b};
+	});
+var _user$project$Player$Player = function (a) {
+	return {ctor: 'Player', _0: a};
+};
+var _user$project$Player$initialize = function (playlistIds) {
+	var createPlaylist = function (id) {
+		return A2(_user$project$Player$Playlist, id, _user$project$PlaylistStructure$empty);
+	};
+	return _user$project$Player$Player(
+		{
+			playlists: A2(_elm_lang$core$List$map, createPlaylist, playlistIds),
+			currentTrack: _elm_lang$core$Maybe$Nothing
+		});
+};
+var _user$project$Player$appendTracksToPlaylist = F3(
+	function (playlistId, tracks, _p0) {
+		var _p1 = _p0;
+		var updatePlaylist = function (playlist) {
+			return _elm_lang$core$Native_Utils.eq(playlist.id, playlistId) ? _elm_lang$core$Native_Utils.update(
+				playlist,
+				{
+					items: A2(_user$project$PlaylistStructure$append, tracks, playlist.items)
+				}) : playlist;
+		};
+		return _user$project$Player$Player(
+			{
+				playlists: A2(_elm_lang$core$List$map, updatePlaylist, _p1._0.playlists),
+				currentTrack: _p1._0.currentTrack
+			});
+	});
 var Elm = {};
-Elm['PlaylistStructure'] = Elm['PlaylistStructure'] || {};
-_elm_lang$core$Native_Platform.addPublicModule(Elm['PlaylistStructure'], 'PlaylistStructure', typeof _user$project$PlaylistStructure$main === 'undefined' ? null : _user$project$PlaylistStructure$main);
+Elm['Player'] = Elm['Player'] || {};
+_elm_lang$core$Native_Platform.addPublicModule(Elm['Player'], 'Player', typeof _user$project$Player$main === 'undefined' ? null : _user$project$Player$main);
 
 if (typeof define === "function" && define['amd'])
 {
@@ -3647,4 +3680,4 @@ for (var publicModule in Elm)
 }
 
 }).call(this);
-</script></head><body><script type="text/javascript">Elm.PlaylistStructure.fullscreen()</script></body></html>
+</script></head><body><script type="text/javascript">Elm.Player.fullscreen()</script></body></html>
