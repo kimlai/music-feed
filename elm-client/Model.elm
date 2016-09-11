@@ -13,7 +13,8 @@ type alias Model =
     , queue : List TrackId
     , customQueue : List TrackId
     , playing : Bool
-    , currentPlaylist : Maybe PlaylistId
+    , currentPlaylistId : Maybe PlaylistId
+    , currentTrackId : Maybe TrackId
     , currentPage : Page
     , lastKeyPressed : Maybe Char
     , currentTime : Maybe Time
@@ -93,20 +94,13 @@ type PlaylistId
     | Blacklist
 
 
+currentPlaylist : Model -> Maybe Playlist
+currentPlaylist model =
+    List.filter ((==) model.currentPlaylistId << Just << .id) model.playlists
+        |> List.head
+
+
 currentTrack : Model -> Maybe Track
 currentTrack model =
-    currentTrackId model
+    model.currentTrackId
         `Maybe.andThen` (flip Dict.get) model.tracks
-
-
-currentTrackId : Model -> Maybe TrackId
-currentTrackId model =
-    let
-        findPlaylist id =
-            List.filter ((==) id << .id) model.playlists
-                |> List.head
-    in
-        model.currentPlaylist
-            `Maybe.andThen` findPlaylist
-            `Maybe.andThen` (.items >> Just)
-            `Maybe.andThen` PlaylistStructure.currentItem

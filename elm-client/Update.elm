@@ -93,7 +93,8 @@ update message model =
                 updatedModel =
                     { model
                     | playlists = updatedPlaylists
-                    , currentPlaylist = Just playlistId
+                    , currentPlaylistId = Just playlistId
+                    , currentTrackId = Just track.id
                     }
             in
                 update Play updatedModel
@@ -141,7 +142,7 @@ update message model =
 
         Pause ->
             ( { model | playing = False }
-            , Ports.pause (Model.currentTrackId model)
+            , Ports.pause (model.currentTrackId)
             )
 
         TrackError trackId ->
@@ -167,7 +168,23 @@ update message model =
                 update Play model
 
         Next ->
-            ( model, Cmd.none )
+            let
+                updatePlaylist playlist =
+                    if model.currentPlaylistId == Just playlist.id then
+                        { playlist | items = PlaylistStructure.next playlist.items }
+                    else playlist
+                updatedPlaylists =
+                    List.map updatePlaylist model.playlists
+                model' =
+                    { model | playlists = updatedPlaylists }
+                currentTrack =
+                    case Model.currentPlaylist model' of
+                        Just playlist ->
+                            PlaylistStructure.currentItem playlist.items
+                        Nothing ->
+                            Nothing
+            in
+                update Play { model' | currentTrackId = currentTrack }
 
         PlayFromCustomQueue track ->
             ( { model
@@ -307,7 +324,7 @@ update message model =
                             ( model, Cmd.none )
 
                 'b' ->
-                    case Model.currentTrackId model of
+                    case model.currentTrackId of
                         Nothing ->
                             ( model
                             , Cmd.none
@@ -317,7 +334,7 @@ update message model =
                             update (BlacklistTrack trackId) model
 
                 's' ->
-                    case Model.currentTrackId model of
+                    case model.currentTrackId of
                         Nothing ->
                             ( model
                             , Cmd.none
@@ -327,7 +344,7 @@ update message model =
                             update (MoveToPlaylist SavedTracks trackId) model
 
                 'P' ->
-                    case Model.currentTrackId model of
+                    case model.currentTrackId  of
                         Nothing ->
                             ( model
                             , Cmd.none
