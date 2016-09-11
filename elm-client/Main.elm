@@ -56,7 +56,7 @@ init page =
       , currentPage = page
       , lastKeyPressed = Nothing
       , currentTime = Nothing
-      , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist ]
+      , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist, CustomQueue ]
       , pages = pages
       , navigation = navigation
       }

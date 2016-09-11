@@ -73,6 +73,7 @@ type PlaylistId
     | SavedTracks
     | PublishedTracks
     | Blacklist
+    | CustomQueue
 
 
 currentPlaylist : Model -> Maybe Playlist

@@ -34,9 +34,9 @@ type Msg
     | KeyPressed Keyboard.KeyCode
     | UpdateCurrentTime Time
     | UpdateCurrentTimeFail
-    | PlayFromCustomQueue Track
+    | PlayFromCustomQueue Int Track
     | PlayFromPlaylist PlaylistId Int Track
-    | OnAddTrackToCustomQueueClicked TrackId
+    | AddToCustomQueue TrackId
     | FetchMore PlaylistId
     | FetchFail PlaylistId Http.Error
     | FetchSuccess PlaylistId ( List Track, String )
@@ -94,8 +94,10 @@ update message model =
                 msg
                 { model | player = Player.select playlistId position model.player }
 
-        OnAddTrackToCustomQueueClicked trackId ->
-            ( model, Cmd.none )
+        AddToCustomQueue trackId ->
+            ( { model | player = Player.appendTracksToPlaylist CustomQueue [ trackId ] model.player}
+            , Cmd.none
+            )
 
         FetchMore playlistId ->
             let
@@ -167,10 +169,10 @@ update message model =
                 Play
                 { model | player = Player.next model.player }
 
-        PlayFromCustomQueue track ->
+        PlayFromCustomQueue position track ->
             ( { model
                 | playing = True
-                , customQueue = List.filter ((/=) track.id) model.customQueue
+                , player = Player.select CustomQueue position model.player
               }
             , Ports.playTrack
                 { id = track.id
@@ -269,8 +271,8 @@ update message model =
                                 PublishedTracks ->
                                     update (ChangePage "/") model
 
-                                Blacklist ->
-                                    update (ChangePage "/") model
+                                _ ->
+                                    ( model, Cmd.none )
                         Nothing ->
                             (model, Cmd.none)
 
@@ -287,8 +289,8 @@ update message model =
                                 PublishedTracks ->
                                     update (ChangePage "/saved-tracks") model
 
-                                Blacklist ->
-                                    update (ChangePage "/") model
+                                _ ->
+                                    ( model, Cmd.none )
                         Nothing ->
                             (model, Cmd.none)
 

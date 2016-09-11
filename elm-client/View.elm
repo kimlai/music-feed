@@ -6,7 +6,7 @@ import Html exposing (Html, a, nav, li, ul, text, div, img)
 import Html.Attributes exposing (class, classList, href, src, style)
 import Json.Decode
 import Html.Events exposing (onClick, onWithOptions)
-import Model exposing (Model, Track, TrackId, Playlist, PlaylistId, NavigationItem)
+import Model exposing (Model, Track, TrackId, Playlist, PlaylistId(..), NavigationItem)
 import Player
 import Time exposing (Time)
 import Update exposing (Msg(..))
@@ -22,7 +22,7 @@ view model =
             model.pages
             model.currentPage
             (Player.currentPlaylist model.player)
-        , viewCustomQueue model.tracks model.customQueue
+        , viewCustomQueue model.tracks (Player.playlistContent CustomQueue model.player)
         , div
             [ class "playlist-container" ]
             [ case model.currentPage.playlist of
@@ -128,15 +128,15 @@ viewCustomQueue : Dict TrackId Track -> List TrackId -> Html Msg
 viewCustomQueue tracks queue =
     queue
         |> List.filterMap (\trackId -> Dict.get trackId tracks)
-        |> List.map (viewCustomPlaylistItem)
+        |> List.indexedMap (viewCustomPlaylistItem)
         |> div [ class "custom-queue" ]
 
 
-viewCustomPlaylistItem : Track -> Html Msg
-viewCustomPlaylistItem track =
+viewCustomPlaylistItem : Int -> Track -> Html Msg
+viewCustomPlaylistItem position track =
     div
         [ class "custom-queue-track"
-        , onClick (PlayFromCustomQueue track)
+        , onClick (PlayFromCustomQueue position track)
         ]
         [ img [ src track.artwork_url ] []
         , div
@@ -233,7 +233,7 @@ viewTrack currentTime playlistId position track =
                             { stopPropagation = True
                             , preventDefault = True
                             }
-                            (Json.Decode.succeed (OnAddTrackToCustomQueueClicked track.id))
+                            (Json.Decode.succeed (AddToCustomQueue track.id))
                         ]
                         [ text "Add to queue" ]
                     ]
