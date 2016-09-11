@@ -17,7 +17,7 @@ view model =
     div
         []
         [ viewGlobalPlayer (Model.currentTrack model) model.playing
-        , viewNavigation Model.navigation model.currentPage model.currentPlaylist
+        , viewNavigation Model.navigation model.currentPage model.currentPlaylistId
         , viewCustomQueue model.tracks model.customQueue
         , div
             [ class "playlist-container" ]

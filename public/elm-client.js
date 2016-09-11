@@ -9582,7 +9582,7 @@ var _user$project$Update$decodeTrack = A2(
 			_elm_lang$core$Json_Decode$succeed(0)),
 		_elm_lang$core$Json_Decode$succeed(0)),
 	_elm_lang$core$Json_Decode$succeed(false));
-var _user$project$Update$decodeFeed = A3(
+var _user$project$Update$decodePlaylist = A3(
 	_elm_lang$core$Json_Decode$object2,
 	F2(
 		function (v0, v1) {
@@ -9634,7 +9634,7 @@ var _user$project$Update$fetchMore = function (playlist) {
 		_elm_lang$core$Task$perform,
 		_user$project$Update$FetchFail(playlist.id),
 		_user$project$Update$FetchSuccess(playlist.id),
-		A2(_evancz$elm_http$Http$get, _user$project$Update$decodeFeed, playlist.nextLink));
+		A2(_evancz$elm_http$Http$get, _user$project$Update$decodePlaylist, playlist.nextLink));
 };
 var _user$project$Update$FetchMore = function (a) {
 	return {ctor: 'FetchMore', _0: a};
@@ -10831,7 +10831,7 @@ var _user$project$View$view = function (model) {
 				_user$project$View$viewGlobalPlayer,
 				_user$project$Model$currentTrack(model),
 				model.playing),
-				A3(_user$project$View$viewNavigation, _user$project$Model$navigation, model.currentPage, model.currentPlaylist),
+				A3(_user$project$View$viewNavigation, _user$project$Model$navigation, model.currentPage, model.currentPlaylistId),
 				A2(_user$project$View$viewCustomQueue, model.tracks, model.customQueue),
 				A2(
 				_elm_lang$html$Html$div,
