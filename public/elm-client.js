@@ -9847,7 +9847,10 @@ var _user$project$Update$update = F2(
 				case 'AddTrackFail':
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				case 'PlayFromPlaylist':
-					var _v1 = _user$project$Update$Play,
+					var msg = _elm_lang$core$Native_Utils.eq(
+						_user$project$Player$currentTrack(model.player),
+						_elm_lang$core$Maybe$Just(_p1._2.id)) ? _user$project$Update$TogglePlayback : _user$project$Update$Play;
+					var _v1 = msg,
 						_v2 = _elm_lang$core$Native_Utils.update(
 						model,
 						{

@@ -83,8 +83,15 @@ update message model =
             ( model, Cmd.none )
 
         PlayFromPlaylist playlistId position track ->
+            let
+                msg =
+                    if Player.currentTrack model.player == Just track.id then
+                        TogglePlayback
+                    else
+                        Play
+            in
             update
-                Play
+                msg
                 { model | player = Player.select playlistId position model.player }
 
         OnAddTrackToCustomQueueClicked trackId ->
