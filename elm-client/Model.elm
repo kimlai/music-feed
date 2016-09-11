@@ -10,8 +10,6 @@ import Time exposing (Time)
 type alias Model =
     { tracks : Dict TrackId Track
     , playlists : List Playlist
-    , queue : List TrackId
-    , customQueue : List TrackId
     , playing : Bool
     , currentPage : Page
     , lastKeyPressed : Maybe Char

@@ -9538,29 +9538,10 @@ var _user$project$Model$emptyPlaylist = F3(
 	function (id, fetchUrl, addTrackUrl) {
 		return {id: id, loading: true, nextLink: fetchUrl, addTrackUrl: addTrackUrl};
 	});
-var _user$project$Model$Model = function (a) {
-	return function (b) {
-		return function (c) {
-			return function (d) {
-				return function (e) {
-					return function (f) {
-						return function (g) {
-							return function (h) {
-								return function (i) {
-									return function (j) {
-										return function (k) {
-											return {tracks: a, playlists: b, queue: c, customQueue: d, playing: e, currentPage: f, lastKeyPressed: g, currentTime: h, player: i, pages: j, navigation: k};
-										};
-									};
-								};
-							};
-						};
-					};
-				};
-			};
-		};
-	};
-};
+var _user$project$Model$Model = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {tracks: a, playlists: b, playing: c, currentPage: d, lastKeyPressed: e, currentTime: f, player: g, pages: h, navigation: i};
+	});
 var _user$project$Model$NavigationItem = F2(
 	function (a, b) {
 		return {displayName: a, href: b};
@@ -11050,10 +11031,6 @@ var _user$project$Main$init = function (page) {
 		_0: {
 			tracks: _elm_lang$core$Dict$empty,
 			playlists: _user$project$Main$playlists,
-			queue: _elm_lang$core$Native_List.fromArray(
-				[]),
-			customQueue: _elm_lang$core$Native_List.fromArray(
-				[]),
 			playing: false,
 			currentPage: page,
 			lastKeyPressed: _elm_lang$core$Maybe$Nothing,

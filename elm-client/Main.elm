@@ -50,8 +50,6 @@ init : Model.Page -> ( Model, Cmd Msg )
 init page =
     ( { tracks = Dict.empty
       , playlists = playlists
-      , queue = []
-      , customQueue = []
       , playing = False
       , currentPage = page
       , lastKeyPressed = Nothing
