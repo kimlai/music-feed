@@ -206,7 +206,28 @@ update message model =
             )
 
         MoveToPlaylist playlistId trackId ->
-            ( model, Cmd.none )
+            let
+                updatePlaylist playlist =
+                    if playlist.id == playlistId then
+                        { playlist | items = PlaylistStructure.prepend trackId playlist.items }
+                    else
+                        { playlist | items = PlaylistStructure.remove trackId playlist.items }
+                updatedPlaylists =
+                    List.map updatePlaylist model.playlists
+                targetPlaylist =
+                    model.playlists
+                        |> List.filter ((==) playlistId << .id)
+                        |> List.head
+                cmd =
+                    case targetPlaylist of
+                        Nothing ->
+                            Cmd.none
+                        Just playlist ->
+                            addTrack playlist.addTrackUrl trackId
+            in
+                ( { model | playlists = updatedPlaylists }
+                , cmd
+                )
 
         MoveToPlaylistFail error ->
             ( model
