@@ -2,50 +2,46 @@ module Playlist exposing
     ( Playlist
     , empty
     , append, prepend, remove
-    , currentItem, next, select, items, id
+    , currentItem, next, select, items
     )
 
 import Array exposing (Array)
 
-type Playlist a b =
+type Playlist a =
     Playlist
-        { id: a
-        , items : Array b
+        { items : Array a
         , position : Int
         }
 
 
-empty : a -> Playlist a b
-empty id =
+empty : Playlist a
+empty =
     Playlist
-        { id = id
-        , items = Array.empty
+        { items = Array.empty
         , position = 0
         }
 
 
-append : List b -> Playlist a b -> Playlist a b
-append newItems (Playlist { id, items, position }) =
+append : List a -> Playlist a -> Playlist a
+append newItems (Playlist { items, position }) =
     Playlist
-        { id = id
-        , items = Array.append items (Array.fromList newItems)
+        { items = Array.append items (Array.fromList newItems)
         , position = position
         }
 
 
-prepend : b -> Playlist a b -> Playlist a b
-prepend item (Playlist { id, items, position }) =
+prepend : a -> Playlist a -> Playlist a
+prepend item (Playlist { items, position }) =
     Playlist
-        { id = id
-        , items = Array.append (Array.fromList [item]) items
+        { items = Array.append (Array.fromList [item]) items
         , position = position + 1
         }
 
 
-remove : b -> Playlist a b -> Playlist a b
+remove : a -> Playlist a -> Playlist a
 remove item playlist =
     let
-        (Playlist { id, items, position }) =
+        (Playlist { items, position }) =
             playlist
         current = currentItem playlist
         matchCountBeforePosition =
@@ -54,40 +50,32 @@ remove item playlist =
                 |> Array.length
     in
         Playlist
-            { id = id
-            , items = Array.filter ((/=) item) items
+            { items = Array.filter ((/=) item) items
             , position = position - matchCountBeforePosition
             }
 
 
-next : Playlist a b -> Playlist a b
-next (Playlist { id, items, position }) =
+next : Playlist a -> Playlist a
+next (Playlist { items, position }) =
     Playlist
-        { id = id
-        , items = items
+        { items = items
         , position = position + 1
         }
 
 
-currentItem : Playlist a b -> Maybe b
+currentItem : Playlist a -> Maybe a
 currentItem (Playlist { items, position }) =
     Array.get position items
 
 
-select : Int -> Playlist a b -> Playlist a b
-select newPosition (Playlist { id, items, position }) =
+select : Int -> Playlist a -> Playlist a
+select newPosition (Playlist { items, position }) =
     Playlist
-        { id = id
-        , items = items
+        { items = items
         , position = newPosition
         }
 
 
-items : Playlist a b -> List b
+items : Playlist a -> List a
 items (Playlist { items }) =
     Array.toList items
-
-
-id : Playlist a b -> a
-id (Playlist { id }) =
-    id

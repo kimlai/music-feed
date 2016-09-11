@@ -6,7 +6,7 @@ import Playlist exposing (Playlist)
 
 type Player a b =
     Player
-        { playlists : List (Playlist a b)
+        { playlists : List (a, Playlist b)
         , currentPlaylist : Maybe a
         , currentTrack : Maybe b
         }
@@ -15,7 +15,7 @@ type Player a b =
 initialize : List a -> Player a b
 initialize playlistIds =
     Player
-        { playlists = List.map Playlist.empty playlistIds
+        { playlists = List.map (\id -> ( id, Playlist.empty )) playlistIds
         , currentPlaylist = Nothing
         , currentTrack = Nothing
         }
@@ -24,11 +24,11 @@ initialize playlistIds =
 appendTracksToPlaylist : a -> List b -> Player a b -> Player a b
 appendTracksToPlaylist playlistId tracks (Player { playlists, currentPlaylist, currentTrack }) =
     let
-        updatePlaylist playlist =
-            if Playlist.id playlist == playlistId then
-                Playlist.append tracks playlist
+        updatePlaylist ( id, playlist ) =
+            if id == playlistId then
+                ( id, Playlist.append tracks playlist )
             else
-                playlist
+                ( id, playlist )
     in
         Player
             { playlists = List.map updatePlaylist playlists
@@ -40,17 +40,18 @@ appendTracksToPlaylist playlistId tracks (Player { playlists, currentPlaylist, c
 select : a -> Int -> Player a b -> Player a b
 select playlistId position (Player { playlists, currentPlaylist, currentTrack }) =
     let
-        updatePlaylist playlist =
-            if Playlist.id playlist == playlistId then
-                Playlist.select position playlist
+        updatePlaylist ( id, playlist ) =
+            if id == playlistId then
+                ( id, Playlist.select position playlist )
             else
-                playlist
+                ( id, playlist )
         playlists' =
             List.map updatePlaylist playlists
         newCurrentPlaylist =
             playlists'
-                |> List.filter ((==) playlistId << Playlist.id)
+                |> List.filter ((==) playlistId << fst)
                 |> List.head
+                |> Maybe.map snd
         currentTrack' =
             newCurrentPlaylist `Maybe.andThen` Playlist.currentItem
     in
@@ -64,18 +65,19 @@ select playlistId position (Player { playlists, currentPlaylist, currentTrack })
 next : Player a b -> Player a b
 next (Player { playlists, currentPlaylist, currentTrack}) =
     let
-        updatePlaylist playlist =
-            if Just (Playlist.id playlist) == currentPlaylist
+        updatePlaylist (id, playlist ) =
+            if Just id == currentPlaylist
                 && (Playlist.currentItem playlist) == currentTrack then
-                Playlist.next playlist
+                ( id, Playlist.next playlist )
             else
-                playlist
+                ( id, playlist )
         playlists' =
             List.map updatePlaylist playlists
         items =
             playlists'
-                |> List.filter ((==) currentPlaylist << Just << Playlist.id)
+                |> List.filter ((==) currentPlaylist << Just << fst)
                 |> List.head
+                |> Maybe.map snd
         currentTrack' =
             items `Maybe.andThen` Playlist.currentItem
     in
@@ -88,11 +90,11 @@ next (Player { playlists, currentPlaylist, currentTrack}) =
 moveTrack : a -> b -> Player a b -> Player a b
 moveTrack playlistId track (Player { playlists, currentPlaylist, currentTrack }) =
     let
-        updatePlaylist playlist =
-            if Playlist.id playlist == playlistId then
-                Playlist.prepend track playlist
+        updatePlaylist (id, playlist ) =
+            if id == playlistId then
+                ( id, Playlist.prepend track playlist )
             else
-                Playlist.remove track playlist
+                ( id, Playlist.remove track playlist )
         playlists' =
             List.map updatePlaylist playlists
     in
@@ -116,7 +118,8 @@ currentTrack (Player { currentTrack }) =
 playlistContent : a -> Player a b -> List b
 playlistContent playlistId (Player { playlists }) =
     playlists
-        |> List.filter ((==) playlistId << Playlist.id)
+        |> List.filter ((==) playlistId << fst)
         |> List.head
-        |> Maybe.withDefault (Playlist.empty playlistId)
+        |> Maybe.withDefault ( playlistId, Playlist.empty )
+        |> snd
         |> Playlist.items
