@@ -11,7 +11,7 @@
     <body>
         <script>
             var playlist = <%=playlist%>;
-            var app = Elm.Radio.fullscreen(JSON.stringify(playlist));
+            var app = Elm.Radio.Main.fullscreen(JSON.stringify(playlist));
 
             var soundcloudClientId = '<%=client_id%>';
             var audio = new Audio();

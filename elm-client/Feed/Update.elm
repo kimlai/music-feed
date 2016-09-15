@@ -1,18 +1,20 @@
-module Update exposing (..)
+module Feed.Update exposing (..)
 
 
+import Api
 import Char
 import Dict
+import Feed.Model as Model exposing (Model, PlaylistId(..))
+import Feed.Ports as Ports
 import Http
 import Json.Decode
 import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Keyboard
-import Model exposing (Model, PlaylistId(..), TrackId, Track)
+import Model exposing (Track, TrackId)
 import Navigation
 import Player
-import Ports
 import Task exposing (Task)
 import Time exposing (Time)
 
@@ -368,48 +370,11 @@ update message model =
 
 fetchMore : Model.Playlist -> Cmd Msg
 fetchMore playlist =
-    Http.get decodePlaylist playlist.nextLink
+    Api.fetchPlaylist playlist.nextLink
         |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
-
-
-decodePlaylist : Json.Decode.Decoder ( List Track, String )
-decodePlaylist =
-    Json.Decode.object2 (,)
-        ("tracks" := Json.Decode.list decodeTrack)
-        ("next_href" := Json.Decode.string)
-
-
-decodeTrack : Json.Decode.Decoder Track
-decodeTrack =
-    Json.Decode.succeed Track
-        |: ("id" := Json.Decode.int)
-        |: (Json.Decode.at [ "user", "username" ] Json.Decode.string)
-        |: ("artwork_url" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
-        |: ("title" := Json.Decode.string)
-        |: ("stream_url" := Json.Decode.string)
-        |: ("permalink_url" := Json.Decode.string)
-        |: ("created_at" := Json.Decode.Extra.date)
-        |: Json.Decode.succeed 0
-        |: Json.Decode.succeed 0
-        |: Json.Decode.succeed False
 
 
 addTrack : String -> Int -> Cmd Msg
 addTrack addTrackUrl trackId =
-    Http.send
-        Http.defaultSettings
-        { verb = "POST"
-        , headers = [ ( "Content-Type", "application/json" ) ]
-        , url = addTrackUrl
-        , body = (addTrackBody trackId)
-        }
-        |> Http.fromJson (Json.Decode.succeed "ok")
+    Api.addTrack addTrackUrl trackId
         |> Task.perform AddTrackFail (\_ -> AddTrackSuccess)
-
-
-addTrackBody : Int -> Http.Body
-addTrackBody trackId =
-    Json.Encode.object
-        [ ( "soundcloudTrackId", Json.Encode.int trackId ) ]
-        |> Json.Encode.encode 0
-        |> Http.string

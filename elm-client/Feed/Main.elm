@@ -1,15 +1,15 @@
-port module Main exposing (..)
+port module Feed.Main exposing (..)
 
 import Dict exposing (Dict)
+import Feed.Model as Model exposing (Model, PlaylistId(..))
+import Feed.Ports as Ports
+import Feed.Update as Update exposing (Msg(..))
+import Feed.View as View
 import Keyboard
-import Model exposing (Model, PlaylistId(..))
 import Navigation
-import Ports
+import Player
 import Task
 import Time exposing (Time)
-import Update exposing (Msg(..))
-import View
-import Player
 
 
 main : Program Never
