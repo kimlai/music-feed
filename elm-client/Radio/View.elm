@@ -3,11 +3,12 @@ module Radio.View exposing (..)
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, a, nav, li, ul, text, div, img)
-import Html.Attributes exposing (class, classList, href, src, style)
+import Html.Attributes exposing (class, classList, href, src, style, target)
 import Json.Decode
 import Html.Events exposing (onClick, onWithOptions)
 import Model exposing (Track, TrackId)
 import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..))
+import Regex
 import Player
 import Time exposing (Time)
 import TimeAgo exposing (timeAgo)
@@ -28,22 +29,35 @@ view model =
             (Player.currentPlaylist model.player)
         , viewCustomQueue model.tracks (Player.playlistContent CustomQueue model.player)
         , div
-            [ class "playlist-container" ]
+            []
             [ case model.currentPage.playlist of
                 Just id ->
-                    let
-                        currentPagePlaylist =
-                            List.filter ((==) id << .id) model.playlists
-                                |> List.head
-                    in
-                        case currentPagePlaylist of
-                            Just playlist ->
-                                viewPlaylist
-                                    model.currentTime
-                                    model.tracks playlist
-                                    (Player.playlistContent id model.player)
-                            Nothing ->
-                                div [] [ text "Well, this is awkward..." ]
+                    case id of
+                        Radio ->
+                            let
+                                currentRadioTrack =
+                                    Player.currentTrackOfPlaylist Radio model.player
+                                        `Maybe.andThen` (flip Dict.get) model.tracks
+                            in
+                                viewRadioTrack currentRadioTrack (Player.currentPlaylist model.player)
+                        _ ->
+                            let
+                                currentPagePlaylist =
+                                    List.filter ((==) id << .id) model.playlists
+                                        |> List.head
+                            in
+                                case currentPagePlaylist of
+                                    Just playlist ->
+                                        div
+                                            [ class "playlist-container" ]
+                                            [
+                                            viewPlaylist
+                                                model.currentTime
+                                                model.tracks playlist
+                                                (Player.playlistContent id model.player)
+                                            ]
+                                    Nothing ->
+                                        div [] [ text "Well, this is awkward..." ]
                 Nothing ->
                     case model.currentPage.url of
                         "/publish-track" ->
@@ -53,6 +67,40 @@ view model =
 
             ]
         ]
+
+
+viewRadioTrack : Maybe Track -> Maybe PlaylistId -> Html Msg
+viewRadioTrack track currentPlaylist =
+    case track of
+        Nothing ->
+            div [] [ text "..." ]
+
+        Just track ->
+            div
+                [ class "radio-track" ]
+                [ img
+                    [ class "cover"
+                    , src (Regex.replace Regex.All (Regex.regex "large") (\_ -> "t500x500") track.artwork_url)
+                    ]
+                    []
+                , div
+                    [ class "track-info" ]
+                    [ div [ class "artist" ] [ text track.artist ]
+                    , div [ class "title" ] [ text track.title ]
+                    , a
+                        [ class "source"
+                        , href track.sourceUrl
+                        , target "_blank"
+                        ]
+                        [ text "Source" ]
+                    , if currentPlaylist /= Just Radio then
+                        div
+                            []
+                            [ text "Resume Radio" ]
+                        else
+                            div [] []
+                    ]
+                ]
 
 
 viewCustomQueue : Dict TrackId Track -> List TrackId -> Html Msg

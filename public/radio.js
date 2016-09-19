@@ -6302,9 +6302,144 @@ var _elm_community$elm_json_extra$Json_Decode_Extra$apply = _elm_lang$core$Json_
 var _elm_community$elm_json_extra$Json_Decode_Extra_ops = _elm_community$elm_json_extra$Json_Decode_Extra_ops || {};
 _elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'] = _elm_community$elm_json_extra$Json_Decode_Extra$apply;
 
+//import Maybe, Native.List //
+
+var _elm_lang$core$Native_Regex = function() {
+
+function escape(str)
+{
+	return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+function caseInsensitive(re)
+{
+	return new RegExp(re.source, 'gi');
+}
+function regex(raw)
+{
+	return new RegExp(raw, 'g');
+}
+
+function contains(re, string)
+{
+	return string.match(re) !== null;
+}
+
+function find(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex === re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		out.push({
+			match: result[0],
+			submatches: _elm_lang$core$Native_List.fromArray(subs),
+			index: result.index,
+			number: number
+		});
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+function replace(n, re, replacer, string)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		return replacer({
+			match: match,
+			submatches: _elm_lang$core$Native_List.fromArray(submatches),
+			index: arguments[i - 1],
+			number: count
+		});
+	}
+	return string.replace(re, jsReplacer);
+}
+
+function split(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	if (n === Infinity)
+	{
+		return _elm_lang$core$Native_List.fromArray(str.split(re));
+	}
+	var string = str;
+	var result;
+	var out = [];
+	var start = re.lastIndex;
+	while (n--)
+	{
+		if (!(result = re.exec(string))) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+return {
+	regex: regex,
+	caseInsensitive: caseInsensitive,
+	escape: escape,
+
+	contains: F2(contains),
+	find: F3(find),
+	replace: F4(replace),
+	split: F3(split)
+};
+
+}();
+
 var _elm_lang$core$Process$kill = _elm_lang$core$Native_Scheduler.kill;
 var _elm_lang$core$Process$sleep = _elm_lang$core$Native_Scheduler.sleep;
 var _elm_lang$core$Process$spawn = _elm_lang$core$Native_Scheduler.spawn;
+
+var _elm_lang$core$Regex$split = _elm_lang$core$Native_Regex.split;
+var _elm_lang$core$Regex$replace = _elm_lang$core$Native_Regex.replace;
+var _elm_lang$core$Regex$find = _elm_lang$core$Native_Regex.find;
+var _elm_lang$core$Regex$contains = _elm_lang$core$Native_Regex.contains;
+var _elm_lang$core$Regex$caseInsensitive = _elm_lang$core$Native_Regex.caseInsensitive;
+var _elm_lang$core$Regex$regex = _elm_lang$core$Native_Regex.regex;
+var _elm_lang$core$Regex$escape = _elm_lang$core$Native_Regex.escape;
+var _elm_lang$core$Regex$Match = F4(
+	function (a, b, c, d) {
+		return {match: a, submatches: b, index: c, number: d};
+	});
+var _elm_lang$core$Regex$Regex = {ctor: 'Regex'};
+var _elm_lang$core$Regex$AtMost = function (a) {
+	return {ctor: 'AtMost', _0: a};
+};
+var _elm_lang$core$Regex$All = {ctor: 'All'};
 
 var _elm_lang$dom$Native_Dom = function() {
 
@@ -9510,13 +9645,35 @@ var _user$project$Player$playlistContent = F2(
 							},
 							_p1._0.playlists)))));
 	});
-var _user$project$Player$currentTrack = function (_p3) {
-	var _p4 = _p3;
-	return _p4._0.currentTrack;
+var _user$project$Player$currentTrackOfPlaylist = F2(
+	function (playlistId, _p3) {
+		var _p4 = _p3;
+		return _user$project$Playlist$currentItem(
+			_elm_lang$core$Basics$snd(
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					{ctor: '_Tuple2', _0: playlistId, _1: _user$project$Playlist$empty},
+					_elm_lang$core$List$head(
+						A2(
+							_elm_lang$core$List$filter,
+							function (_p5) {
+								return A2(
+									F2(
+										function (x, y) {
+											return _elm_lang$core$Native_Utils.eq(x, y);
+										}),
+									playlistId,
+									_elm_lang$core$Basics$fst(_p5));
+							},
+							_p4._0.playlists)))));
+	});
+var _user$project$Player$currentTrack = function (_p6) {
+	var _p7 = _p6;
+	return _p7._0.currentTrack;
 };
-var _user$project$Player$currentPlaylist = function (_p5) {
-	var _p6 = _p5;
-	return _p6._0.currentPlaylist;
+var _user$project$Player$currentPlaylist = function (_p8) {
+	var _p9 = _p8;
+	return _p9._0.currentPlaylist;
 };
 var _user$project$Player$Player = function (a) {
 	return {ctor: 'Player', _0: a};
@@ -9535,53 +9692,53 @@ var _user$project$Player$initialize = function (playlistIds) {
 		});
 };
 var _user$project$Player$appendTracksToPlaylist = F3(
-	function (playlistId, tracks, _p7) {
-		var _p8 = _p7;
-		var updatePlaylist = function (_p9) {
-			var _p10 = _p9;
-			var _p12 = _p10._1;
-			var _p11 = _p10._0;
-			return _elm_lang$core$Native_Utils.eq(_p11, playlistId) ? {
+	function (playlistId, tracks, _p10) {
+		var _p11 = _p10;
+		var updatePlaylist = function (_p12) {
+			var _p13 = _p12;
+			var _p15 = _p13._1;
+			var _p14 = _p13._0;
+			return _elm_lang$core$Native_Utils.eq(_p14, playlistId) ? {
 				ctor: '_Tuple2',
-				_0: _p11,
-				_1: A2(_user$project$Playlist$append, tracks, _p12)
-			} : {ctor: '_Tuple2', _0: _p11, _1: _p12};
+				_0: _p14,
+				_1: A2(_user$project$Playlist$append, tracks, _p15)
+			} : {ctor: '_Tuple2', _0: _p14, _1: _p15};
 		};
 		return _user$project$Player$Player(
 			{
-				playlists: A2(_elm_lang$core$List$map, updatePlaylist, _p8._0.playlists),
-				currentPlaylist: _p8._0.currentPlaylist,
-				currentTrack: _p8._0.currentTrack
+				playlists: A2(_elm_lang$core$List$map, updatePlaylist, _p11._0.playlists),
+				currentPlaylist: _p11._0.currentPlaylist,
+				currentTrack: _p11._0.currentTrack
 			});
 	});
 var _user$project$Player$select = F3(
-	function (playlistId, position, _p13) {
-		var _p14 = _p13;
-		var updatePlaylist = function (_p15) {
-			var _p16 = _p15;
-			var _p18 = _p16._1;
-			var _p17 = _p16._0;
-			return _elm_lang$core$Native_Utils.eq(_p17, playlistId) ? {
+	function (playlistId, position, _p16) {
+		var _p17 = _p16;
+		var updatePlaylist = function (_p18) {
+			var _p19 = _p18;
+			var _p21 = _p19._1;
+			var _p20 = _p19._0;
+			return _elm_lang$core$Native_Utils.eq(_p20, playlistId) ? {
 				ctor: '_Tuple2',
-				_0: _p17,
-				_1: A2(_user$project$Playlist$select, position, _p18)
-			} : {ctor: '_Tuple2', _0: _p17, _1: _p18};
+				_0: _p20,
+				_1: A2(_user$project$Playlist$select, position, _p21)
+			} : {ctor: '_Tuple2', _0: _p20, _1: _p21};
 		};
-		var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p14._0.playlists);
+		var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p17._0.playlists);
 		var newCurrentPlaylist = A2(
 			_elm_lang$core$Maybe$map,
 			_elm_lang$core$Basics$snd,
 			_elm_lang$core$List$head(
 				A2(
 					_elm_lang$core$List$filter,
-					function (_p19) {
+					function (_p22) {
 						return A2(
 							F2(
 								function (x, y) {
 									return _elm_lang$core$Native_Utils.eq(x, y);
 								}),
 							playlistId,
-							_elm_lang$core$Basics$fst(_p19));
+							_elm_lang$core$Basics$fst(_p22));
 					},
 					playlists$)));
 		var currentTrack$ = A2(_elm_lang$core$Maybe$andThen, newCurrentPlaylist, _user$project$Playlist$currentItem);
@@ -9592,65 +9749,65 @@ var _user$project$Player$select = F3(
 				currentTrack: currentTrack$
 			});
 	});
-var _user$project$Player$next = function (_p20) {
-	var _p21 = _p20;
-	var _p27 = _p21._0.currentPlaylist;
-	var updatePlaylist = function (_p22) {
-		var _p23 = _p22;
-		var _p25 = _p23._1;
-		var _p24 = _p23._0;
+var _user$project$Player$next = function (_p23) {
+	var _p24 = _p23;
+	var _p30 = _p24._0.currentPlaylist;
+	var updatePlaylist = function (_p25) {
+		var _p26 = _p25;
+		var _p28 = _p26._1;
+		var _p27 = _p26._0;
 		return (_elm_lang$core$Native_Utils.eq(
-			_elm_lang$core$Maybe$Just(_p24),
-			_p27) && _elm_lang$core$Native_Utils.eq(
-			_user$project$Playlist$currentItem(_p25),
-			_p21._0.currentTrack)) ? {
+			_elm_lang$core$Maybe$Just(_p27),
+			_p30) && _elm_lang$core$Native_Utils.eq(
+			_user$project$Playlist$currentItem(_p28),
+			_p24._0.currentTrack)) ? {
 			ctor: '_Tuple2',
-			_0: _p24,
-			_1: _user$project$Playlist$next(_p25)
-		} : {ctor: '_Tuple2', _0: _p24, _1: _p25};
+			_0: _p27,
+			_1: _user$project$Playlist$next(_p28)
+		} : {ctor: '_Tuple2', _0: _p27, _1: _p28};
 	};
-	var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p21._0.playlists);
+	var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p24._0.playlists);
 	var items = A2(
 		_elm_lang$core$Maybe$map,
 		_elm_lang$core$Basics$snd,
 		_elm_lang$core$List$head(
 			A2(
 				_elm_lang$core$List$filter,
-				function (_p26) {
+				function (_p29) {
 					return A2(
 						F2(
 							function (x, y) {
 								return _elm_lang$core$Native_Utils.eq(x, y);
 							}),
-						_p27,
+						_p30,
 						_elm_lang$core$Maybe$Just(
-							_elm_lang$core$Basics$fst(_p26)));
+							_elm_lang$core$Basics$fst(_p29)));
 				},
 				playlists$)));
 	var currentTrack$ = A2(_elm_lang$core$Maybe$andThen, items, _user$project$Playlist$currentItem);
 	return _user$project$Player$Player(
-		{playlists: playlists$, currentPlaylist: _p27, currentTrack: currentTrack$});
+		{playlists: playlists$, currentPlaylist: _p30, currentTrack: currentTrack$});
 };
 var _user$project$Player$moveTrack = F3(
-	function (playlistId, track, _p28) {
-		var _p29 = _p28;
-		var updatePlaylist = function (_p30) {
-			var _p31 = _p30;
-			var _p33 = _p31._1;
-			var _p32 = _p31._0;
-			return _elm_lang$core$Native_Utils.eq(_p32, playlistId) ? {
+	function (playlistId, track, _p31) {
+		var _p32 = _p31;
+		var updatePlaylist = function (_p33) {
+			var _p34 = _p33;
+			var _p36 = _p34._1;
+			var _p35 = _p34._0;
+			return _elm_lang$core$Native_Utils.eq(_p35, playlistId) ? {
 				ctor: '_Tuple2',
-				_0: _p32,
-				_1: A2(_user$project$Playlist$prepend, track, _p33)
+				_0: _p35,
+				_1: A2(_user$project$Playlist$prepend, track, _p36)
 			} : {
 				ctor: '_Tuple2',
-				_0: _p32,
-				_1: A2(_user$project$Playlist$remove, track, _p33)
+				_0: _p35,
+				_1: A2(_user$project$Playlist$remove, track, _p36)
 			};
 		};
-		var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p29._0.playlists);
+		var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p32._0.playlists);
 		return _user$project$Player$Player(
-			{playlists: playlists$, currentPlaylist: _p29._0.currentPlaylist, currentTrack: _p29._0.currentTrack});
+			{playlists: playlists$, currentPlaylist: _p32._0.currentPlaylist, currentTrack: _p32._0.currentTrack});
 	});
 
 var _user$project$Radio_Model$currentTrack = function (model) {
@@ -10749,6 +10906,104 @@ var _user$project$Radio_View$viewCustomQueue = F2(
 					},
 					queue)));
 	});
+var _user$project$Radio_View$viewRadioTrack = F2(
+	function (track, currentPlaylist) {
+		var _p0 = track;
+		if (_p0.ctor === 'Nothing') {
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('...')
+					]));
+		} else {
+			var _p2 = _p0._0;
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class('radio-track')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$img,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('cover'),
+								_elm_lang$html$Html_Attributes$src(
+								A4(
+									_elm_lang$core$Regex$replace,
+									_elm_lang$core$Regex$All,
+									_elm_lang$core$Regex$regex('large'),
+									function (_p1) {
+										return 't500x500';
+									},
+									_p2.artwork_url))
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('track-info')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('artist')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text(_p2.artist)
+									])),
+								A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('title')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text(_p2.title)
+									])),
+								A2(
+								_elm_lang$html$Html$a,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('source'),
+										_elm_lang$html$Html_Attributes$href(_p2.sourceUrl),
+										_elm_lang$html$Html_Attributes$target('_blank')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('Source')
+									])),
+								(!_elm_lang$core$Native_Utils.eq(
+								currentPlaylist,
+								_elm_lang$core$Maybe$Just(_user$project$Radio_Model$Radio))) ? A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('Resume Radio')
+									])) : A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[]),
+								_elm_lang$core$Native_List.fromArray(
+									[]))
+							]))
+					]));
+		}
+	});
 var _user$project$Radio_View$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -10776,51 +11031,70 @@ var _user$project$Radio_View$view = function (model) {
 				A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$class('playlist-container')
-					]),
+					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[
 						function () {
-						var _p0 = model.currentPage.playlist;
-						if (_p0.ctor === 'Just') {
-							var _p3 = _p0._0;
-							var currentPagePlaylist = _elm_lang$core$List$head(
-								A2(
-									_elm_lang$core$List$filter,
-									function (_p1) {
-										return A2(
-											F2(
-												function (x, y) {
-													return _elm_lang$core$Native_Utils.eq(x, y);
-												}),
-											_p3,
-											function (_) {
-												return _.id;
-											}(_p1));
-									},
-									model.playlists));
-							var _p2 = currentPagePlaylist;
-							if (_p2.ctor === 'Just') {
-								return A4(
-									_user$project$Radio_View$viewPlaylist,
-									model.currentTime,
-									model.tracks,
-									_p2._0,
-									A2(_user$project$Player$playlistContent, _p3, model.player));
-							} else {
+						var _p3 = model.currentPage.playlist;
+						if (_p3.ctor === 'Just') {
+							var _p7 = _p3._0;
+							var _p4 = _p7;
+							if (_p4.ctor === 'Radio') {
+								var currentRadioTrack = A2(
+									_elm_lang$core$Maybe$andThen,
+									A2(_user$project$Player$currentTrackOfPlaylist, _user$project$Radio_Model$Radio, model.player),
+									A2(_elm_lang$core$Basics$flip, _elm_lang$core$Dict$get, model.tracks));
 								return A2(
-									_elm_lang$html$Html$div,
-									_elm_lang$core$Native_List.fromArray(
-										[]),
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html$text('Well, this is awkward...')
-										]));
+									_user$project$Radio_View$viewRadioTrack,
+									currentRadioTrack,
+									_user$project$Player$currentPlaylist(model.player));
+							} else {
+								var currentPagePlaylist = _elm_lang$core$List$head(
+									A2(
+										_elm_lang$core$List$filter,
+										function (_p5) {
+											return A2(
+												F2(
+													function (x, y) {
+														return _elm_lang$core$Native_Utils.eq(x, y);
+													}),
+												_p7,
+												function (_) {
+													return _.id;
+												}(_p5));
+										},
+										model.playlists));
+								var _p6 = currentPagePlaylist;
+								if (_p6.ctor === 'Just') {
+									return A2(
+										_elm_lang$html$Html$div,
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html_Attributes$class('playlist-container')
+											]),
+										_elm_lang$core$Native_List.fromArray(
+											[
+												A4(
+												_user$project$Radio_View$viewPlaylist,
+												model.currentTime,
+												model.tracks,
+												_p6._0,
+												A2(_user$project$Player$playlistContent, _p7, model.player))
+											]));
+								} else {
+									return A2(
+										_elm_lang$html$Html$div,
+										_elm_lang$core$Native_List.fromArray(
+											[]),
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html$text('Well, this is awkward...')
+											]));
+								}
 							}
 						} else {
-							var _p4 = model.currentPage.url;
-							if (_p4 === '/publish-track') {
+							var _p8 = model.currentPage.url;
+							if (_p8 === '/publish-track') {
 								return A2(
 									_elm_lang$html$Html$div,
 									_elm_lang$core$Native_List.fromArray(

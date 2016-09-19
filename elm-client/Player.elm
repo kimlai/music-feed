@@ -115,6 +115,16 @@ currentTrack (Player { currentTrack }) =
     currentTrack
 
 
+currentTrackOfPlaylist : a -> Player a b -> Maybe b
+currentTrackOfPlaylist playlistId (Player { playlists }) =
+    playlists
+        |> List.filter ((==) playlistId << fst)
+        |> List.head
+        |> Maybe.withDefault ( playlistId, Playlist.empty )
+        |> snd
+        |> Playlist.currentItem
+
+
 playlistContent : a -> Player a b -> List b
 playlistContent playlistId (Player { playlists }) =
     playlists
