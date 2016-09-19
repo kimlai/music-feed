@@ -4,9 +4,9 @@ import Date exposing (Date)
 import Dict exposing (Dict)
 import Feed.Model as Model exposing (Model, Playlist, PlaylistId(..))
 import Feed.Update exposing (Msg(..))
-import Html exposing (Html, a, nav, li, ul, text, div, img)
+import Html exposing (Html, a, nav, li, ul, text, div, img, input)
 import Html.Attributes exposing (class, classList, href, src, style)
-import Html.Events exposing (onClick, onWithOptions)
+import Html.Events exposing (onClick, onWithOptions, onInput)
 import Json.Decode
 import Model exposing (Track, TrackId)
 import Player
@@ -47,7 +47,7 @@ view model =
                 Nothing ->
                     case model.currentPage.url of
                         "/publish-track" ->
-                            div [] [ text "Publish Track" ]
+                            viewPublishTrack
                         _ ->
                             div [] [ text "404" ]
 
@@ -169,3 +169,13 @@ viewMoreButton playlistId =
         , onClick (FetchMore playlistId)
         ]
         [ text "More" ]
+
+
+viewPublishTrack : Html Msg
+viewPublishTrack =
+    div
+        []
+        [ input
+            [ onInput ResolveTrackInfo ]
+            []
+        ]

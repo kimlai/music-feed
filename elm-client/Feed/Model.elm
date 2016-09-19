@@ -18,6 +18,7 @@ type alias Model =
     , player : Player PlaylistId TrackId
     , pages : List Page
     , navigation : List NavigationItem
+    , soundcloudClientId : String
     }
 
 

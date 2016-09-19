@@ -15,6 +15,7 @@ import Keyboard
 import Model exposing (Track, TrackId)
 import Navigation
 import Player
+import Soundcloud
 import Task exposing (Task)
 import Time exposing (Time)
 
@@ -44,6 +45,9 @@ type Msg
     | FetchSuccess PlaylistId ( List Track, String )
     | AddTrackFail Http.Error
     | AddTrackSuccess
+    | ResolveTrackInfo String
+    | ResolveTrackInfoFailure Http.Error
+    | ResolveTrackInfoSuccess Track
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -246,6 +250,27 @@ update message model =
             in
                 ( newModel', Cmd.batch [ command, command' ] )
 
+        ResolveTrackInfo url ->
+            ( model
+            , resolveTrackInfo model.soundcloudClientId url
+            )
+
+        ResolveTrackInfoFailure error ->
+            ( model
+            , Cmd.none
+            )
+
+        ResolveTrackInfoSuccess track ->
+            let
+                model' =
+                    { model | tracks = Dict.insert track.id track model.tracks }
+                ( model'', command ) =
+                    update (MoveToPlaylist PublishedTracks track.id) model'
+                ( model''', command' ) =
+                    update (ChangePage "published-tracks") model''
+            in
+                model''' ! [ command, command' ]
+
         KeyPressed keyCode ->
             case (Char.fromCode keyCode) of
                 'n' ->
@@ -378,3 +403,9 @@ addTrack : String -> Int -> Cmd Msg
 addTrack addTrackUrl trackId =
     Api.addTrack addTrackUrl trackId
         |> Task.perform AddTrackFail (\_ -> AddTrackSuccess)
+
+
+resolveTrackInfo : String -> String -> Cmd Msg
+resolveTrackInfo soundcloudClientId url =
+    Soundcloud.resolve soundcloudClientId url
+        |> Task.perform ResolveTrackInfoFailure ResolveTrackInfoSuccess

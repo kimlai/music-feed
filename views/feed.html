@@ -10,9 +10,9 @@
     </head>
     <body>
         <script>
-            var app = Elm.Feed.Main.fullscreen();
-
             var soundcloudClientId = '<%=client_id%>';
+            var app = Elm.Feed.Main.fullscreen(soundcloudClientId);
+
             var audio = new Audio();
             var currentTrackId;
 

@@ -12,9 +12,9 @@ import Task
 import Time exposing (Time)
 
 
-main : Program Never
+main : Program String
 main =
-    Navigation.program urlParser
+    Navigation.programWithFlags urlParser
         { init = init
         , view = View.view
         , update = Update.update
@@ -46,8 +46,8 @@ urlUpdate page model =
 
 
 
-init : Model.Page -> ( Model, Cmd Msg )
-init page =
+init : String -> Model.Page -> ( Model, Cmd Msg )
+init soundcloudClientId page =
     ( { tracks = Dict.empty
       , playlists = playlists
       , playing = False
@@ -57,7 +57,8 @@ init page =
       , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist, CustomQueue ]
       , pages = pages
       , navigation = navigation
-      }
+      , soundcloudClientId = soundcloudClientId
+    }
     , Cmd.batch
         (List.append
             (List.map Update.fetchMore playlists)

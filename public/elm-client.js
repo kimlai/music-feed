@@ -9681,10 +9681,27 @@ var _user$project$Feed_Model$emptyPlaylist = F3(
 	function (id, fetchUrl, addTrackUrl) {
 		return {id: id, loading: true, nextLink: fetchUrl, addTrackUrl: addTrackUrl};
 	});
-var _user$project$Feed_Model$Model = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {tracks: a, playlists: b, playing: c, currentPage: d, lastKeyPressed: e, currentTime: f, player: g, pages: h, navigation: i};
-	});
+var _user$project$Feed_Model$Model = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {tracks: a, playlists: b, playing: c, currentPage: d, lastKeyPressed: e, currentTime: f, player: g, pages: h, navigation: i, soundcloudClientId: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var _user$project$Feed_Model$NavigationItem = F2(
 	function (a, b) {
 		return {displayName: a, href: b};
@@ -9742,6 +9759,37 @@ var _user$project$Feed_Ports$trackProgress = _elm_lang$core$Native_Platform.inco
 var _user$project$Feed_Ports$trackEnd = _elm_lang$core$Native_Platform.incomingPort('trackEnd', _elm_lang$core$Json_Decode$int);
 var _user$project$Feed_Ports$trackError = _elm_lang$core$Native_Platform.incomingPort('trackError', _elm_lang$core$Json_Decode$int);
 
+var _user$project$Soundcloud$resolve = F2(
+	function (clientId, url) {
+		return A2(
+			_evancz$elm_http$Http$get,
+			_user$project$Api$decodeTrack,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'https://api.soundcloud.com/resolve?url=',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					url,
+					A2(_elm_lang$core$Basics_ops['++'], '&client_id=', clientId))));
+	});
+
+var _user$project$Feed_Update$ResolveTrackInfoSuccess = function (a) {
+	return {ctor: 'ResolveTrackInfoSuccess', _0: a};
+};
+var _user$project$Feed_Update$ResolveTrackInfoFailure = function (a) {
+	return {ctor: 'ResolveTrackInfoFailure', _0: a};
+};
+var _user$project$Feed_Update$resolveTrackInfo = F2(
+	function (soundcloudClientId, url) {
+		return A3(
+			_elm_lang$core$Task$perform,
+			_user$project$Feed_Update$ResolveTrackInfoFailure,
+			_user$project$Feed_Update$ResolveTrackInfoSuccess,
+			A2(_user$project$Soundcloud$resolve, soundcloudClientId, url));
+	});
+var _user$project$Feed_Update$ResolveTrackInfo = function (a) {
+	return {ctor: 'ResolveTrackInfo', _0: a};
+};
 var _user$project$Feed_Update$AddTrackSuccess = {ctor: 'AddTrackSuccess'};
 var _user$project$Feed_Update$AddTrackFail = function (a) {
 	return {ctor: 'AddTrackFail', _0: a};
@@ -10098,9 +10146,41 @@ var _user$project$Feed_Update$update = F2(
 							_elm_lang$core$Native_List.fromArray(
 								[command, command$]))
 					};
+				case 'ResolveTrackInfo':
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: A2(_user$project$Feed_Update$resolveTrackInfo, model.soundcloudClientId, _p1._0)
+					};
+				case 'ResolveTrackInfoFailure':
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				case 'ResolveTrackInfoSuccess':
+					var _p17 = _p1._0;
+					var model$ = _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							tracks: A3(_elm_lang$core$Dict$insert, _p17.id, _p17, model.tracks)
+						});
+					var _p15 = A2(
+						_user$project$Feed_Update$update,
+						A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$PublishedTracks, _p17.id),
+						model$);
+					var model$$ = _p15._0;
+					var command = _p15._1;
+					var _p16 = A2(
+						_user$project$Feed_Update$update,
+						_user$project$Feed_Update$ChangePage('published-tracks'),
+						model$$);
+					var model$$$ = _p16._0;
+					var command$ = _p16._1;
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						model$$$,
+						_elm_lang$core$Native_List.fromArray(
+							[command, command$]));
 				default:
-					var _p15 = _elm_lang$core$Char$fromCode(_p1._0);
-					switch (_p15.valueOf()) {
+					var _p18 = _elm_lang$core$Char$fromCode(_p1._0);
+					switch (_p18.valueOf()) {
 						case 'n':
 							var _v12 = _user$project$Feed_Update$Next,
 								_v13 = model;
@@ -10126,10 +10206,10 @@ var _user$project$Feed_Update$update = F2(
 							model = _v19;
 							continue update;
 						case 'L':
-							var _p16 = model.currentPage.playlist;
-							if (_p16.ctor === 'Just') {
-								var _p17 = _p16._0;
-								switch (_p17.ctor) {
+							var _p19 = model.currentPage.playlist;
+							if (_p19.ctor === 'Just') {
+								var _p20 = _p19._0;
+								switch (_p20.ctor) {
 									case 'Feed':
 										var _v22 = _user$project$Feed_Update$ChangePage('/saved-tracks'),
 											_v23 = model;
@@ -10155,10 +10235,10 @@ var _user$project$Feed_Update$update = F2(
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							}
 						case 'H':
-							var _p18 = model.currentPage.playlist;
-							if (_p18.ctor === 'Just') {
-								var _p19 = _p18._0;
-								switch (_p19.ctor) {
+							var _p21 = model.currentPage.playlist;
+							if (_p21.ctor === 'Just') {
+								var _p22 = _p21._0;
+								switch (_p22.ctor) {
 									case 'Feed':
 										var _v30 = _user$project$Feed_Update$ChangePage('/published-tracks'),
 											_v31 = model;
@@ -10184,9 +10264,9 @@ var _user$project$Feed_Update$update = F2(
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							}
 						case 'm':
-							var _p20 = model.currentPage.playlist;
-							if (_p20.ctor === 'Just') {
-								var _v37 = _user$project$Feed_Update$FetchMore(_p20._0),
+							var _p23 = model.currentPage.playlist;
+							if (_p23.ctor === 'Just') {
+								var _v37 = _user$project$Feed_Update$FetchMore(_p23._0),
 									_v38 = model;
 								message = _v37;
 								model = _v38;
@@ -10195,33 +10275,33 @@ var _user$project$Feed_Update$update = F2(
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							}
 						case 'b':
-							var _p21 = _user$project$Player$currentTrack(model.player);
-							if (_p21.ctor === 'Nothing') {
+							var _p24 = _user$project$Player$currentTrack(model.player);
+							if (_p24.ctor === 'Nothing') {
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							} else {
-								var _v40 = _user$project$Feed_Update$BlacklistTrack(_p21._0),
+								var _v40 = _user$project$Feed_Update$BlacklistTrack(_p24._0),
 									_v41 = model;
 								message = _v40;
 								model = _v41;
 								continue update;
 							}
 						case 's':
-							var _p22 = _user$project$Player$currentTrack(model.player);
-							if (_p22.ctor === 'Nothing') {
+							var _p25 = _user$project$Player$currentTrack(model.player);
+							if (_p25.ctor === 'Nothing') {
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							} else {
-								var _v43 = A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$SavedTracks, _p22._0),
+								var _v43 = A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$SavedTracks, _p25._0),
 									_v44 = model;
 								message = _v43;
 								model = _v44;
 								continue update;
 							}
 						case 'P':
-							var _p23 = _user$project$Player$currentTrack(model.player);
-							if (_p23.ctor === 'Nothing') {
+							var _p26 = _user$project$Player$currentTrack(model.player);
+							if (_p26.ctor === 'Nothing') {
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							} else {
-								var _v46 = A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$PublishedTracks, _p23._0),
+								var _v46 = A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$PublishedTracks, _p26._0),
 									_v47 = model;
 								message = _v46;
 								model = _v47;
@@ -10641,6 +10721,21 @@ var _user$project$View$viewGlobalPlayer = F4(
 		}
 	});
 
+var _user$project$Feed_View$viewPublishTrack = A2(
+	_elm_lang$html$Html$div,
+	_elm_lang$core$Native_List.fromArray(
+		[]),
+	_elm_lang$core$Native_List.fromArray(
+		[
+			A2(
+			_elm_lang$html$Html$input,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Events$onInput(_user$project$Feed_Update$ResolveTrackInfo)
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[]))
+		]));
 var _user$project$Feed_View$viewMoreButton = function (playlistId) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -11007,14 +11102,7 @@ var _user$project$Feed_View$view = function (model) {
 						} else {
 							var _p4 = model.currentPage.url;
 							if (_p4 === '/publish-track') {
-								return A2(
-									_elm_lang$html$Html$div,
-									_elm_lang$core$Native_List.fromArray(
-										[]),
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html$text('Publish Track')
-										]));
+								return _user$project$Feed_View$viewPublishTrack;
 							} else {
 								return A2(
 									_elm_lang$html$Html$div,
@@ -11074,38 +11162,40 @@ var _user$project$Feed_Main$subscriptions = function (model) {
 				_elm_lang$keyboard$Keyboard$presses(_user$project$Feed_Update$KeyPressed)
 			]));
 };
-var _user$project$Feed_Main$init = function (page) {
-	return {
-		ctor: '_Tuple2',
-		_0: {
-			tracks: _elm_lang$core$Dict$empty,
-			playlists: _user$project$Feed_Main$playlists,
-			playing: false,
-			currentPage: page,
-			lastKeyPressed: _elm_lang$core$Maybe$Nothing,
-			currentTime: _elm_lang$core$Maybe$Nothing,
-			player: _user$project$Player$initialize(
-				_elm_lang$core$Native_List.fromArray(
-					[_user$project$Feed_Model$Feed, _user$project$Feed_Model$SavedTracks, _user$project$Feed_Model$PublishedTracks, _user$project$Feed_Model$Blacklist, _user$project$Feed_Model$CustomQueue])),
-			pages: _user$project$Feed_Main$pages,
-			navigation: _user$project$Feed_Main$navigation
-		},
-		_1: _elm_lang$core$Platform_Cmd$batch(
-			A2(
-				_elm_lang$core$List$append,
-				A2(_elm_lang$core$List$map, _user$project$Feed_Update$fetchMore, _user$project$Feed_Main$playlists),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						A3(
-						_elm_lang$core$Task$perform,
-						function (_p1) {
-							return _user$project$Feed_Update$UpdateCurrentTimeFail;
-						},
-						_user$project$Feed_Update$UpdateCurrentTime,
-						_elm_lang$core$Time$now)
-					])))
-	};
-};
+var _user$project$Feed_Main$init = F2(
+	function (soundcloudClientId, page) {
+		return {
+			ctor: '_Tuple2',
+			_0: {
+				tracks: _elm_lang$core$Dict$empty,
+				playlists: _user$project$Feed_Main$playlists,
+				playing: false,
+				currentPage: page,
+				lastKeyPressed: _elm_lang$core$Maybe$Nothing,
+				currentTime: _elm_lang$core$Maybe$Nothing,
+				player: _user$project$Player$initialize(
+					_elm_lang$core$Native_List.fromArray(
+						[_user$project$Feed_Model$Feed, _user$project$Feed_Model$SavedTracks, _user$project$Feed_Model$PublishedTracks, _user$project$Feed_Model$Blacklist, _user$project$Feed_Model$CustomQueue])),
+				pages: _user$project$Feed_Main$pages,
+				navigation: _user$project$Feed_Main$navigation,
+				soundcloudClientId: soundcloudClientId
+			},
+			_1: _elm_lang$core$Platform_Cmd$batch(
+				A2(
+					_elm_lang$core$List$append,
+					A2(_elm_lang$core$List$map, _user$project$Feed_Update$fetchMore, _user$project$Feed_Main$playlists),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A3(
+							_elm_lang$core$Task$perform,
+							function (_p1) {
+								return _user$project$Feed_Update$UpdateCurrentTimeFail;
+							},
+							_user$project$Feed_Update$UpdateCurrentTime,
+							_elm_lang$core$Time$now)
+						])))
+		};
+	});
 var _user$project$Feed_Main$urlUpdate = F2(
 	function (page, model) {
 		return {
@@ -11143,9 +11233,10 @@ var _user$project$Feed_Main$urlParser = _elm_lang$navigation$Navigation$makePars
 	});
 var _user$project$Feed_Main$main = {
 	main: A2(
-		_elm_lang$navigation$Navigation$program,
+		_elm_lang$navigation$Navigation$programWithFlags,
 		_user$project$Feed_Main$urlParser,
-		{init: _user$project$Feed_Main$init, view: _user$project$Feed_View$view, update: _user$project$Feed_Update$update, urlUpdate: _user$project$Feed_Main$urlUpdate, subscriptions: _user$project$Feed_Main$subscriptions})
+		{init: _user$project$Feed_Main$init, view: _user$project$Feed_View$view, update: _user$project$Feed_Update$update, urlUpdate: _user$project$Feed_Main$urlUpdate, subscriptions: _user$project$Feed_Main$subscriptions}),
+	flags: _elm_lang$core$Json_Decode$string
 };
 
 var Elm = {};
