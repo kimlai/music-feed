@@ -28,6 +28,11 @@ app.use(router.routes());
 
 app.use(function *redirectNotFoundToIndex(next) {
     yield next;
+
+    if (this.status != 404) {
+        return;
+    }
+
     yield index.call(this, requireAuthentication.call(this));
 });
 
@@ -37,7 +42,7 @@ function *requireAuthentication(next) {
         this.state.user = yield soundcloud.me(token);
     } catch (error) {
         if (error.status === 401) {
-            return this.redirect('/connect');
+            return this.redirect('/feed/connect');
         }
     }
     this.state.token = token;
@@ -71,7 +76,7 @@ function *publishedTracks() {
 function *connect() {
     yield this.render('connect', {
         client_id: process.env.SOUNDCLOUD_CLIENT_ID,
-        redirect_uri: process.env.MUSICFEED_API_ROOT + '/callback',
+        redirect_uri: process.env.MUSICFEED_API_ROOT + '/feed/callback',
         response_type: 'code'
     });
 }
@@ -80,7 +85,7 @@ function *callback() {
     var code = this.query.code;
     var tokens = yield soundcloud.requestAccessToken(code);
     this.cookies.set('access_token', tokens.access_token, { httpOnly: false });
-    this.redirect('/');
+    this.redirect('/feed');
 }
 
 function *blacklist() {

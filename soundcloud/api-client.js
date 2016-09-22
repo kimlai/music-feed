@@ -19,7 +19,7 @@ module.exports = {
                 client_id: process.env.SOUNDCLOUD_CLIENT_ID,
                 client_secret: process.env.SOUNDCLOUD_SECRET,
                 grant_type: 'authorization_code',
-                redirect_uri: process.env.MUSICFEED_API_ROOT + '/callback',
+                redirect_uri: process.env.MUSICFEED_API_ROOT + '/feed/callback',
                 code: code
             })
             .then(function (response) {
