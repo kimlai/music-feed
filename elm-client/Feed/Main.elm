@@ -34,7 +34,7 @@ urlParser =
             pages
                 |> List.filter ((==) pathname << .url)
                 |> List.head
-                |> Maybe.withDefault (Model.Page "/" (Just Feed))
+                |> Maybe.withDefault (Model.Page "/feed" (Just Feed))
         )
 
 
@@ -83,26 +83,26 @@ subscriptions model =
 
 playlists : List Model.Playlist
 playlists =
-    [ Model.emptyPlaylist Feed "/feed" "fake-url"
-    , Model.emptyPlaylist SavedTracks "/saved_tracks" "save_track"
-    , Model.emptyPlaylist PublishedTracks "/published_tracks" "publish_track"
-    , Model.emptyPlaylist Blacklist "/blacklist" "blacklist"
+    [ Model.emptyPlaylist Feed "/feed/feed" "fake-url"
+    , Model.emptyPlaylist SavedTracks "/feed/saved_tracks" "/feed/save_track"
+    , Model.emptyPlaylist PublishedTracks "/feed/published_tracks" "/feed/publish_track"
+    , Model.emptyPlaylist Blacklist "/feed/blacklist" "/feed/blacklist"
     ]
 
 
 pages : List Model.Page
 pages =
     [ Model.Page "/" (Just Feed)
-    , Model.Page "/saved-tracks" (Just SavedTracks)
-    , Model.Page "/published-tracks" (Just PublishedTracks)
-    , Model.Page "/publish-track" Nothing
+    , Model.Page "/feed/saved-tracks" (Just SavedTracks)
+    , Model.Page "/feed/published-tracks" (Just PublishedTracks)
+    , Model.Page "/feed/publish-track" Nothing
     ]
 
 
 navigation : List Model.NavigationItem
 navigation =
-    [ Model.NavigationItem "Feed" "/"
-    , Model.NavigationItem "saved tracks" "/saved-tracks"
-    , Model.NavigationItem "published tracks" "/published-tracks"
-    , Model.NavigationItem "+" "/publish-track"
+    [ Model.NavigationItem "Feed" "/feed"
+    , Model.NavigationItem "saved tracks" "/feed/saved-tracks"
+    , Model.NavigationItem "published tracks" "/feed/published-tracks"
+    , Model.NavigationItem "+" "/feed/publish-track"
     ]

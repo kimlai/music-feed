@@ -23,7 +23,7 @@ module.exports = function fetchPublishedTracks(soundcloudUserId, offset) {
             var nextOffset = offset+10;
             return {
                 tracks: tracks,
-                next_href: '/published_tracks?offset=' + nextOffset,
+                next_href: '/feed/published_tracks?offset=' + nextOffset,
             };
         });
 };

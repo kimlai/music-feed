@@ -59,11 +59,7 @@ view model =
                                     Nothing ->
                                         div [] [ text "Well, this is awkward..." ]
                 Nothing ->
-                    case model.currentPage.url of
-                        "/publish-track" ->
-                            div [] [ text "Publish Track" ]
-                        _ ->
-                            div [] [ text "404" ]
+                    div [] [ text "404" ]
 
             ]
         ]

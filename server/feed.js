@@ -23,7 +23,7 @@ module.exports = function fetchFeed(soundcloudUserId, token, nextSoundcloudLink,
                 })
             );
             if (newFeed.tracks.length >= 10) {
-                newFeed.next_href = '/feed?nextLink=' + encodeURIComponent(newFeed.next_href);
+                newFeed.next_href = '/feed/feed?nextLink=' + encodeURIComponent(newFeed.next_href);
                 return newFeed;
             }
             return fetchFeed(soundcloudUserId, token, newFeed.next_href, newFeed);

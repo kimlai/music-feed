@@ -64,7 +64,7 @@ init radioPlaylistJsonString page =
             }
         decodedRadioPayload =
             Json.Decode.decodeString Api.decodePlaylist radioPlaylistJsonString
-                |> Result.withDefault ( [], "/radio_playlist" )
+                |> Result.withDefault ( [], "/playlist" )
         ( model', command ) =
             Update.update (FetchSuccess Radio decodedRadioPayload) model
         ( model'', command' ) =
@@ -98,20 +98,20 @@ subscriptions model =
 
 playlists : List Radio.Model.Playlist
 playlists =
-    [ Radio.Model.emptyPlaylist Radio "/radio_paylist" "fake-url"
-    , Radio.Model.emptyPlaylist LatestTracks "/published_tracks" "fake-url"
+    [ Radio.Model.emptyPlaylist Radio "/playlist" "fake-url"
+    , Radio.Model.emptyPlaylist LatestTracks "/latest-tracks" "fake-url"
     ]
 
 
 pages : List (Page Radio.Model.PlaylistId)
 pages =
-    [ Model.Page "/radio" (Just Radio)
+    [ Model.Page "/" (Just Radio)
     , Model.Page "/latest" (Just LatestTracks)
     ]
 
 
 navigation : List Model.NavigationItem
 navigation =
-    [ Model.NavigationItem "Radio" "/radio"
+    [ Model.NavigationItem "Radio" "/"
     , Model.NavigationItem "Latest Tracks" "/latest"
     ]

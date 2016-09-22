@@ -11093,26 +11093,14 @@ var _user$project$Radio_View$view = function (model) {
 								}
 							}
 						} else {
-							var _p8 = model.currentPage.url;
-							if (_p8 === '/publish-track') {
-								return A2(
-									_elm_lang$html$Html$div,
-									_elm_lang$core$Native_List.fromArray(
-										[]),
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html$text('Publish Track')
-										]));
-							} else {
-								return A2(
-									_elm_lang$html$Html$div,
-									_elm_lang$core$Native_List.fromArray(
-										[]),
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html$text('404')
-										]));
-							}
+							return A2(
+								_elm_lang$html$Html$div,
+								_elm_lang$core$Native_List.fromArray(
+									[]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('404')
+									]));
 						}
 					}()
 					]))
@@ -11121,14 +11109,14 @@ var _user$project$Radio_View$view = function (model) {
 
 var _user$project$Radio_Main$navigation = _elm_lang$core$Native_List.fromArray(
 	[
-		A2(_user$project$Model$NavigationItem, 'Radio', '/radio'),
+		A2(_user$project$Model$NavigationItem, 'Radio', '/'),
 		A2(_user$project$Model$NavigationItem, 'Latest Tracks', '/latest')
 	]);
 var _user$project$Radio_Main$pages = _elm_lang$core$Native_List.fromArray(
 	[
 		A2(
 		_user$project$Model$Page,
-		'/radio',
+		'/',
 		_elm_lang$core$Maybe$Just(_user$project$Radio_Model$Radio)),
 		A2(
 		_user$project$Model$Page,
@@ -11137,8 +11125,8 @@ var _user$project$Radio_Main$pages = _elm_lang$core$Native_List.fromArray(
 	]);
 var _user$project$Radio_Main$playlists = _elm_lang$core$Native_List.fromArray(
 	[
-		A3(_user$project$Radio_Model$emptyPlaylist, _user$project$Radio_Model$Radio, '/radio_paylist', 'fake-url'),
-		A3(_user$project$Radio_Model$emptyPlaylist, _user$project$Radio_Model$LatestTracks, '/published_tracks', 'fake-url')
+		A3(_user$project$Radio_Model$emptyPlaylist, _user$project$Radio_Model$Radio, '/playlist', 'fake-url'),
+		A3(_user$project$Radio_Model$emptyPlaylist, _user$project$Radio_Model$LatestTracks, '/latest-tracks', 'fake-url')
 	]);
 var _user$project$Radio_Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
@@ -11161,7 +11149,7 @@ var _user$project$Radio_Main$init = F2(
 				ctor: '_Tuple2',
 				_0: _elm_lang$core$Native_List.fromArray(
 					[]),
-				_1: '/radio_playlist'
+				_1: '/playlist'
 			},
 			A2(_elm_lang$core$Json_Decode$decodeString, _user$project$Api$decodePlaylist, radioPlaylistJsonString));
 		var model = {

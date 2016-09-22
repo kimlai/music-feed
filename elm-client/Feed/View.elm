@@ -46,7 +46,7 @@ view model =
                                 div [] [ text "Well, this is awkward..." ]
                 Nothing ->
                     case model.currentPage.url of
-                        "/publish-track" ->
+                        "/feed/publish-track" ->
                             viewPublishTrack
                         _ ->
                             div [] [ text "404" ]
