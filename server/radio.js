@@ -1,7 +1,7 @@
 var knexfile = require('../knexfile');
 var knex = require('knex')(knexfile);
 
-module.exports = function radioPlaylist(soundcloudUserId) {
+module.exports = function fetchRadioPlaylist(soundcloudUserId) {
     return knex.select('track', 'savedAt')
         .where({soundcloudUserId: soundcloudUserId})
         .orderByRaw('RANDOM()')

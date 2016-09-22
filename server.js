@@ -7,10 +7,10 @@ var soundcloud = require('./soundcloud/api-client');
 var knexfile = require('./knexfile');
 var knex = require('knex')(knexfile);
 var bodyParser = require('koa-bodyparser');
-var feedApi = require('./server/feed');
-var savedTracksApi = require('./server/savedTracks');
-var publishedTracksApi = require('./server/publishedTracks');
-var radioApi = require('./server/radio');
+var fetchFeed = require('./server/feed');
+var fetchSavedTracks = require('./server/savedTracks');
+var fetchPublishedTracks = require('./server/publishedTracks');
+var fetchRadioPlaylist = require('./server/radio');
 var _ = require('lodash');
 
 var app = koa();
@@ -65,7 +65,7 @@ function *index() {
 
 function *radio() {
     var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
-    var playlist = yield radioApi(soundcloudUserId);
+    var playlist = yield fetchRadioPlaylist(soundcloudUserId);
     yield this.render('radio', {
         client_id: process.env.SOUNDCLOUD_CLIENT_ID,
         playlist: JSON.stringify(playlist)
@@ -74,25 +74,25 @@ function *radio() {
 
 function *radioPlaylist() {
     var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
-    this.body = yield radioApi(soundcloudUserId);
+    this.body = yield fetchRadioPlaylist(soundcloudUserId);
 }
 
 function *feed() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;
-    this.body = yield feedApi(soundcloudUserId, token, this.request.query.nextLink);
+    this.body = yield fetchFeed(soundcloudUserId, token, this.request.query.nextLink);
 }
 
 function *savedTracks() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;
-    this.body = yield savedTracksApi(soundcloudUserId, this.request.query.offset);
+    this.body = yield fetchSavedTracks(soundcloudUserId, this.request.query.offset);
 }
 
 function *publishedTracks() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;
-    this.body = yield publishedTracksApi(soundcloudUserId, this.request.query.offset);
+    this.body = yield fetchPublishedTracks(soundcloudUserId, this.request.query.offset);
 }
 
 function *connect() {

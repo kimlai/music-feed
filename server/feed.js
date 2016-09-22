@@ -3,7 +3,7 @@ var knexfile = require('../knexfile');
 var knex = require('knex')(knexfile);
 var _ = require('lodash');
 
-module.exports = function fetchFeedApi(soundcloudUserId, token, nextSoundcloudLink, feed) {
+module.exports = function fetchFeed(soundcloudUserId, token, nextSoundcloudLink, feed) {
     feed = feed || {};
     feed.tracks = feed.tracks || [];
     return Promise.all([
@@ -26,7 +26,7 @@ module.exports = function fetchFeedApi(soundcloudUserId, token, nextSoundcloudLi
                 newFeed.next_href = '/feed?nextLink=' + encodeURIComponent(newFeed.next_href);
                 return newFeed;
             }
-            return fetchFeedApi(soundcloudUserId, token, newFeed.next_href, newFeed);
+            return fetchFeed(soundcloudUserId, token, newFeed.next_href, newFeed);
         });
 };
 
