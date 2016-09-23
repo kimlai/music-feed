@@ -9855,11 +9855,6 @@ var _user$project$Radio_Ports$playTrack = _elm_lang$core$Native_Platform.outgoin
 	function (v) {
 		return {id: v.id, streamUrl: v.streamUrl, currentTime: v.currentTime};
 	});
-var _user$project$Radio_Ports$resume = _elm_lang$core$Native_Platform.outgoingPort(
-	'resume',
-	function (v) {
-		return (v.ctor === 'Nothing') ? null : v._0;
-	});
 var _user$project$Radio_Ports$pause = _elm_lang$core$Native_Platform.outgoingPort(
 	'pause',
 	function (v) {
