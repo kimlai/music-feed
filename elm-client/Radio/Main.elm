@@ -63,7 +63,8 @@ init radioPlaylistJsonString page =
             , navigation = navigation
             }
         decodedRadioPayload =
-            Json.Decode.decodeString Api.decodePlaylist radioPlaylistJsonString
+            Json.Decode.decodeString (Api.decodePlaylist Api.decodeTrack) radioPlaylistJsonString
+                |> Debug.log "result"
                 |> Result.withDefault ( [], "/playlist" )
         ( model', command ) =
             Update.update (FetchSuccess Radio decodedRadioPayload) model

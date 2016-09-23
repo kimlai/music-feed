@@ -9515,36 +9515,42 @@ var _user$project$Api$decodeTrack = A2(
 										_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
 										_elm_lang$core$Json_Decode$succeed(_user$project$Model$Track),
 										A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
-									A2(
-										_elm_lang$core$Json_Decode$at,
-										_elm_lang$core$Native_List.fromArray(
-											['user', 'username']),
-										_elm_lang$core$Json_Decode$string)),
+									A2(_elm_lang$core$Json_Decode_ops[':='], 'artist', _elm_lang$core$Json_Decode$string)),
 								A2(
 									_elm_lang$core$Json_Decode_ops[':='],
-									'artwork_url',
+									'cover',
 									A2(_elm_community$elm_json_extra$Json_Decode_Extra$withDefault, '/images/placeholder.jpg', _elm_lang$core$Json_Decode$string))),
 							A2(_elm_lang$core$Json_Decode_ops[':='], 'title', _elm_lang$core$Json_Decode$string)),
-						A2(_elm_lang$core$Json_Decode_ops[':='], 'stream_url', _elm_lang$core$Json_Decode$string)),
-					A2(_elm_lang$core$Json_Decode_ops[':='], 'permalink_url', _elm_lang$core$Json_Decode$string)),
+						A2(
+							_elm_lang$core$Json_Decode$at,
+							_elm_lang$core$Native_List.fromArray(
+								['soundcloud', 'stream_url']),
+							_elm_lang$core$Json_Decode$string)),
+					A2(_elm_lang$core$Json_Decode_ops[':='], 'source', _elm_lang$core$Json_Decode$string)),
 				A2(_elm_lang$core$Json_Decode_ops[':='], 'created_at', _elm_community$elm_json_extra$Json_Decode_Extra$date)),
 			_elm_lang$core$Json_Decode$succeed(0)),
 		_elm_lang$core$Json_Decode$succeed(0)),
 	_elm_lang$core$Json_Decode$succeed(false));
-var _user$project$Api$decodePlaylist = A3(
-	_elm_lang$core$Json_Decode$object2,
-	F2(
-		function (v0, v1) {
-			return {ctor: '_Tuple2', _0: v0, _1: v1};
-		}),
-	A2(
-		_elm_lang$core$Json_Decode_ops[':='],
-		'tracks',
-		_elm_lang$core$Json_Decode$list(_user$project$Api$decodeTrack)),
-	A2(_elm_lang$core$Json_Decode_ops[':='], 'next_href', _elm_lang$core$Json_Decode$string));
-var _user$project$Api$fetchPlaylist = function (url) {
-	return A2(_evancz$elm_http$Http$get, _user$project$Api$decodePlaylist, url);
+var _user$project$Api$decodePlaylist = function (trackDecoder) {
+	return A3(
+		_elm_lang$core$Json_Decode$object2,
+		F2(
+			function (v0, v1) {
+				return {ctor: '_Tuple2', _0: v0, _1: v1};
+			}),
+		A2(
+			_elm_lang$core$Json_Decode_ops[':='],
+			'tracks',
+			_elm_lang$core$Json_Decode$list(trackDecoder)),
+		A2(_elm_lang$core$Json_Decode_ops[':='], 'next_href', _elm_lang$core$Json_Decode$string));
 };
+var _user$project$Api$fetchPlaylist = F2(
+	function (url, trackDecoder) {
+		return A2(
+			_evancz$elm_http$Http$get,
+			_user$project$Api$decodePlaylist(trackDecoder),
+			url);
+	});
 
 var _user$project$Playlist$items = function (_p0) {
 	var _p1 = _p0;
@@ -9897,7 +9903,7 @@ var _user$project$Radio_Update$fetchMore = function (playlist) {
 		_elm_lang$core$Task$perform,
 		_user$project$Radio_Update$FetchFail(playlist.id),
 		_user$project$Radio_Update$FetchSuccess(playlist.id),
-		_user$project$Api$fetchPlaylist(playlist.nextLink));
+		A2(_user$project$Api$fetchPlaylist, playlist.nextLink, _user$project$Api$decodeTrack));
 };
 var _user$project$Radio_Update$FetchMore = function (a) {
 	return {ctor: 'FetchMore', _0: a};
@@ -11146,7 +11152,13 @@ var _user$project$Radio_Main$init = F2(
 					[]),
 				_1: '/playlist'
 			},
-			A2(_elm_lang$core$Json_Decode$decodeString, _user$project$Api$decodePlaylist, radioPlaylistJsonString));
+			A2(
+				_elm_lang$core$Debug$log,
+				'result',
+				A2(
+					_elm_lang$core$Json_Decode$decodeString,
+					_user$project$Api$decodePlaylist(_user$project$Api$decodeTrack),
+					radioPlaylistJsonString)));
 		var model = {
 			tracks: _elm_lang$core$Dict$empty,
 			playlists: _user$project$Radio_Main$playlists,

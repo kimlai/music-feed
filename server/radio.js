@@ -2,7 +2,7 @@ var knexfile = require('../knexfile');
 var knex = require('knex')(knexfile);
 
 module.exports = function fetchRadioPlaylist(soundcloudUserId) {
-    return knex.select('track', 'savedAt')
+    return knex.select('soundcloudTrackId', 'track', 'savedAt')
         .where({soundcloudUserId: soundcloudUserId})
         .orderByRaw('RANDOM()')
         .limit(100)
@@ -11,6 +11,7 @@ module.exports = function fetchRadioPlaylist(soundcloudUserId) {
             return rows.map(function (row) {
                 var track = row.track;
                 track.created_at = row.savedAt;
+                track.id = parseInt(row.soundcloudTrackId, 10);
                 return track;
             });
         })

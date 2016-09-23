@@ -395,8 +395,16 @@ update message model =
 
 fetchMore : Model.Playlist -> Cmd Msg
 fetchMore playlist =
-    Api.fetchPlaylist playlist.nextLink
-        |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
+    let
+        trackDecoder =
+            case playlist.id of
+                PublishedTracks ->
+                    Api.decodeTrack
+                _ ->
+                    Soundcloud.decodeTrack
+    in
+        Api.fetchPlaylist playlist.nextLink trackDecoder
+            |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
 
 
 addTrack : String -> Int -> Cmd Msg

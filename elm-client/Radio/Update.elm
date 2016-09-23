@@ -255,5 +255,5 @@ update message model =
 
 fetchMore : Model.Playlist -> Cmd Msg
 fetchMore playlist =
-    Api.fetchPlaylist playlist.nextLink
+    Api.fetchPlaylist playlist.nextLink Api.decodeTrack
         |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)

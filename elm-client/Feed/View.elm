@@ -180,4 +180,9 @@ viewPublishTrack =
             [ label [] [ text "Soundcloud" ]
             , input [ onInput PublishFromSoundcloudUrl ] []
             ]
+        , div
+            []
+            [ label [] [ text "Youtube" ]
+            , input [ onInput PublishFromSoundcloudUrl ] []
+            ]
         ]

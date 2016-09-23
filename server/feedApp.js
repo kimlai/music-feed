@@ -145,11 +145,21 @@ function *publishTrack() {
     var soundcloudTrackId = this.request.body.soundcloudTrackId;
     yield Promise.all([
         soundcloud.track(soundcloudTrackId)
-        .then(function (track) {
+        .then(function (trackInfo) {
             return knex.insert({
                 soundcloudUserId: soundcloudUserId,
                 soundcloudTrackId: soundcloudTrackId,
-                track : track,
+                track: {
+                    source: trackInfo.permalink_url,
+                    artist: trackInfo.user.username,
+                    title: trackInfo.title,
+                    cover: trackInfo.artwork_url,
+                    created_at: trackInfo.created_at,
+                    soundcloud: {
+                        id: trackInfo.id,
+                        stream_url: trackInfo.stream_url
+                    }
+                },
                 savedAt: new Date(),
             }).into('published_tracks');
         }),

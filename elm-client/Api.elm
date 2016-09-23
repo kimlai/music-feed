@@ -10,15 +10,15 @@ import Model exposing (Track)
 import Task exposing (Task)
 
 
-fetchPlaylist : String -> Task Http.Error ( List Track, String )
-fetchPlaylist url =
-    Http.get decodePlaylist url
+fetchPlaylist : String -> Json.Decode.Decoder Track -> Task Http.Error ( List Track, String )
+fetchPlaylist url trackDecoder =
+    Http.get (decodePlaylist trackDecoder) url
 
 
-decodePlaylist : Json.Decode.Decoder ( List Track, String )
-decodePlaylist =
+decodePlaylist : Json.Decode.Decoder Track -> Json.Decode.Decoder ( List Track, String )
+decodePlaylist trackDecoder =
     Json.Decode.object2 (,)
-        ("tracks" := Json.Decode.list decodeTrack)
+        ("tracks" := Json.Decode.list trackDecoder)
         ("next_href" := Json.Decode.string)
 
 
@@ -26,11 +26,11 @@ decodeTrack : Json.Decode.Decoder Track
 decodeTrack =
     Json.Decode.succeed Track
         |: ("id" := Json.Decode.int)
-        |: (Json.Decode.at [ "user", "username" ] Json.Decode.string)
-        |: ("artwork_url" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
+        |: ("artist" := Json.Decode.string)
+        |: ("cover" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
         |: ("title" := Json.Decode.string)
-        |: ("stream_url" := Json.Decode.string)
-        |: ("permalink_url" := Json.Decode.string)
+        |: (Json.Decode.at [ "soundcloud", "stream_url" ] Json.Decode.string)
+        |: ("source" := Json.Decode.string)
         |: ("created_at" := Json.Decode.Extra.date)
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed 0
