@@ -45,9 +45,9 @@ type Msg
     | FetchSuccess PlaylistId ( List Track, String )
     | AddTrackFail Http.Error
     | AddTrackSuccess
-    | ResolveTrackInfo String
-    | ResolveTrackInfoFailure Http.Error
-    | ResolveTrackInfoSuccess Track
+    | PublishFromSoundcloudUrl String
+    | PublishFromSoundcloudUrlFailure Http.Error
+    | PublishFromSoundcloudUrlSuccess Track
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -250,17 +250,17 @@ update message model =
             in
                 ( newModel', Cmd.batch [ command, command' ] )
 
-        ResolveTrackInfo url ->
+        PublishFromSoundcloudUrl url ->
             ( model
-            , resolveTrackInfo model.soundcloudClientId url
+            , publishFromSoundcloudUrl model.soundcloudClientId url
             )
 
-        ResolveTrackInfoFailure error ->
+        PublishFromSoundcloudUrlFailure error ->
             ( model
             , Cmd.none
             )
 
-        ResolveTrackInfoSuccess track ->
+        PublishFromSoundcloudUrlSuccess track ->
             let
                 model' =
                     { model | tracks = Dict.insert track.id track model.tracks }
@@ -405,7 +405,7 @@ addTrack addTrackUrl trackId =
         |> Task.perform AddTrackFail (\_ -> AddTrackSuccess)
 
 
-resolveTrackInfo : String -> String -> Cmd Msg
-resolveTrackInfo soundcloudClientId url =
+publishFromSoundcloudUrl : String -> String -> Cmd Msg
+publishFromSoundcloudUrl soundcloudClientId url =
     Soundcloud.resolve soundcloudClientId url
-        |> Task.perform ResolveTrackInfoFailure ResolveTrackInfoSuccess
+        |> Task.perform PublishFromSoundcloudUrlFailure PublishFromSoundcloudUrlSuccess

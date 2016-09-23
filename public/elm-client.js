@@ -9790,22 +9790,22 @@ var _user$project$Soundcloud$resolve = F2(
 					A2(_elm_lang$core$Basics_ops['++'], '&client_id=', clientId))));
 	});
 
-var _user$project$Feed_Update$ResolveTrackInfoSuccess = function (a) {
-	return {ctor: 'ResolveTrackInfoSuccess', _0: a};
+var _user$project$Feed_Update$PublishFromSoundcloudUrlSuccess = function (a) {
+	return {ctor: 'PublishFromSoundcloudUrlSuccess', _0: a};
 };
-var _user$project$Feed_Update$ResolveTrackInfoFailure = function (a) {
-	return {ctor: 'ResolveTrackInfoFailure', _0: a};
+var _user$project$Feed_Update$PublishFromSoundcloudUrlFailure = function (a) {
+	return {ctor: 'PublishFromSoundcloudUrlFailure', _0: a};
 };
-var _user$project$Feed_Update$resolveTrackInfo = F2(
+var _user$project$Feed_Update$publishFromSoundcloudUrl = F2(
 	function (soundcloudClientId, url) {
 		return A3(
 			_elm_lang$core$Task$perform,
-			_user$project$Feed_Update$ResolveTrackInfoFailure,
-			_user$project$Feed_Update$ResolveTrackInfoSuccess,
+			_user$project$Feed_Update$PublishFromSoundcloudUrlFailure,
+			_user$project$Feed_Update$PublishFromSoundcloudUrlSuccess,
 			A2(_user$project$Soundcloud$resolve, soundcloudClientId, url));
 	});
-var _user$project$Feed_Update$ResolveTrackInfo = function (a) {
-	return {ctor: 'ResolveTrackInfo', _0: a};
+var _user$project$Feed_Update$PublishFromSoundcloudUrl = function (a) {
+	return {ctor: 'PublishFromSoundcloudUrl', _0: a};
 };
 var _user$project$Feed_Update$AddTrackSuccess = {ctor: 'AddTrackSuccess'};
 var _user$project$Feed_Update$AddTrackFail = function (a) {
@@ -10163,15 +10163,15 @@ var _user$project$Feed_Update$update = F2(
 							_elm_lang$core$Native_List.fromArray(
 								[command, command$]))
 					};
-				case 'ResolveTrackInfo':
+				case 'PublishFromSoundcloudUrl':
 					return {
 						ctor: '_Tuple2',
 						_0: model,
-						_1: A2(_user$project$Feed_Update$resolveTrackInfo, model.soundcloudClientId, _p1._0)
+						_1: A2(_user$project$Feed_Update$publishFromSoundcloudUrl, model.soundcloudClientId, _p1._0)
 					};
-				case 'ResolveTrackInfoFailure':
+				case 'PublishFromSoundcloudUrlFailure':
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				case 'ResolveTrackInfoSuccess':
+				case 'PublishFromSoundcloudUrlSuccess':
 					var _p17 = _p1._0;
 					var model$ = _elm_lang$core$Native_Utils.update(
 						model,
@@ -10745,13 +10745,28 @@ var _user$project$Feed_View$viewPublishTrack = A2(
 	_elm_lang$core$Native_List.fromArray(
 		[
 			A2(
-			_elm_lang$html$Html$input,
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[]),
 			_elm_lang$core$Native_List.fromArray(
 				[
-					_elm_lang$html$Html_Events$onInput(_user$project$Feed_Update$ResolveTrackInfo)
-				]),
-			_elm_lang$core$Native_List.fromArray(
-				[]))
+					A2(
+					_elm_lang$html$Html$label,
+					_elm_lang$core$Native_List.fromArray(
+						[]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text('Soundcloud')
+						])),
+					A2(
+					_elm_lang$html$Html$input,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Events$onInput(_user$project$Feed_Update$PublishFromSoundcloudUrl)
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[]))
+				]))
 		]));
 var _user$project$Feed_View$viewMoreButton = function (playlistId) {
 	return A2(

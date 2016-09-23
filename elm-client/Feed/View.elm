@@ -4,7 +4,7 @@ import Date exposing (Date)
 import Dict exposing (Dict)
 import Feed.Model as Model exposing (Model, Playlist, PlaylistId(..))
 import Feed.Update exposing (Msg(..))
-import Html exposing (Html, a, nav, li, ul, text, div, img, input)
+import Html exposing (Html, a, nav, li, ul, text, div, img, input, label)
 import Html.Attributes exposing (class, classList, href, src, style)
 import Html.Events exposing (onClick, onWithOptions, onInput)
 import Json.Decode
@@ -175,7 +175,9 @@ viewPublishTrack : Html Msg
 viewPublishTrack =
     div
         []
-        [ input
-            [ onInput ResolveTrackInfo ]
+        [ div
             []
+            [ label [] [ text "Soundcloud" ]
+            , input [ onInput PublishFromSoundcloudUrl ] []
+            ]
         ]
