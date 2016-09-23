@@ -10,7 +10,7 @@ import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Keyboard
-import Model exposing (Track, TrackId)
+import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
 import Radio.Model as Model exposing (Model, PlaylistId(..))
@@ -122,11 +122,7 @@ update message model =
                     ( model, Cmd.none )
                 Just track ->
                     ( { model | playing = True }
-                    , Ports.playTrack
-                        { id = track.id
-                        , streamUrl = track.streamUrl
-                        , currentTime = track.currentTime
-                        }
+                    , play track
                     )
 
         Pause ->
@@ -166,11 +162,7 @@ update message model =
                 | playing = True
                 , player = Player.select CustomQueue position model.player
               }
-            , Ports.playTrack
-                { id = track.id
-                , streamUrl = track.streamUrl
-                , currentTime = track.currentTime
-                }
+            , play track
             )
 
         TrackProgress ( trackId, progress, currentTime ) ->
@@ -257,3 +249,24 @@ fetchMore : Model.Playlist -> Cmd Msg
 fetchMore playlist =
     Api.fetchPlaylist playlist.nextLink Api.decodeTrack
         |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
+
+
+
+-- PORTS
+
+
+play : Track -> Cmd msg
+play track =
+    case track.streamingInfo of
+        Soundcloud streamUrl ->
+            Ports.playTrack
+                { id = track.id
+                , streamUrl = streamUrl
+                , currentTime = track.currentTime
+                }
+        Youtube youtubeId ->
+            Ports.playTrack
+                { id = track.id
+                , streamUrl = youtubeId
+                , currentTime = track.currentTime
+                }

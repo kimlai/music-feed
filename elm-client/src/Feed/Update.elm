@@ -12,7 +12,7 @@ import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Keyboard
-import Model exposing (Track, TrackId)
+import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
 import Soundcloud
@@ -136,11 +136,7 @@ update message model =
                     ( model, Cmd.none )
                 Just track ->
                     ( { model | playing = True }
-                    , Ports.playTrack
-                        { id = track.id
-                        , streamUrl = track.streamUrl
-                        , currentTime = track.currentTime
-                        }
+                    , play track
                     )
 
         Pause ->
@@ -180,11 +176,7 @@ update message model =
                 | playing = True
                 , player = Player.select CustomQueue position model.player
               }
-            , Ports.playTrack
-                { id = track.id
-                , streamUrl = track.streamUrl
-                , currentTime = track.currentTime
-                }
+            , play track
             )
 
         TrackProgress ( trackId, progress, currentTime ) ->
@@ -417,3 +409,24 @@ publishFromSoundcloudUrl : String -> String -> Cmd Msg
 publishFromSoundcloudUrl soundcloudClientId url =
     Soundcloud.resolve soundcloudClientId url
         |> Task.perform PublishFromSoundcloudUrlFailure PublishFromSoundcloudUrlSuccess
+
+
+
+-- PORTS
+
+
+play : Track -> Cmd msg
+play track =
+    case track.streamingInfo of
+        Soundcloud streamUrl ->
+            Ports.playTrack
+                { id = track.id
+                , streamUrl = streamUrl
+                , currentTime = track.currentTime
+                }
+        Youtube youtubeId ->
+            Ports.playTrack
+                { id = track.id
+                , streamUrl = youtubeId
+                , currentTime = track.currentTime
+                }

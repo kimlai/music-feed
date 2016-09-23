@@ -12,13 +12,24 @@ type alias Track =
     , artist : String
     , artwork_url : String
     , title : String
-    , streamUrl : String
+    , streamingInfo: StreamingInfo
     , sourceUrl : String
     , createdAt : Date
     , progress : Float
     , currentTime : Float
     , error : Bool
     }
+
+
+type StreamingInfo
+    = Soundcloud StreamUrl
+    | Youtube YoutubeId
+
+
+type alias StreamUrl = String
+
+
+type alias YoutubeId = String
 
 
 type alias NavigationItem =
