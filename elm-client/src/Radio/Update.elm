@@ -265,8 +265,8 @@ play track =
                 , currentTime = track.currentTime
                 }
         Youtube youtubeId ->
-            Ports.playTrack
+            Ports.playYoutubeTrack
                 { id = track.id
-                , streamUrl = youtubeId
+                , youtubeId = youtubeId
                 , currentTime = track.currentTime
                 }

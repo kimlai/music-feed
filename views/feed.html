@@ -52,7 +52,9 @@
                     app.ports.trackError.send(currentTrackId);
                 });
                 app.ports.playTrack.subscribe(function(track) {
-                    youtubePlayer.pauseVideo();
+                    if (currentYoutubeId) {
+                        youtubePlayer.pauseVideo();
+                    }
                     currentTrackId = track.id;
                     audio.src = track.streamUrl + '?client_id=' + soundcloudClientId;
                     audio.currentTime = track.currentTime;
