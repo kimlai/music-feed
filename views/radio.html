@@ -53,7 +53,9 @@
                 });
                 app.ports.changeCurrentTime.subscribe(function(amount) {
                     audio.currentTime = audio.currentTime + amount;
-                    youtubePlayer.seekTo(youtubePlayer.getCurrentTime() + amount);
+                    if (currentYoutubeId) {
+                        youtubePlayer.seekTo(youtubePlayer.getCurrentTime() + amount);
+                    }
                 });
                 app.ports.pause.subscribe(function(trackId) {
                     audio.pause();
@@ -106,7 +108,9 @@
                     }
                 });
                 app.ports.pause.subscribe(function(trackId) {
-                    youtubePlayer.pauseVideo();
+                    if (currentYoutubeId) {
+                        youtubePlayer.pauseVideo();
+                    }
                 });
             }
         </script>
