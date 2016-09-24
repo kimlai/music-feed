@@ -7,12 +7,15 @@
         <script src="//use.typekit.net/ztf8rcq.js"></script>
         <script>try{Typekit.load({ async: false });}catch(e){}</script>
         <script src="/elm-client.js"></script>
+        <script src="https://code.ospry.io/v1/ospry.js"></script>
     </head>
     <body>
         <div id="youtube-player">
             <div id="player"></div>
         </div>
         <script>
+            var ospry = new Ospry('<%=ospry_id%>');
+
             var tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
             var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -91,8 +94,19 @@
                         500
                     );
                 });
+
                 app.ports.pause.subscribe(function(trackId) {
                     youtubePlayer.pauseVideo();
+                });
+
+                app.ports.uploadImage.subscribe(function () {
+                    var form = document.getElementById('cover-upload');
+                    ospry.up({
+                        form: form,
+                        imageReady: function(err, metadata) {
+                            app.ports.imageUploaded.send(metadata.url);
+                        }
+                    });
                 });
             }
         </script>

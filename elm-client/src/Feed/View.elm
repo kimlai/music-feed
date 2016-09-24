@@ -4,8 +4,8 @@ import Date exposing (Date)
 import Dict exposing (Dict)
 import Feed.Model as Model exposing (Model, Playlist, PlaylistId(..))
 import Feed.Update exposing (Msg(..))
-import Html exposing (Html, a, nav, li, ul, text, div, img, input, label)
-import Html.Attributes exposing (class, classList, href, src, style, value)
+import Html exposing (Html, a, nav, li, ul, text, div, img, input, label, form, button)
+import Html.Attributes exposing (class, classList, href, src, style, value, id, type')
 import Html.Events exposing (onClick, onWithOptions, onInput)
 import Json.Decode
 import Model exposing (Track, TrackId)
@@ -191,7 +191,7 @@ viewPublishTrack newTrack =
 
 viewNewTrackForm : Maybe Track -> Html Msg
 viewNewTrackForm newTrack =
-    case Debug.log "track" newTrack of
+    case newTrack of
         Nothing ->
             text ""
         Just track ->
@@ -215,7 +215,14 @@ viewNewTrackForm newTrack =
                         ]
                         []
                     ]
+                , form
+                    [ id "cover-upload" ]
+                    [ input [ type' "file" ] []
+                    , div
+                        [ onClick UploadImage ]
+                        [ text "Upload" ]
                 , div
                     [ onClick (PublishYoutubeTrack track) ]
                     [ text "Publish" ]
                 ]
+            ]

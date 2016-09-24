@@ -10413,6 +10413,11 @@ var _user$project$Feed_Ports$scroll = _elm_lang$core$Native_Platform.outgoingPor
 	function (v) {
 		return v;
 	});
+var _user$project$Feed_Ports$uploadImage = _elm_lang$core$Native_Platform.outgoingPort(
+	'uploadImage',
+	function (v) {
+		return (v.ctor === 'Nothing') ? null : v._0;
+	});
 var _user$project$Feed_Ports$trackProgress = _elm_lang$core$Native_Platform.incomingPort(
 	'trackProgress',
 	A4(
@@ -10426,6 +10431,7 @@ var _user$project$Feed_Ports$trackProgress = _elm_lang$core$Native_Platform.inco
 		_elm_lang$core$Json_Decode$float));
 var _user$project$Feed_Ports$trackEnd = _elm_lang$core$Native_Platform.incomingPort('trackEnd', _elm_lang$core$Json_Decode$string);
 var _user$project$Feed_Ports$trackError = _elm_lang$core$Native_Platform.incomingPort('trackError', _elm_lang$core$Json_Decode$string);
+var _user$project$Feed_Ports$imageUploaded = _elm_lang$core$Native_Platform.incomingPort('imageUploaded', _elm_lang$core$Json_Decode$string);
 
 var _user$project$Soundcloud$decodeTrack = A2(
 	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
@@ -10514,6 +10520,10 @@ var _user$project$Feed_Update$publishYoutubeTrack = function (track) {
 var _user$project$Feed_Update$PublishYoutubeTrack = function (a) {
 	return {ctor: 'PublishYoutubeTrack', _0: a};
 };
+var _user$project$Feed_Update$ImageUploaded = function (a) {
+	return {ctor: 'ImageUploaded', _0: a};
+};
+var _user$project$Feed_Update$UploadImage = {ctor: 'UploadImage'};
 var _user$project$Feed_Update$UpdateNewTrackTitle = function (a) {
 	return {ctor: 'UpdateNewTrackTitle', _0: a};
 };
@@ -10951,24 +10961,21 @@ var _user$project$Feed_Update$update = F2(
 								error: false
 							};
 						},
-						A2(
-							_elm_lang$core$Debug$log,
-							'wtf',
-							_elm_lang$core$List$head(
-								A2(
-									_elm_lang$core$List$filterMap,
-									_elm_lang$core$Basics$identity,
-									_elm_lang$core$List$concat(
-										A2(
-											_elm_lang$core$List$map,
-											function (_) {
-												return _.submatches;
-											},
-											A3(
-												_elm_lang$core$Regex$find,
-												_elm_lang$core$Regex$AtMost(1),
-												_elm_lang$core$Regex$regex('https:\\/\\/www\\.youtube\\.com\\/watch\\?v=(\\w+)'),
-												_p18)))))));
+						_elm_lang$core$List$head(
+							A2(
+								_elm_lang$core$List$filterMap,
+								_elm_lang$core$Basics$identity,
+								_elm_lang$core$List$concat(
+									A2(
+										_elm_lang$core$List$map,
+										function (_) {
+											return _.submatches;
+										},
+										A3(
+											_elm_lang$core$Regex$find,
+											_elm_lang$core$Regex$AtMost(1),
+											_elm_lang$core$Regex$regex('https:\\/\\/www\\.youtube\\.com\\/watch\\?v=(\\w+)'),
+											_p18))))));
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -10999,6 +11006,28 @@ var _user$project$Feed_Update$update = F2(
 							return _elm_lang$core$Native_Utils.update(
 								track,
 								{title: _p3._0});
+						},
+						model.youtubeTrackPublication);
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{youtubeTrackPublication: youtubeTrackPublication}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'UploadImage':
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: _user$project$Feed_Ports$uploadImage(_elm_lang$core$Maybe$Nothing)
+					};
+				case 'ImageUploaded':
+					var youtubeTrackPublication = A2(
+						_elm_lang$core$Maybe$map,
+						function (track) {
+							return _elm_lang$core$Native_Utils.update(
+								track,
+								{artwork_url: _p3._0});
 						},
 						model.youtubeTrackPublication);
 					return {
@@ -11586,7 +11615,7 @@ var _user$project$View$viewGlobalPlayer = F4(
 	});
 
 var _user$project$Feed_View$viewNewTrackForm = function (newTrack) {
-	var _p0 = A2(_elm_lang$core$Debug$log, 'track', newTrack);
+	var _p0 = newTrack;
 	if (_p0.ctor === 'Nothing') {
 		return _elm_lang$html$Html$text('');
 	} else {
@@ -11648,15 +11677,42 @@ var _user$project$Feed_View$viewNewTrackForm = function (newTrack) {
 								[]))
 						])),
 					A2(
-					_elm_lang$html$Html$div,
+					_elm_lang$html$Html$form,
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html_Events$onClick(
-							_user$project$Feed_Update$PublishYoutubeTrack(_p1))
+							_elm_lang$html$Html_Attributes$id('cover-upload')
 						]),
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html$text('Publish')
+							A2(
+							_elm_lang$html$Html$input,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$type$('file')
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[])),
+							A2(
+							_elm_lang$html$Html$div,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Events$onClick(_user$project$Feed_Update$UploadImage)
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html$text('Upload')
+								])),
+							A2(
+							_elm_lang$html$Html$div,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Events$onClick(
+									_user$project$Feed_Update$PublishYoutubeTrack(_p1))
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html$text('Publish')
+								]))
 						]))
 				]));
 	}
@@ -12140,6 +12196,7 @@ var _user$project$Feed_Main$subscriptions = function (model) {
 					return _user$project$Feed_Update$Next;
 				}),
 				_user$project$Feed_Ports$trackError(_user$project$Feed_Update$TrackError),
+				_user$project$Feed_Ports$imageUploaded(_user$project$Feed_Update$ImageUploaded),
 				_elm_lang$keyboard$Keyboard$presses(_user$project$Feed_Update$KeyPressed)
 			]));
 };

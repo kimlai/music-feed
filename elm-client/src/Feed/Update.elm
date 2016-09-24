@@ -53,6 +53,8 @@ type Msg
     | ParseYoutubeUrl String
     | UpdateNewTrackArtist String
     | UpdateNewTrackTitle String
+    | UploadImage
+    | ImageUploaded String
     | PublishYoutubeTrack Track
     | PublishYoutubeTrackFailure Http.Error
     | PublishYoutubeTrackSuccess Track
@@ -279,7 +281,6 @@ update message model =
                         |> List.concat
                         |> List.filterMap identity
                         |> List.head
-                        |> Debug.log "wtf"
                         |> Maybe.map
                             (\youtubeId ->
                                 { id = ""
@@ -312,6 +313,18 @@ update message model =
             let
                 youtubeTrackPublication =
                     Maybe.map (\track -> { track | title = title }) model.youtubeTrackPublication
+            in
+            ( { model | youtubeTrackPublication = youtubeTrackPublication }
+            , Cmd.none
+            )
+
+        UploadImage ->
+            ( model, Ports.uploadImage Nothing )
+
+        ImageUploaded url ->
+            let
+                youtubeTrackPublication =
+                    Maybe.map (\track -> { track | artwork_url = url }) model.youtubeTrackPublication
             in
             ( { model | youtubeTrackPublication = youtubeTrackPublication }
             , Cmd.none

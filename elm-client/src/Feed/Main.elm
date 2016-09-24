@@ -78,6 +78,7 @@ subscriptions model =
         [ Ports.trackProgress TrackProgress
         , Ports.trackEnd (\_ -> Next)
         , Ports.trackError TrackError
+        , Ports.imageUploaded ImageUploaded
         , Keyboard.presses KeyPressed
         ]
 
