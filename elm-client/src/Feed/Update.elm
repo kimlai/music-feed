@@ -51,6 +51,8 @@ type Msg
     | PublishFromSoundcloudUrlFailure Http.Error
     | PublishFromSoundcloudUrlSuccess Track
     | ParseYoutubeUrl String
+    | UpdateNewTrackArtist String
+    | UpdateNewTrackTitle String
     | PublishYoutubeTrack Track
     | PublishYoutubeTrackFailure Http.Error
     | PublishYoutubeTrackSuccess Track
@@ -296,6 +298,24 @@ update message model =
                 ( { model | youtubeTrackPublication = track }
                 , Cmd.none
                 )
+
+        UpdateNewTrackArtist artist ->
+            let
+                youtubeTrackPublication =
+                    Maybe.map (\track -> { track | artist = artist }) model.youtubeTrackPublication
+            in
+            ( { model | youtubeTrackPublication = youtubeTrackPublication }
+            , Cmd.none
+            )
+
+        UpdateNewTrackTitle title ->
+            let
+                youtubeTrackPublication =
+                    Maybe.map (\track -> { track | title = title }) model.youtubeTrackPublication
+            in
+            ( { model | youtubeTrackPublication = youtubeTrackPublication }
+            , Cmd.none
+            )
 
         PublishYoutubeTrack track ->
             ( { model | youtubeTrackPublication = Nothing }

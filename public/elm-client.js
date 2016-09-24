@@ -10509,6 +10509,12 @@ var _user$project$Feed_Update$publishYoutubeTrack = function (track) {
 var _user$project$Feed_Update$PublishYoutubeTrack = function (a) {
 	return {ctor: 'PublishYoutubeTrack', _0: a};
 };
+var _user$project$Feed_Update$UpdateNewTrackTitle = function (a) {
+	return {ctor: 'UpdateNewTrackTitle', _0: a};
+};
+var _user$project$Feed_Update$UpdateNewTrackArtist = function (a) {
+	return {ctor: 'UpdateNewTrackArtist', _0: a};
+};
 var _user$project$Feed_Update$ParseYoutubeUrl = function (a) {
 	return {ctor: 'ParseYoutubeUrl', _0: a};
 };
@@ -10963,6 +10969,38 @@ var _user$project$Feed_Update$update = F2(
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{youtubeTrackPublication: track}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'UpdateNewTrackArtist':
+					var youtubeTrackPublication = A2(
+						_elm_lang$core$Maybe$map,
+						function (track) {
+							return _elm_lang$core$Native_Utils.update(
+								track,
+								{artist: _p3._0});
+						},
+						model.youtubeTrackPublication);
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{youtubeTrackPublication: youtubeTrackPublication}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'UpdateNewTrackTitle':
+					var youtubeTrackPublication = A2(
+						_elm_lang$core$Maybe$map,
+						function (track) {
+							return _elm_lang$core$Native_Utils.update(
+								track,
+								{title: _p3._0});
+						},
+						model.youtubeTrackPublication);
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{youtubeTrackPublication: youtubeTrackPublication}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				case 'PublishYoutubeTrack':
@@ -11574,7 +11612,8 @@ var _user$project$Feed_View$viewNewTrackForm = function (newTrack) {
 							_elm_lang$html$Html$input,
 							_elm_lang$core$Native_List.fromArray(
 								[
-									_elm_lang$html$Html_Attributes$value(_p1.artist)
+									_elm_lang$html$Html_Attributes$value(_p1.artist),
+									_elm_lang$html$Html_Events$onInput(_user$project$Feed_Update$UpdateNewTrackArtist)
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[]))
@@ -11597,7 +11636,8 @@ var _user$project$Feed_View$viewNewTrackForm = function (newTrack) {
 							_elm_lang$html$Html$input,
 							_elm_lang$core$Native_List.fromArray(
 								[
-									_elm_lang$html$Html_Attributes$value(_p1.title)
+									_elm_lang$html$Html_Attributes$value(_p1.title),
+									_elm_lang$html$Html_Events$onInput(_user$project$Feed_Update$UpdateNewTrackTitle)
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[]))

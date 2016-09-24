@@ -200,12 +200,20 @@ viewNewTrackForm newTrack =
                 [ div
                     []
                     [ label [] [ text "Artist" ]
-                    , input [ value track.artist ] []
+                    , input
+                        [ value track.artist
+                        , onInput UpdateNewTrackArtist
+                        ]
+                        []
                     ]
                 , div
                     []
                     [ label [] [ text "Title" ]
-                    , input [ value track.title ] []
+                    , input
+                        [ value track.title
+                        , onInput UpdateNewTrackTitle
+                        ]
+                        []
                     ]
                 , div
                     [ onClick (PublishYoutubeTrack track) ]
