@@ -58,6 +58,7 @@ init soundcloudClientId page =
       , pages = pages
       , navigation = navigation
       , soundcloudClientId = soundcloudClientId
+      , youtubeTrackPublication = Nothing
     }
     , Cmd.batch
         (List.append

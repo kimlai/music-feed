@@ -6543,9 +6543,144 @@ var _elm_community$elm_json_extra$Json_Decode_Extra$apply = _elm_lang$core$Json_
 var _elm_community$elm_json_extra$Json_Decode_Extra_ops = _elm_community$elm_json_extra$Json_Decode_Extra_ops || {};
 _elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'] = _elm_community$elm_json_extra$Json_Decode_Extra$apply;
 
+//import Maybe, Native.List //
+
+var _elm_lang$core$Native_Regex = function() {
+
+function escape(str)
+{
+	return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+function caseInsensitive(re)
+{
+	return new RegExp(re.source, 'gi');
+}
+function regex(raw)
+{
+	return new RegExp(raw, 'g');
+}
+
+function contains(re, string)
+{
+	return string.match(re) !== null;
+}
+
+function find(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex === re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		out.push({
+			match: result[0],
+			submatches: _elm_lang$core$Native_List.fromArray(subs),
+			index: result.index,
+			number: number
+		});
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+function replace(n, re, replacer, string)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		return replacer({
+			match: match,
+			submatches: _elm_lang$core$Native_List.fromArray(submatches),
+			index: arguments[i - 1],
+			number: count
+		});
+	}
+	return string.replace(re, jsReplacer);
+}
+
+function split(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	if (n === Infinity)
+	{
+		return _elm_lang$core$Native_List.fromArray(str.split(re));
+	}
+	var string = str;
+	var result;
+	var out = [];
+	var start = re.lastIndex;
+	while (n--)
+	{
+		if (!(result = re.exec(string))) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+return {
+	regex: regex,
+	caseInsensitive: caseInsensitive,
+	escape: escape,
+
+	contains: F2(contains),
+	find: F3(find),
+	replace: F4(replace),
+	split: F3(split)
+};
+
+}();
+
 var _elm_lang$core$Process$kill = _elm_lang$core$Native_Scheduler.kill;
 var _elm_lang$core$Process$sleep = _elm_lang$core$Native_Scheduler.sleep;
 var _elm_lang$core$Process$spawn = _elm_lang$core$Native_Scheduler.spawn;
+
+var _elm_lang$core$Regex$split = _elm_lang$core$Native_Regex.split;
+var _elm_lang$core$Regex$replace = _elm_lang$core$Native_Regex.replace;
+var _elm_lang$core$Regex$find = _elm_lang$core$Native_Regex.find;
+var _elm_lang$core$Regex$contains = _elm_lang$core$Native_Regex.contains;
+var _elm_lang$core$Regex$caseInsensitive = _elm_lang$core$Native_Regex.caseInsensitive;
+var _elm_lang$core$Regex$regex = _elm_lang$core$Native_Regex.regex;
+var _elm_lang$core$Regex$escape = _elm_lang$core$Native_Regex.escape;
+var _elm_lang$core$Regex$Match = F4(
+	function (a, b, c, d) {
+		return {match: a, submatches: b, index: c, number: d};
+	});
+var _elm_lang$core$Regex$Regex = {ctor: 'Regex'};
+var _elm_lang$core$Regex$AtMost = function (a) {
+	return {ctor: 'AtMost', _0: a};
+};
+var _elm_lang$core$Regex$All = {ctor: 'All'};
 
 var _elm_lang$dom$Native_Dom = function() {
 
@@ -9716,6 +9851,80 @@ var _user$project$Model$Soundcloud = function (a) {
 	return {ctor: 'Soundcloud', _0: a};
 };
 
+var _user$project$Api$publishTrackBody = function (track) {
+	var streamInfo = function () {
+		var _p0 = track.streamingInfo;
+		if (_p0.ctor === 'Soundcloud') {
+			return _elm_lang$core$Native_List.fromArray(
+				[
+					{
+					ctor: '_Tuple2',
+					_0: 'soundcloud',
+					_1: _elm_lang$core$Json_Encode$object(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								{
+								ctor: '_Tuple2',
+								_0: 'stream_url',
+								_1: _elm_lang$core$Json_Encode$string(_p0._0)
+							}
+							]))
+				}
+				]);
+		} else {
+			return _elm_lang$core$Native_List.fromArray(
+				[
+					{
+					ctor: '_Tuple2',
+					_0: 'youtube',
+					_1: _elm_lang$core$Json_Encode$object(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								{
+								ctor: '_Tuple2',
+								_0: 'id',
+								_1: _elm_lang$core$Json_Encode$string(_p0._0)
+							}
+							]))
+				}
+				]);
+		}
+	}();
+	return _evancz$elm_http$Http$string(
+		A2(
+			_elm_lang$core$Json_Encode$encode,
+			0,
+			_elm_lang$core$Json_Encode$object(
+				A2(
+					F2(
+						function (x, y) {
+							return A2(_elm_lang$core$Basics_ops['++'], x, y);
+						}),
+					streamInfo,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{
+							ctor: '_Tuple2',
+							_0: 'artist',
+							_1: _elm_lang$core$Json_Encode$string(track.artist)
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'title',
+							_1: _elm_lang$core$Json_Encode$string(track.title)
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'source',
+							_1: _elm_lang$core$Json_Encode$string(track.sourceUrl)
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'cover',
+							_1: _elm_lang$core$Json_Encode$string(track.artwork_url)
+						}
+						])))));
+};
 var _user$project$Api$addTrackBody = function (trackId) {
 	return _evancz$elm_http$Http$string(
 		A2(
@@ -9727,7 +9936,7 @@ var _user$project$Api$addTrackBody = function (trackId) {
 						{
 						ctor: '_Tuple2',
 						_0: 'soundcloudTrackId',
-						_1: _elm_lang$core$Json_Encode$int(trackId)
+						_1: _elm_lang$core$Json_Encode$string(trackId)
 					}
 					]))));
 };
@@ -9795,7 +10004,7 @@ var _user$project$Api$decodeTrack = A2(
 									A2(
 										_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
 										_elm_lang$core$Json_Decode$succeed(_user$project$Model$Track),
-										A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
+										A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$string)),
 									A2(_elm_lang$core$Json_Decode_ops[':='], 'artist', _elm_lang$core$Json_Decode$string)),
 								A2(
 									_elm_lang$core$Json_Decode_ops[':='],
@@ -9808,6 +10017,23 @@ var _user$project$Api$decodeTrack = A2(
 			_elm_lang$core$Json_Decode$succeed(0)),
 		_elm_lang$core$Json_Decode$succeed(0)),
 	_elm_lang$core$Json_Decode$succeed(false));
+var _user$project$Api$publishTrack = function (track) {
+	return A2(
+		_evancz$elm_http$Http$fromJson,
+		_user$project$Api$decodeTrack,
+		A2(
+			_evancz$elm_http$Http$send,
+			_evancz$elm_http$Http$defaultSettings,
+			{
+				verb: 'POST',
+				headers: _elm_lang$core$Native_List.fromArray(
+					[
+						{ctor: '_Tuple2', _0: 'Content-Type', _1: 'application/json'}
+					]),
+				url: '/feed/publish_custom_track',
+				body: _user$project$Api$publishTrackBody(track)
+			}));
+};
 var _user$project$Api$decodePlaylist = function (trackDecoder) {
 	return A3(
 		_elm_lang$core$Json_Decode$object2,
@@ -10131,7 +10357,9 @@ var _user$project$Feed_Model$Model = function (a) {
 							return function (h) {
 								return function (i) {
 									return function (j) {
-										return {tracks: a, playlists: b, playing: c, currentPage: d, lastKeyPressed: e, currentTime: f, player: g, pages: h, navigation: i, soundcloudClientId: j};
+										return function (k) {
+											return {tracks: a, playlists: b, playing: c, currentPage: d, lastKeyPressed: e, currentTime: f, player: g, pages: h, navigation: i, soundcloudClientId: j, youtubeTrackPublication: k};
+										};
 									};
 								};
 							};
@@ -10188,11 +10416,11 @@ var _user$project$Feed_Ports$trackProgress = _elm_lang$core$Native_Platform.inco
 			function (x1, x2, x3) {
 				return {ctor: '_Tuple3', _0: x1, _1: x2, _2: x3};
 			}),
-		_elm_lang$core$Json_Decode$int,
+		_elm_lang$core$Json_Decode$string,
 		_elm_lang$core$Json_Decode$float,
 		_elm_lang$core$Json_Decode$float));
-var _user$project$Feed_Ports$trackEnd = _elm_lang$core$Native_Platform.incomingPort('trackEnd', _elm_lang$core$Json_Decode$int);
-var _user$project$Feed_Ports$trackError = _elm_lang$core$Native_Platform.incomingPort('trackError', _elm_lang$core$Json_Decode$int);
+var _user$project$Feed_Ports$trackEnd = _elm_lang$core$Native_Platform.incomingPort('trackEnd', _elm_lang$core$Json_Decode$string);
+var _user$project$Feed_Ports$trackError = _elm_lang$core$Native_Platform.incomingPort('trackError', _elm_lang$core$Json_Decode$string);
 
 var _user$project$Soundcloud$decodeTrack = A2(
 	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
@@ -10215,7 +10443,10 @@ var _user$project$Soundcloud$decodeTrack = A2(
 									A2(
 										_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
 										_elm_lang$core$Json_Decode$succeed(_user$project$Model$Track),
-										A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
+										A2(
+											_elm_lang$core$Json_Decode$map,
+											_elm_lang$core$Basics$toString,
+											A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int))),
 									A2(
 										_elm_lang$core$Json_Decode$at,
 										_elm_lang$core$Native_List.fromArray(
@@ -10261,6 +10492,25 @@ var _user$project$Feed_Update$play = function (track) {
 		return _user$project$Feed_Ports$playTrack(
 			{id: track.id, streamUrl: _p0._0, currentTime: track.currentTime});
 	}
+};
+var _user$project$Feed_Update$PublishYoutubeTrackSuccess = function (a) {
+	return {ctor: 'PublishYoutubeTrackSuccess', _0: a};
+};
+var _user$project$Feed_Update$PublishYoutubeTrackFailure = function (a) {
+	return {ctor: 'PublishYoutubeTrackFailure', _0: a};
+};
+var _user$project$Feed_Update$publishYoutubeTrack = function (track) {
+	return A3(
+		_elm_lang$core$Task$perform,
+		_user$project$Feed_Update$PublishYoutubeTrackFailure,
+		_user$project$Feed_Update$PublishYoutubeTrackSuccess,
+		_user$project$Api$publishTrack(track));
+};
+var _user$project$Feed_Update$PublishYoutubeTrack = function (a) {
+	return {ctor: 'PublishYoutubeTrack', _0: a};
+};
+var _user$project$Feed_Update$ParseYoutubeUrl = function (a) {
+	return {ctor: 'ParseYoutubeUrl', _0: a};
 };
 var _user$project$Feed_Update$PublishFromSoundcloudUrlSuccess = function (a) {
 	return {ctor: 'PublishFromSoundcloudUrlSuccess', _0: a};
@@ -10671,9 +10921,87 @@ var _user$project$Feed_Update$update = F2(
 						model$$$,
 						_elm_lang$core$Native_List.fromArray(
 							[command, command$]));
+				case 'ParseYoutubeUrl':
+					var _p18 = _p3._0;
+					var track = A2(
+						_elm_lang$core$Maybe$map,
+						function (youtubeId) {
+							return {
+								id: '',
+								artist: '',
+								artwork_url: '',
+								title: '',
+								streamingInfo: _user$project$Model$Youtube(youtubeId),
+								sourceUrl: _p18,
+								createdAt: _elm_lang$core$Date$fromTime(
+									A2(_elm_lang$core$Maybe$withDefault, 0, model.currentTime)),
+								progress: 0,
+								currentTime: 0,
+								error: false
+							};
+						},
+						A2(
+							_elm_lang$core$Debug$log,
+							'wtf',
+							_elm_lang$core$List$head(
+								A2(
+									_elm_lang$core$List$filterMap,
+									_elm_lang$core$Basics$identity,
+									_elm_lang$core$List$concat(
+										A2(
+											_elm_lang$core$List$map,
+											function (_) {
+												return _.submatches;
+											},
+											A3(
+												_elm_lang$core$Regex$find,
+												_elm_lang$core$Regex$AtMost(1),
+												_elm_lang$core$Regex$regex('https:\\/\\/www\\.youtube\\.com\\/watch\\?v=(\\w+)'),
+												_p18)))))));
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{youtubeTrackPublication: track}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'PublishYoutubeTrack':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{youtubeTrackPublication: _elm_lang$core$Maybe$Nothing}),
+						_1: _user$project$Feed_Update$publishYoutubeTrack(_p3._0)
+					};
+				case 'PublishYoutubeTrackFailure':
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				case 'PublishYoutubeTrackSuccess':
+					var _p21 = _p3._0;
+					var model$ = _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							tracks: A3(_elm_lang$core$Dict$insert, _p21.id, _p21, model.tracks)
+						});
+					var _p19 = A2(
+						_user$project$Feed_Update$update,
+						A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$PublishedTracks, _p21.id),
+						model$);
+					var model$$ = _p19._0;
+					var command = _p19._1;
+					var _p20 = A2(
+						_user$project$Feed_Update$update,
+						_user$project$Feed_Update$ChangePage('published-tracks'),
+						model$$);
+					var model$$$ = _p20._0;
+					var command$ = _p20._1;
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						model$$$,
+						_elm_lang$core$Native_List.fromArray(
+							[command, command$]));
 				default:
-					var _p18 = _elm_lang$core$Char$fromCode(_p3._0);
-					switch (_p18.valueOf()) {
+					var _p22 = _elm_lang$core$Char$fromCode(_p3._0);
+					switch (_p22.valueOf()) {
 						case 'n':
 							var _v14 = _user$project$Feed_Update$Next,
 								_v15 = model;
@@ -10699,10 +11027,10 @@ var _user$project$Feed_Update$update = F2(
 							model = _v21;
 							continue update;
 						case 'L':
-							var _p19 = model.currentPage.playlist;
-							if (_p19.ctor === 'Just') {
-								var _p20 = _p19._0;
-								switch (_p20.ctor) {
+							var _p23 = model.currentPage.playlist;
+							if (_p23.ctor === 'Just') {
+								var _p24 = _p23._0;
+								switch (_p24.ctor) {
 									case 'Feed':
 										var _v24 = _user$project$Feed_Update$ChangePage('/saved-tracks'),
 											_v25 = model;
@@ -10728,10 +11056,10 @@ var _user$project$Feed_Update$update = F2(
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							}
 						case 'H':
-							var _p21 = model.currentPage.playlist;
-							if (_p21.ctor === 'Just') {
-								var _p22 = _p21._0;
-								switch (_p22.ctor) {
+							var _p25 = model.currentPage.playlist;
+							if (_p25.ctor === 'Just') {
+								var _p26 = _p25._0;
+								switch (_p26.ctor) {
 									case 'Feed':
 										var _v32 = _user$project$Feed_Update$ChangePage('/published-tracks'),
 											_v33 = model;
@@ -10757,9 +11085,9 @@ var _user$project$Feed_Update$update = F2(
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							}
 						case 'm':
-							var _p23 = model.currentPage.playlist;
-							if (_p23.ctor === 'Just') {
-								var _v39 = _user$project$Feed_Update$FetchMore(_p23._0),
+							var _p27 = model.currentPage.playlist;
+							if (_p27.ctor === 'Just') {
+								var _v39 = _user$project$Feed_Update$FetchMore(_p27._0),
 									_v40 = model;
 								message = _v39;
 								model = _v40;
@@ -10768,33 +11096,33 @@ var _user$project$Feed_Update$update = F2(
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							}
 						case 'b':
-							var _p24 = _user$project$Player$currentTrack(model.player);
-							if (_p24.ctor === 'Nothing') {
+							var _p28 = _user$project$Player$currentTrack(model.player);
+							if (_p28.ctor === 'Nothing') {
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							} else {
-								var _v42 = _user$project$Feed_Update$BlacklistTrack(_p24._0),
+								var _v42 = _user$project$Feed_Update$BlacklistTrack(_p28._0),
 									_v43 = model;
 								message = _v42;
 								model = _v43;
 								continue update;
 							}
 						case 's':
-							var _p25 = _user$project$Player$currentTrack(model.player);
-							if (_p25.ctor === 'Nothing') {
+							var _p29 = _user$project$Player$currentTrack(model.player);
+							if (_p29.ctor === 'Nothing') {
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							} else {
-								var _v45 = A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$SavedTracks, _p25._0),
+								var _v45 = A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$SavedTracks, _p29._0),
 									_v46 = model;
 								message = _v45;
 								model = _v46;
 								continue update;
 							}
 						case 'P':
-							var _p26 = _user$project$Player$currentTrack(model.player);
-							if (_p26.ctor === 'Nothing') {
+							var _p30 = _user$project$Player$currentTrack(model.player);
+							if (_p30.ctor === 'Nothing') {
 								return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 							} else {
-								var _v48 = A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$PublishedTracks, _p26._0),
+								var _v48 = A2(_user$project$Feed_Update$MoveToPlaylist, _user$project$Feed_Model$PublishedTracks, _p30._0),
 									_v49 = model;
 								message = _v48;
 								model = _v49;
@@ -11214,59 +11542,136 @@ var _user$project$View$viewGlobalPlayer = F4(
 		}
 	});
 
-var _user$project$Feed_View$viewPublishTrack = A2(
-	_elm_lang$html$Html$div,
-	_elm_lang$core$Native_List.fromArray(
-		[]),
-	_elm_lang$core$Native_List.fromArray(
-		[
-			A2(
+var _user$project$Feed_View$viewNewTrackForm = function (newTrack) {
+	var _p0 = A2(_elm_lang$core$Debug$log, 'track', newTrack);
+	if (_p0.ctor === 'Nothing') {
+		return _elm_lang$html$Html$text('');
+	} else {
+		var _p1 = _p0._0;
+		return A2(
 			_elm_lang$html$Html$div,
 			_elm_lang$core$Native_List.fromArray(
-				[]),
+				[
+					_elm_lang$html$Html_Attributes$class('new-track-form')
+				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
 					A2(
-					_elm_lang$html$Html$label,
+					_elm_lang$html$Html$div,
 					_elm_lang$core$Native_List.fromArray(
 						[]),
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html$text('Soundcloud')
+							A2(
+							_elm_lang$html$Html$label,
+							_elm_lang$core$Native_List.fromArray(
+								[]),
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html$text('Artist')
+								])),
+							A2(
+							_elm_lang$html$Html$input,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$value(_p1.artist)
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[]))
 						])),
 					A2(
-					_elm_lang$html$Html$input,
-					_elm_lang$core$Native_List.fromArray(
-						[
-							_elm_lang$html$Html_Events$onInput(_user$project$Feed_Update$PublishFromSoundcloudUrl)
-						]),
-					_elm_lang$core$Native_List.fromArray(
-						[]))
-				])),
-			A2(
-			_elm_lang$html$Html$div,
-			_elm_lang$core$Native_List.fromArray(
-				[]),
-			_elm_lang$core$Native_List.fromArray(
-				[
-					A2(
-					_elm_lang$html$Html$label,
+					_elm_lang$html$Html$div,
 					_elm_lang$core$Native_List.fromArray(
 						[]),
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html$text('Youtube')
+							A2(
+							_elm_lang$html$Html$label,
+							_elm_lang$core$Native_List.fromArray(
+								[]),
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html$text('Title')
+								])),
+							A2(
+							_elm_lang$html$Html$input,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$value(_p1.title)
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[]))
 						])),
 					A2(
-					_elm_lang$html$Html$input,
+					_elm_lang$html$Html$div,
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html_Events$onInput(_user$project$Feed_Update$PublishFromSoundcloudUrl)
+							_elm_lang$html$Html_Events$onClick(
+							_user$project$Feed_Update$PublishYoutubeTrack(_p1))
 						]),
 					_elm_lang$core$Native_List.fromArray(
-						[]))
-				]))
-		]));
+						[
+							_elm_lang$html$Html$text('Publish')
+						]))
+				]));
+	}
+};
+var _user$project$Feed_View$viewPublishTrack = function (newTrack) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$label,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Soundcloud')
+							])),
+						A2(
+						_elm_lang$html$Html$input,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Events$onInput(_user$project$Feed_Update$PublishFromSoundcloudUrl)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[]))
+					])),
+				A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$label,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Youtube')
+							])),
+						A2(
+						_elm_lang$html$Html$input,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Events$onInput(_user$project$Feed_Update$ParseYoutubeUrl)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[]))
+					])),
+				_user$project$Feed_View$viewNewTrackForm(newTrack)
+			]));
+};
 var _user$project$Feed_View$viewMoreButton = function (playlistId) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -11594,32 +11999,32 @@ var _user$project$Feed_View$view = function (model) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						function () {
-						var _p0 = model.currentPage.playlist;
-						if (_p0.ctor === 'Just') {
-							var _p3 = _p0._0;
+						var _p2 = model.currentPage.playlist;
+						if (_p2.ctor === 'Just') {
+							var _p5 = _p2._0;
 							var currentPagePlaylist = _elm_lang$core$List$head(
 								A2(
 									_elm_lang$core$List$filter,
-									function (_p1) {
+									function (_p3) {
 										return A2(
 											F2(
 												function (x, y) {
 													return _elm_lang$core$Native_Utils.eq(x, y);
 												}),
-											_p3,
+											_p5,
 											function (_) {
 												return _.id;
-											}(_p1));
+											}(_p3));
 									},
 									model.playlists));
-							var _p2 = currentPagePlaylist;
-							if (_p2.ctor === 'Just') {
+							var _p4 = currentPagePlaylist;
+							if (_p4.ctor === 'Just') {
 								return A4(
 									_user$project$Feed_View$viewPlaylist,
 									model.currentTime,
 									model.tracks,
-									_p2._0,
-									A2(_user$project$Player$playlistContent, _p3, model.player));
+									_p4._0,
+									A2(_user$project$Player$playlistContent, _p5, model.player));
 							} else {
 								return A2(
 									_elm_lang$html$Html$div,
@@ -11631,9 +12036,9 @@ var _user$project$Feed_View$view = function (model) {
 										]));
 							}
 						} else {
-							var _p4 = model.currentPage.url;
-							if (_p4 === '/feed/publish-track') {
-								return _user$project$Feed_View$viewPublishTrack;
+							var _p6 = model.currentPage.url;
+							if (_p6 === '/feed/publish-track') {
+								return _user$project$Feed_View$viewPublishTrack(model.youtubeTrackPublication);
 							} else {
 								return A2(
 									_elm_lang$html$Html$div,
@@ -11709,7 +12114,8 @@ var _user$project$Feed_Main$init = F2(
 						[_user$project$Feed_Model$Feed, _user$project$Feed_Model$SavedTracks, _user$project$Feed_Model$PublishedTracks, _user$project$Feed_Model$Blacklist, _user$project$Feed_Model$CustomQueue])),
 				pages: _user$project$Feed_Main$pages,
 				navigation: _user$project$Feed_Main$navigation,
-				soundcloudClientId: soundcloudClientId
+				soundcloudClientId: soundcloudClientId,
+				youtubeTrackPublication: _elm_lang$core$Maybe$Nothing
 			},
 			_1: _elm_lang$core$Platform_Cmd$batch(
 				A2(

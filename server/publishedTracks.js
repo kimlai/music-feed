@@ -16,7 +16,7 @@ module.exports = function fetchPublishedTracks(soundcloudUserId, offset) {
             return _.map(rows, function (row) {
                 var track = row.track;
                 track.saved_at = row.savedAt;
-                track.id = parseInt(row.soundcloudTrackId, 10);
+                track.id = row.soundcloudTrackId;
                 return track;
             });
         })

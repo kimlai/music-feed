@@ -9851,6 +9851,80 @@ var _user$project$Model$Soundcloud = function (a) {
 	return {ctor: 'Soundcloud', _0: a};
 };
 
+var _user$project$Api$publishTrackBody = function (track) {
+	var streamInfo = function () {
+		var _p0 = track.streamingInfo;
+		if (_p0.ctor === 'Soundcloud') {
+			return _elm_lang$core$Native_List.fromArray(
+				[
+					{
+					ctor: '_Tuple2',
+					_0: 'soundcloud',
+					_1: _elm_lang$core$Json_Encode$object(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								{
+								ctor: '_Tuple2',
+								_0: 'stream_url',
+								_1: _elm_lang$core$Json_Encode$string(_p0._0)
+							}
+							]))
+				}
+				]);
+		} else {
+			return _elm_lang$core$Native_List.fromArray(
+				[
+					{
+					ctor: '_Tuple2',
+					_0: 'youtube',
+					_1: _elm_lang$core$Json_Encode$object(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								{
+								ctor: '_Tuple2',
+								_0: 'id',
+								_1: _elm_lang$core$Json_Encode$string(_p0._0)
+							}
+							]))
+				}
+				]);
+		}
+	}();
+	return _evancz$elm_http$Http$string(
+		A2(
+			_elm_lang$core$Json_Encode$encode,
+			0,
+			_elm_lang$core$Json_Encode$object(
+				A2(
+					F2(
+						function (x, y) {
+							return A2(_elm_lang$core$Basics_ops['++'], x, y);
+						}),
+					streamInfo,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{
+							ctor: '_Tuple2',
+							_0: 'artist',
+							_1: _elm_lang$core$Json_Encode$string(track.artist)
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'title',
+							_1: _elm_lang$core$Json_Encode$string(track.title)
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'source',
+							_1: _elm_lang$core$Json_Encode$string(track.sourceUrl)
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'cover',
+							_1: _elm_lang$core$Json_Encode$string(track.artwork_url)
+						}
+						])))));
+};
 var _user$project$Api$addTrackBody = function (trackId) {
 	return _evancz$elm_http$Http$string(
 		A2(
@@ -9862,7 +9936,7 @@ var _user$project$Api$addTrackBody = function (trackId) {
 						{
 						ctor: '_Tuple2',
 						_0: 'soundcloudTrackId',
-						_1: _elm_lang$core$Json_Encode$int(trackId)
+						_1: _elm_lang$core$Json_Encode$string(trackId)
 					}
 					]))));
 };
@@ -9930,7 +10004,7 @@ var _user$project$Api$decodeTrack = A2(
 									A2(
 										_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
 										_elm_lang$core$Json_Decode$succeed(_user$project$Model$Track),
-										A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$int)),
+										A2(_elm_lang$core$Json_Decode_ops[':='], 'id', _elm_lang$core$Json_Decode$string)),
 									A2(_elm_lang$core$Json_Decode_ops[':='], 'artist', _elm_lang$core$Json_Decode$string)),
 								A2(
 									_elm_lang$core$Json_Decode_ops[':='],
@@ -9943,6 +10017,23 @@ var _user$project$Api$decodeTrack = A2(
 			_elm_lang$core$Json_Decode$succeed(0)),
 		_elm_lang$core$Json_Decode$succeed(0)),
 	_elm_lang$core$Json_Decode$succeed(false));
+var _user$project$Api$publishTrack = function (track) {
+	return A2(
+		_evancz$elm_http$Http$fromJson,
+		_user$project$Api$decodeTrack,
+		A2(
+			_evancz$elm_http$Http$send,
+			_evancz$elm_http$Http$defaultSettings,
+			{
+				verb: 'POST',
+				headers: _elm_lang$core$Native_List.fromArray(
+					[
+						{ctor: '_Tuple2', _0: 'Content-Type', _1: 'application/json'}
+					]),
+				url: '/feed/publish_custom_track',
+				body: _user$project$Api$publishTrackBody(track)
+			}));
+};
 var _user$project$Api$decodePlaylist = function (trackDecoder) {
 	return A3(
 		_elm_lang$core$Json_Decode$object2,
@@ -10296,11 +10387,11 @@ var _user$project$Radio_Ports$trackProgress = _elm_lang$core$Native_Platform.inc
 			function (x1, x2, x3) {
 				return {ctor: '_Tuple3', _0: x1, _1: x2, _2: x3};
 			}),
-		_elm_lang$core$Json_Decode$int,
+		_elm_lang$core$Json_Decode$string,
 		_elm_lang$core$Json_Decode$float,
 		_elm_lang$core$Json_Decode$float));
-var _user$project$Radio_Ports$trackEnd = _elm_lang$core$Native_Platform.incomingPort('trackEnd', _elm_lang$core$Json_Decode$int);
-var _user$project$Radio_Ports$trackError = _elm_lang$core$Native_Platform.incomingPort('trackError', _elm_lang$core$Json_Decode$int);
+var _user$project$Radio_Ports$trackEnd = _elm_lang$core$Native_Platform.incomingPort('trackEnd', _elm_lang$core$Json_Decode$string);
+var _user$project$Radio_Ports$trackError = _elm_lang$core$Native_Platform.incomingPort('trackError', _elm_lang$core$Json_Decode$string);
 
 var _user$project$Radio_Update$play = function (track) {
 	var _p0 = track.streamingInfo;

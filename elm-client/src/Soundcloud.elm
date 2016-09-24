@@ -20,7 +20,7 @@ resolve clientId url =
 decodeTrack : Json.Decode.Decoder Track
 decodeTrack =
     Json.Decode.succeed Track
-        |: ("id" := Json.Decode.int)
+        |: (("id" := Json.Decode.int) |> Json.Decode.map toString)
         |: (Json.Decode.at [ "user", "username" ] Json.Decode.string)
         |: ("artwork_url" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
         |: ("title" := Json.Decode.string)

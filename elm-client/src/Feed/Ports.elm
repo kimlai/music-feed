@@ -8,7 +8,7 @@ import Model exposing (TrackId)
 -- TO JS
 
 
-port playTrack : { id : Int, streamUrl : String, currentTime : Float } -> Cmd msg
+port playTrack : { id : TrackId, streamUrl : String, currentTime : Float } -> Cmd msg
 port pause : Maybe TrackId -> Cmd msg
 port changeCurrentTime : Int -> Cmd msg
 port scroll : Int -> Cmd msg

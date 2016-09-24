@@ -3,6 +3,7 @@ module Feed.Update exposing (..)
 
 import Api
 import Char
+import Date
 import Dict
 import Feed.Model as Model exposing (Model, PlaylistId(..))
 import Feed.Ports as Ports
@@ -15,6 +16,7 @@ import Keyboard
 import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
+import Regex
 import Soundcloud
 import Task exposing (Task)
 import Time exposing (Time)
@@ -48,6 +50,10 @@ type Msg
     | PublishFromSoundcloudUrl String
     | PublishFromSoundcloudUrlFailure Http.Error
     | PublishFromSoundcloudUrlSuccess Track
+    | ParseYoutubeUrl String
+    | PublishYoutubeTrack Track
+    | PublishYoutubeTrackFailure Http.Error
+    | PublishYoutubeTrackSuccess Track
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -263,6 +269,53 @@ update message model =
             in
                 model''' ! [ command, command' ]
 
+        ParseYoutubeUrl url ->
+            let
+                track =
+                    Regex.find (Regex.AtMost 1) (Regex.regex "https:\\/\\/www\\.youtube\\.com\\/watch\\?v=(\\w+)") url
+                        |> List.map .submatches
+                        |> List.concat
+                        |> List.filterMap identity
+                        |> List.head
+                        |> Debug.log "wtf"
+                        |> Maybe.map
+                            (\youtubeId ->
+                                { id = ""
+                                , artist = ""
+                                , artwork_url = ""
+                                , title = ""
+                                , streamingInfo = Youtube youtubeId
+                                , sourceUrl = url
+                                , createdAt = Date.fromTime (Maybe.withDefault 0 model.currentTime)
+                                , progress = 0
+                                , currentTime = 0
+                                , error = False
+                                }
+                            )
+            in
+                ( { model | youtubeTrackPublication = track }
+                , Cmd.none
+                )
+
+        PublishYoutubeTrack track ->
+            ( { model | youtubeTrackPublication = Nothing }
+            , publishYoutubeTrack track
+            )
+
+        PublishYoutubeTrackFailure error ->
+            ( model, Cmd.none )
+
+        PublishYoutubeTrackSuccess track ->
+            let
+                model' =
+                    { model | tracks = Dict.insert track.id track model.tracks }
+                ( model'', command ) =
+                    update (MoveToPlaylist PublishedTracks track.id) model'
+                ( model''', command' ) =
+                    update (ChangePage "published-tracks") model''
+            in
+                model''' ! [ command, command' ]
+
         KeyPressed keyCode ->
             case (Char.fromCode keyCode) of
                 'n' ->
@@ -399,7 +452,7 @@ fetchMore playlist =
             |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
 
 
-addTrack : String -> Int -> Cmd Msg
+addTrack : String -> TrackId -> Cmd Msg
 addTrack addTrackUrl trackId =
     Api.addTrack addTrackUrl trackId
         |> Task.perform AddTrackFail (\_ -> AddTrackSuccess)
@@ -409,6 +462,12 @@ publishFromSoundcloudUrl : String -> String -> Cmd Msg
 publishFromSoundcloudUrl soundcloudClientId url =
     Soundcloud.resolve soundcloudClientId url
         |> Task.perform PublishFromSoundcloudUrlFailure PublishFromSoundcloudUrlSuccess
+
+
+publishYoutubeTrack : Track -> Cmd Msg
+publishYoutubeTrack track =
+    Api.publishTrack track
+        |> Task.perform PublishYoutubeTrackFailure PublishYoutubeTrackSuccess
 
 
 

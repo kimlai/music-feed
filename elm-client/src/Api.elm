@@ -6,7 +6,7 @@ import Json.Decode
 import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
-import Model exposing (Track, StreamingInfo(..))
+import Model exposing (Track, StreamingInfo(..), TrackId)
 import Task exposing (Task)
 
 
@@ -25,7 +25,7 @@ decodePlaylist trackDecoder =
 decodeTrack : Json.Decode.Decoder Track
 decodeTrack =
     Json.Decode.succeed Track
-        |: ("id" := Json.Decode.int)
+        |: ("id" := Json.Decode.string)
         |: ("artist" := Json.Decode.string)
         |: ("cover" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
         |: ("title" := Json.Decode.string)
@@ -54,7 +54,7 @@ decodeYoutubeStreamingInfo =
     `Json.Decode.andThen` \id -> Json.Decode.succeed (Youtube id)
 
 
-addTrack : String -> Int -> Task Http.Error String
+addTrack : String -> TrackId -> Task Http.Error String
 addTrack addTrackUrl trackId =
     Http.send
         Http.defaultSettings
@@ -66,9 +66,42 @@ addTrack addTrackUrl trackId =
         |> Http.fromJson (Json.Decode.succeed "ok")
 
 
-addTrackBody : Int -> Http.Body
+addTrackBody : TrackId -> Http.Body
 addTrackBody trackId =
     Json.Encode.object
-        [ ( "soundcloudTrackId", Json.Encode.int trackId ) ]
+        [ ( "soundcloudTrackId", Json.Encode.string trackId ) ]
         |> Json.Encode.encode 0
         |> Http.string
+
+
+publishTrack : Track -> Task Http.Error Track
+publishTrack track =
+    Http.send
+        Http.defaultSettings
+        { verb = "POST"
+        , headers = [ ( "Content-Type", "application/json" ) ]
+        , url = "/feed/publish_custom_track"
+        , body = (publishTrackBody track)
+        }
+        |> Http.fromJson decodeTrack
+
+
+publishTrackBody : Track -> Http.Body
+publishTrackBody track =
+    let
+        streamInfo =
+            case track.streamingInfo of
+                Soundcloud url ->
+                    [ ( "soundcloud" , Json.Encode.object [ ( "stream_url", Json.Encode.string url ) ] ) ]
+                Youtube youtubeId ->
+                    [ ( "youtube" , Json.Encode.object [ ( "id", Json.Encode.string youtubeId ) ] ) ]
+    in
+            [ ( "artist", Json.Encode.string track.artist )
+            , ( "title", Json.Encode.string track.title )
+            , ( "source", Json.Encode.string track.sourceUrl )
+            , ( "cover", Json.Encode.string track.artwork_url )
+            ]
+            |> (++) streamInfo
+            |> Json.Encode.object
+            |> Json.Encode.encode 0
+            |> Http.string

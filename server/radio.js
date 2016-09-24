@@ -11,7 +11,7 @@ module.exports = function fetchRadioPlaylist(soundcloudUserId) {
             return rows.map(function (row) {
                 var track = row.track;
                 track.created_at = row.savedAt;
-                track.id = parseInt(row.soundcloudTrackId, 10);
+                track.id = row.soundcloudTrackId;
                 return track;
             });
         })

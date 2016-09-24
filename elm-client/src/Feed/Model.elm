@@ -19,6 +19,7 @@ type alias Model =
     , pages : List Page
     , navigation : List NavigationItem
     , soundcloudClientId : String
+    , youtubeTrackPublication : Maybe Track
     }
 
 

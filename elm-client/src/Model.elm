@@ -4,7 +4,7 @@ module Model exposing (..)
 import Date exposing (Date)
 
 
-type alias TrackId = Int
+type alias TrackId = String
 
 
 type alias Track =

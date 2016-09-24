@@ -5,7 +5,7 @@ import Dict exposing (Dict)
 import Feed.Model as Model exposing (Model, Playlist, PlaylistId(..))
 import Feed.Update exposing (Msg(..))
 import Html exposing (Html, a, nav, li, ul, text, div, img, input, label)
-import Html.Attributes exposing (class, classList, href, src, style)
+import Html.Attributes exposing (class, classList, href, src, style, value)
 import Html.Events exposing (onClick, onWithOptions, onInput)
 import Json.Decode
 import Model exposing (Track, TrackId)
@@ -47,7 +47,7 @@ view model =
                 Nothing ->
                     case model.currentPage.url of
                         "/feed/publish-track" ->
-                            viewPublishTrack
+                            viewPublishTrack model.youtubeTrackPublication
                         _ ->
                             div [] [ text "404" ]
 
@@ -171,8 +171,8 @@ viewMoreButton playlistId =
         [ text "More" ]
 
 
-viewPublishTrack : Html Msg
-viewPublishTrack =
+viewPublishTrack : Maybe Track -> Html Msg
+viewPublishTrack newTrack =
     div
         []
         [ div
@@ -183,6 +183,31 @@ viewPublishTrack =
         , div
             []
             [ label [] [ text "Youtube" ]
-            , input [ onInput PublishFromSoundcloudUrl ] []
+            , input [ onInput ParseYoutubeUrl ] []
             ]
+        , viewNewTrackForm newTrack
         ]
+
+
+viewNewTrackForm : Maybe Track -> Html Msg
+viewNewTrackForm newTrack =
+    case Debug.log "track" newTrack of
+        Nothing ->
+            text ""
+        Just track ->
+            div
+                [ class "new-track-form" ]
+                [ div
+                    []
+                    [ label [] [ text "Artist" ]
+                    , input [ value track.artist ] []
+                    ]
+                , div
+                    []
+                    [ label [] [ text "Title" ]
+                    , input [ value track.title ] []
+                    ]
+                , div
+                    [ onClick (PublishYoutubeTrack track) ]
+                    [ text "Publish" ]
+                ]
