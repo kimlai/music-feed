@@ -35,6 +35,9 @@
                             if (e.data == YT.PlayerState.ENDED) {
                                 app.ports.trackEnd.send(currentYoutubeId);
                             }
+                        },
+                        'onError': function () {
+                            app.ports.trackError.send(currentYoutubeId);
                         }
                     }
                 });
