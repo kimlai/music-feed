@@ -8,7 +8,7 @@ import Model exposing (TrackId, YoutubeId)
 -- TO JS
 
 
-port playTrack : { id : TrackId, streamUrl : String, currentTime : Float } -> Cmd msg
+port playSoundcloudTrack : { id : TrackId, streamUrl : String, currentTime : Float } -> Cmd msg
 port playYoutubeTrack : { id : TrackId, youtubeId : YoutubeId, currentTime : Float } -> Cmd msg
 port pause : Maybe TrackId -> Cmd msg
 port changeCurrentTime : Int -> Cmd msg

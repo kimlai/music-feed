@@ -10388,8 +10388,8 @@ var _user$project$Feed_Model$PublishedTracks = {ctor: 'PublishedTracks'};
 var _user$project$Feed_Model$SavedTracks = {ctor: 'SavedTracks'};
 var _user$project$Feed_Model$Feed = {ctor: 'Feed'};
 
-var _user$project$Feed_Ports$playTrack = _elm_lang$core$Native_Platform.outgoingPort(
-	'playTrack',
+var _user$project$Feed_Ports$playSoundcloudTrack = _elm_lang$core$Native_Platform.outgoingPort(
+	'playSoundcloudTrack',
 	function (v) {
 		return {id: v.id, streamUrl: v.streamUrl, currentTime: v.currentTime};
 	});
@@ -10497,7 +10497,7 @@ var _user$project$Soundcloud$resolve = F2(
 var _user$project$Feed_Update$play = function (track) {
 	var _p0 = track.streamingInfo;
 	if (_p0.ctor === 'Soundcloud') {
-		return _user$project$Feed_Ports$playTrack(
+		return _user$project$Feed_Ports$playSoundcloudTrack(
 			{id: track.id, streamUrl: _p0._0, currentTime: track.currentTime});
 	} else {
 		return _user$project$Feed_Ports$playYoutubeTrack(

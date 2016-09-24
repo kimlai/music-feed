@@ -259,7 +259,7 @@ play : Track -> Cmd msg
 play track =
     case track.streamingInfo of
         Soundcloud streamUrl ->
-            Ports.playTrack
+            Ports.playSoundcloudTrack
                 { id = track.id
                 , streamUrl = streamUrl
                 , currentTime = track.currentTime

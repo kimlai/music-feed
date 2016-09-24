@@ -6,6 +6,8 @@
         <link rel="stylesheet" href="/style.css">
         <script src="//use.typekit.net/ztf8rcq.js"></script>
         <script>try{Typekit.load({ async: false });}catch(e){}</script>
+        <script src="/soundcloud.js"></script>
+        <script src="/youtube.js"></script>
         <script src="/radio.js"></script>
     </head>
     <body>
@@ -18,99 +20,35 @@
             var firstScriptTag = document.getElementsByTagName('script')[0];
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-            var soundcloudClientId = '<%=client_id%>';
-            var playlist = <%=playlist%>;
-            var audio = new Audio();
-            var currentTrackId = null;
-            var currentYoutubeId = null;
-            var updateTrackProgress = null;
-            var youtubePlayer = null;
-
             function onYouTubeIframeAPIReady() {
+                var soundcloudClientId = '<%=client_id%>';
+                var playlist = <%=playlist%>;
                 var app = Elm.Radio.Main.fullscreen(JSON.stringify(playlist));
+                var soundcloud = new Soundcloud(soundcloudClientId, app);
+                var youtube = new Youtube(app);
 
-                audio.addEventListener('timeupdate', function (e) {
-                    app.ports.trackProgress.send([
-                        currentTrackId,
-                        e.target.currentTime / e.target.duration * 100,
-                        e.target.currentTime
-                    ]);
+                app.ports.playSoundcloudTrack.subscribe(function(track) {
+                    youtube.pause();
+                    soundcloud.play(track);
                 });
-                audio.addEventListener('ended', function (e) {
-                    app.ports.trackEnd.send(currentTrackId);
-                });
-                audio.addEventListener('error', function (e) {
-                    app.ports.trackError.send(currentTrackId);
-                });
-                app.ports.playTrack.subscribe(function(track) {
-                    if (currentYoutubeId) {
-                        youtubePlayer.pauseVideo();
-                    }
-                    currentTrackId = track.id;
-                    audio.src = track.streamUrl + '?client_id=' + soundcloudClientId;
-                    audio.currentTime = track.currentTime;
-                    audio.play();
-                });
+
                 app.ports.changeCurrentTime.subscribe(function(amount) {
-                    audio.currentTime = audio.currentTime + amount;
-                    if (currentYoutubeId) {
-                        youtubePlayer.seekTo(youtubePlayer.getCurrentTime() + amount);
-                    }
+                    soundcloud.seek(amount);
+                    youtube.seek(amount);
                 });
+
                 app.ports.pause.subscribe(function(trackId) {
-                    audio.pause();
+                    soundcloud.pause();
+                    youtube.pause();
+                });
+
+                app.ports.playYoutubeTrack.subscribe(function(track) {
+                    soundcloud.pause();
+                    youtube.play(track);
                 });
 
                 app.ports.scroll.subscribe(function(offset) {
                     window.scrollBy(0, offset);
-                });
-
-                app.ports.playYoutubeTrack.subscribe(function(track) {
-                    var youtubePlay = function (track) {
-                        youtubePlayer.loadVideoById(track.youtubeId, track.currentTime);
-                        updateTrackProgress = window.setInterval(function () {
-                            var currentTime = youtubePlayer.getCurrentTime();
-                            var duration = youtubePlayer.getDuration();
-                            app.ports.trackProgress.send([
-                                currentYoutubeId,
-                                currentTime / duration * 100,
-                                currentTime
-                            ])},
-                            500
-                        );
-                    }
-                    audio.pause();
-                    if (currentYoutubeId === track.id) {
-                        youtubePlayer.playVideo();
-                        return;
-                    }
-                    currentYoutubeId = track.id;
-                    if (!youtubePlayer) {
-                        youtubePlayer = new YT.Player('player', {
-                            height: '390',
-                            width: '620',
-                            events: {
-                                'onStateChange': function(e) {
-                                    if (e.data == YT.PlayerState.ENDED) {
-                                        app.ports.trackEnd.send(currentYoutubeId);
-                                    }
-                                },
-                                'onError': function () {
-                                    app.ports.trackError.send(currentYoutubeId);
-                                },
-                                'onReady': function () {
-                                    youtubePlay(track);
-                                }
-                            }
-                        });
-                    } else {
-                        youtubePlay(track);
-                    }
-                });
-                app.ports.pause.subscribe(function(trackId) {
-                    if (currentYoutubeId) {
-                        youtubePlayer.pauseVideo();
-                    }
                 });
             }
         </script>
