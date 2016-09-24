@@ -10393,6 +10393,11 @@ var _user$project$Feed_Ports$playTrack = _elm_lang$core$Native_Platform.outgoing
 	function (v) {
 		return {id: v.id, streamUrl: v.streamUrl, currentTime: v.currentTime};
 	});
+var _user$project$Feed_Ports$playYoutubeTrack = _elm_lang$core$Native_Platform.outgoingPort(
+	'playYoutubeTrack',
+	function (v) {
+		return {id: v.id, youtubeId: v.youtubeId, currentTime: v.currentTime};
+	});
 var _user$project$Feed_Ports$pause = _elm_lang$core$Native_Platform.outgoingPort(
 	'pause',
 	function (v) {
@@ -10489,8 +10494,8 @@ var _user$project$Feed_Update$play = function (track) {
 		return _user$project$Feed_Ports$playTrack(
 			{id: track.id, streamUrl: _p0._0, currentTime: track.currentTime});
 	} else {
-		return _user$project$Feed_Ports$playTrack(
-			{id: track.id, streamUrl: _p0._0, currentTime: track.currentTime});
+		return _user$project$Feed_Ports$playYoutubeTrack(
+			{id: track.id, youtubeId: _p0._0, currentTime: track.currentTime});
 	}
 };
 var _user$project$Feed_Update$PublishYoutubeTrackSuccess = function (a) {

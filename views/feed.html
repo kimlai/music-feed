@@ -9,42 +9,90 @@
         <script src="/elm-client.js"></script>
     </head>
     <body>
+        <div id="youtube-player">
+            <div id="player"></div>
+        </div>
         <script>
-            var soundcloudClientId = '<%=client_id%>';
-            var app = Elm.Feed.Main.fullscreen(soundcloudClientId);
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-            var audio = new Audio();
-            var currentTrackId;
+            function onYouTubeIframeAPIReady() {
+                var soundcloudClientId = '<%=client_id%>';
+                var app = Elm.Feed.Main.fullscreen(soundcloudClientId);
 
-            audio.addEventListener('timeupdate', function (e) {
-                app.ports.trackProgress.send([
-                    currentTrackId,
-                    e.target.currentTime / e.target.duration * 100,
-                    e.target.currentTime
-                ]);
-            });
-            audio.addEventListener('ended', function (e) {
-                app.ports.trackEnd.send(currentTrackId);
-            });
-            audio.addEventListener('error', function (e) {
-                app.ports.trackError.send(currentTrackId);
-            });
-            app.ports.playTrack.subscribe(function(track) {
-                currentTrackId = track.id;
-                audio.src = track.streamUrl + '?client_id=' + soundcloudClientId;
-                audio.currentTime = track.currentTime;
-                audio.play();
-            });
-            app.ports.changeCurrentTime.subscribe(function(amount) {
-                audio.currentTime = audio.currentTime + amount;
-            });
-            app.ports.pause.subscribe(function(trackId) {
-                audio.pause();
-            });
+                var audio = new Audio();
+                var currentTrackId;
+                var currentYoutubeId;
+                var updateTrackProgress = null;
+                var youtubePlayer = new YT.Player('player', {
+                    height: '390',
+                    width: '620',
+                    events: {
+                        'onStateChange': function(e) {
+                            if (e.data == YT.PlayerState.ENDED) {
+                                app.ports.trackEnd.send(currentYoutubeId);
+                            }
+                        }
+                    }
+                });
 
-            app.ports.scroll.subscribe(function(offset) {
-                window.scrollBy(0, offset);
-            });
+                audio.addEventListener('timeupdate', function (e) {
+                    app.ports.trackProgress.send([
+                        currentTrackId,
+                        e.target.currentTime / e.target.duration * 100,
+                        e.target.currentTime
+                    ]);
+                });
+                audio.addEventListener('ended', function (e) {
+                    app.ports.trackEnd.send(currentTrackId);
+                });
+                audio.addEventListener('error', function (e) {
+                    app.ports.trackError.send(currentTrackId);
+                });
+                app.ports.playTrack.subscribe(function(track) {
+                    youtubePlayer.pauseVideo();
+                    currentTrackId = track.id;
+                    audio.src = track.streamUrl + '?client_id=' + soundcloudClientId;
+                    audio.currentTime = track.currentTime;
+                    audio.play();
+                });
+                app.ports.changeCurrentTime.subscribe(function(amount) {
+                    audio.currentTime = audio.currentTime + amount;
+                    youtubePlayer.seekTo(youtubePlayer.getCurrentTime() + amount);
+                });
+                app.ports.pause.subscribe(function(trackId) {
+                    audio.pause();
+                });
+
+                app.ports.scroll.subscribe(function(offset) {
+                    window.scrollBy(0, offset);
+                });
+
+                app.ports.playYoutubeTrack.subscribe(function(track) {
+                    audio.pause();
+                    if (currentYoutubeId === track.id) {
+                        youtubePlayer.playVideo();
+                        return;
+                    }
+                    currentYoutubeId = track.id;
+                    youtubePlayer.loadVideoById(track.youtubeId, track.currentTime);
+                    updateTrackProgress = window.setInterval(function () {
+                        var currentTime = youtubePlayer.getCurrentTime();
+                        var duration = youtubePlayer.getDuration();
+                        app.ports.trackProgress.send([
+                            currentYoutubeId,
+                            currentTime / duration * 100,
+                            currentTime
+                        ])},
+                        500
+                    );
+                });
+                app.ports.pause.subscribe(function(trackId) {
+                    youtubePlayer.pauseVideo();
+                });
+            }
         </script>
     </body>
 </html>
