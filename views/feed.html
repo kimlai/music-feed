@@ -34,8 +34,11 @@
                     soundcloud.play(track);
                 });
 
-                app.ports.changeCurrentTime.subscribe(function(amount) {
+                app.ports.changeSoundcloudCurrentTime.subscribe(function(amount) {
                     soundcloud.seek(amount);
+                });
+
+                app.ports.changeYoutubeCurrentTime.subscribe(function(amount) {
                     youtube.seek(amount);
                 });
 

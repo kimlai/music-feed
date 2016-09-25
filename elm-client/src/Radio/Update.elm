@@ -13,6 +13,7 @@ import Keyboard
 import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
+import PlayerEngine
 import Radio.Model as Model exposing (Model, PlaylistId(..))
 import Radio.Ports as Ports
 import Task exposing (Task)
@@ -122,12 +123,12 @@ update message model =
                     ( model, Cmd.none )
                 Just track ->
                     ( { model | playing = True }
-                    , play track
+                    , PlayerEngine.play track
                     )
 
         Pause ->
             ( { model | playing = False }
-            , Ports.pause (Player.currentTrack model.player)
+            , PlayerEngine.pause (Player.currentTrack model.player)
             )
 
         TrackError trackId ->
@@ -162,7 +163,7 @@ update message model =
                 | playing = True
                 , player = Player.select CustomQueue position model.player
               }
-            , play track
+            , PlayerEngine.play track
             )
 
         TrackProgress ( trackId, progress, currentTime ) ->
@@ -181,12 +182,12 @@ update message model =
 
         FastForward ->
             ( model
-            , Ports.changeCurrentTime 10
+            , PlayerEngine.changeCurrentTime (Model.currentTrack model) 10
             )
 
         Rewind ->
             ( model
-            , Ports.changeCurrentTime -10
+            , PlayerEngine.changeCurrentTime (Model.currentTrack model) -10
             )
 
         KeyPressed keyCode ->
@@ -249,24 +250,3 @@ fetchMore : Model.Playlist -> Cmd Msg
 fetchMore playlist =
     Api.fetchPlaylist playlist.nextLink Api.decodeTrack
         |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
-
-
-
--- PORTS
-
-
-play : Track -> Cmd msg
-play track =
-    case track.streamingInfo of
-        Soundcloud streamUrl ->
-            Ports.playSoundcloudTrack
-                { id = track.id
-                , streamUrl = streamUrl
-                , currentTime = track.currentTime
-                }
-        Youtube youtubeId ->
-            Ports.playYoutubeTrack
-                { id = track.id
-                , youtubeId = youtubeId
-                , currentTime = track.currentTime
-                }

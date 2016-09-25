@@ -8,6 +8,7 @@ import Feed.View as View
 import Keyboard
 import Navigation
 import Player
+import PlayerEngine
 import Task
 import Time exposing (Time)
 
@@ -75,9 +76,9 @@ init soundcloudClientId page =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Ports.trackProgress TrackProgress
-        , Ports.trackEnd (\_ -> Next)
-        , Ports.trackError TrackError
+        [ PlayerEngine.trackProgress TrackProgress
+        , PlayerEngine.trackEnd (\_ -> Next)
+        , PlayerEngine.trackError TrackError
         , Ports.imageUploaded ImageUploaded
         , Keyboard.presses KeyPressed
         ]

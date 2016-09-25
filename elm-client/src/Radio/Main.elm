@@ -7,8 +7,8 @@ import Keyboard
 import Model exposing (Page)
 import Navigation
 import Player
+import PlayerEngine
 import Radio.Model exposing (PlaylistId(..))
-import Radio.Ports as Ports
 import Radio.Update as Update exposing (Msg(..))
 import Radio.View as View
 import Task
@@ -89,9 +89,9 @@ init radioPlaylistJsonString page =
 subscriptions : Radio.Model.Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Ports.trackProgress TrackProgress
-        , Ports.trackEnd (\_ -> Next)
-        , Ports.trackError TrackError
+        [ PlayerEngine.trackProgress TrackProgress
+        , PlayerEngine.trackEnd (\_ -> Next)
+        , PlayerEngine.trackError TrackError
         , Keyboard.presses KeyPressed
         ]
 
