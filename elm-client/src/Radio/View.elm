@@ -48,6 +48,7 @@ view model =
                                 case currentPagePlaylist of
                                     Just playlist ->
                                         viewLatestTracks
+                                            (Player.currentTrack model.player)
                                             model.currentTime
                                             model.tracks playlist
                                             (Player.playlistContent id model.player)
@@ -117,8 +118,8 @@ viewCustomPlaylistItem position track =
         ]
 
 
-viewLatestTracks : Maybe Time -> Dict TrackId Track -> Playlist -> List TrackId -> Html Msg
-viewLatestTracks currentTime tracks playlist playlistContent=
+viewLatestTracks : Maybe TrackId -> Maybe Time -> Dict TrackId Track -> Playlist -> List TrackId -> Html Msg
+viewLatestTracks currentTrackId currentTime tracks playlist playlistContent=
     let
         playlistTracks =
             playlistContent
@@ -137,7 +138,7 @@ viewLatestTracks currentTime tracks playlist playlistContent=
                 text ""
 
         tracksView =
-            List.indexedMap (viewTrack currentTime playlist.id) playlistTracks
+            List.indexedMap (viewTrack currentTrackId currentTime playlist.id) playlistTracks
     in
         div
             [ class "latest-tracks" ]
@@ -148,12 +149,13 @@ viewLatestTracks currentTime tracks playlist playlistContent=
             ]
 
 
-viewTrack : Maybe Time -> PlaylistId -> Int -> Track -> Html Msg
-viewTrack currentTime playlistId position track =
+viewTrack : Maybe TrackId -> Maybe Time -> PlaylistId -> Int -> Track -> Html Msg
+viewTrack currentTrackId currentTime playlistId position track =
     div
         [ classList
             [ ("latest-track", True)
             , ("error", track.error)
+            , ("selected", currentTrackId == Just track.id)
             ]
         ]
         [ div

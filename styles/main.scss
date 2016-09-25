@@ -273,6 +273,10 @@ body {
     &.error {
         opacity: 0.5;
     }
+    &.selected {
+        background: #d7d7d7;
+        border: 6px solid #d7d7d7;
+    }
     .cover {
         cursor: pointer;
         width: 200px;

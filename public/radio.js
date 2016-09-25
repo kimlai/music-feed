@@ -11193,8 +11193,8 @@ var _user$project$Radio_View$viewTrackPlaceHolder = A2(
 						]))
 				]))
 		]));
-var _user$project$Radio_View$viewTrack = F4(
-	function (currentTime, playlistId, position, track) {
+var _user$project$Radio_View$viewTrack = F5(
+	function (currentTrackId, currentTime, playlistId, position, track) {
 		return A2(
 			_elm_lang$html$Html$div,
 			_elm_lang$core$Native_List.fromArray(
@@ -11203,7 +11203,14 @@ var _user$project$Radio_View$viewTrack = F4(
 					_elm_lang$core$Native_List.fromArray(
 						[
 							{ctor: '_Tuple2', _0: 'latest-track', _1: true},
-							{ctor: '_Tuple2', _0: 'error', _1: track.error}
+							{ctor: '_Tuple2', _0: 'error', _1: track.error},
+							{
+							ctor: '_Tuple2',
+							_0: 'selected',
+							_1: _elm_lang$core$Native_Utils.eq(
+								currentTrackId,
+								_elm_lang$core$Maybe$Just(track.id))
+						}
 						]))
 				]),
 			_elm_lang$core$Native_List.fromArray(
@@ -11320,8 +11327,8 @@ var _user$project$Radio_View$viewTrack = F4(
 						]))
 				]));
 	});
-var _user$project$Radio_View$viewLatestTracks = F4(
-	function (currentTime, tracks, playlist, playlistContent) {
+var _user$project$Radio_View$viewLatestTracks = F5(
+	function (currentTrackId, currentTime, tracks, playlist, playlistContent) {
 		var moreButton = _elm_lang$core$Native_Utils.eq(playlist.loading, false) ? _user$project$Radio_View$viewMoreButton(playlist.id) : _elm_lang$html$Html$text('');
 		var placeholders = _elm_lang$core$Native_Utils.eq(playlist.loading, true) ? A2(_elm_lang$core$List$repeat, 10, _user$project$Radio_View$viewTrackPlaceHolder) : _elm_lang$core$Native_List.fromArray(
 			[]);
@@ -11333,7 +11340,7 @@ var _user$project$Radio_View$viewLatestTracks = F4(
 			playlistContent);
 		var tracksView = A2(
 			_elm_lang$core$List$indexedMap,
-			A2(_user$project$Radio_View$viewTrack, currentTime, playlist.id),
+			A3(_user$project$Radio_View$viewTrack, currentTrackId, currentTime, playlist.id),
 			playlistTracks);
 		return A2(
 			_elm_lang$html$Html$div,
@@ -11574,8 +11581,9 @@ var _user$project$Radio_View$view = function (model) {
 										model.playlists));
 								var _p7 = currentPagePlaylist;
 								if (_p7.ctor === 'Just') {
-									return A4(
+									return A5(
 										_user$project$Radio_View$viewLatestTracks,
+										_user$project$Player$currentTrack(model.player),
 										model.currentTime,
 										model.tracks,
 										_p7._0,
