@@ -194,6 +194,8 @@ body {
     text-transform: uppercase; }
   .radio-track .title {
     font-size: 32px; }
+  .radio-track .resume-radio {
+    cursor: pointer; }
 
 #youtube-player {
   position: absolute;

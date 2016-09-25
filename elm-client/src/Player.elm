@@ -62,6 +62,24 @@ select playlistId position (Player { playlists, currentPlaylist, currentTrack })
             }
 
 
+selectPlaylist : a -> Player a b -> Player a b
+selectPlaylist playlistId (Player { playlists, currentPlaylist, currentTrack }) =
+    let
+        selectedPlaylist =
+            playlists
+                |> List.filter ((==) playlistId << fst)
+                |> List.head
+                |> Maybe.map snd
+        currentTrack' =
+            selectedPlaylist `Maybe.andThen` Playlist.currentItem
+    in
+        Player
+            { playlists = playlists
+            , currentPlaylist = Just playlistId
+            , currentTrack = currentTrack'
+            }
+
+
 next : Player a b -> Player a b
 next (Player { playlists, currentPlaylist, currentTrack}) =
     let

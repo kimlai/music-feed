@@ -39,6 +39,7 @@ type Msg
     | FetchMore PlaylistId
     | FetchFail PlaylistId Http.Error
     | FetchSuccess PlaylistId ( List Track, String )
+    | ResumeRadio
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -116,7 +117,6 @@ update message model =
         UpdateCurrentTime newTime ->
             ( { model | currentTime = Just newTime }, Cmd.none )
 
-
         Play ->
             case Model.currentTrack model of
                 Nothing ->
@@ -130,6 +130,13 @@ update message model =
             ( { model | playing = False }
             , PlayerEngine.pause (Player.currentTrack model.player)
             )
+
+        ResumeRadio ->
+            let
+                model' =
+                    { model | player = Player.selectPlaylist Radio model.player }
+            in
+                update Play model'
 
         TrackError trackId ->
             let

@@ -87,7 +87,9 @@ viewRadioTrack track currentPlaylist =
                         [ text "Source" ]
                     , if currentPlaylist /= Just Radio then
                         div
-                            []
+                            [ class "resume-radio"
+                            , onClick ResumeRadio
+                            ]
                             [ text "Resume Radio" ]
                         else
                             div [] []
