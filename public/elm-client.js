@@ -9815,6 +9815,24 @@ var _evancz$elm_http$Http$post = F3(
 			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request));
 	});
 
+var _user$project$Youtube$extractYoutubeIdFromUrl = function (url) {
+	return _elm_lang$core$List$head(
+		A2(
+			_elm_lang$core$List$filterMap,
+			_elm_lang$core$Basics$identity,
+			_elm_lang$core$List$concat(
+				A2(
+					_elm_lang$core$List$map,
+					function (_) {
+						return _.submatches;
+					},
+					A3(
+						_elm_lang$core$Regex$find,
+						_elm_lang$core$Regex$AtMost(1),
+						_elm_lang$core$Regex$regex('https:\\/\\/www\\.youtube\\.com\\/watch\\?v=(.+)'),
+						url)))));
+};
+
 var _user$project$Model$Track = function (a) {
 	return function (b) {
 		return function (c) {
@@ -10961,24 +10979,7 @@ var _user$project$Feed_Update$update = F2(
 								error: false
 							};
 						},
-						_elm_lang$core$List$head(
-							A2(
-								_elm_lang$core$List$filterMap,
-								_elm_lang$core$Basics$identity,
-								_elm_lang$core$List$concat(
-									A2(
-										_elm_lang$core$Debug$log,
-										'matches',
-										A2(
-											_elm_lang$core$List$map,
-											function (_) {
-												return _.submatches;
-											},
-											A3(
-												_elm_lang$core$Regex$find,
-												_elm_lang$core$Regex$AtMost(1),
-												_elm_lang$core$Regex$regex('https:\\/\\/www\\.youtube\\.com\\/watch\\?v=(.+)'),
-												_p18)))))));
+						_user$project$Youtube$extractYoutubeIdFromUrl(_p18));
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(

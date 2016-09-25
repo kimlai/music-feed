@@ -20,6 +20,7 @@ import Regex
 import Soundcloud
 import Task exposing (Task)
 import Time exposing (Time)
+import Youtube
 
 
 type Msg
@@ -276,11 +277,7 @@ update message model =
         ParseYoutubeUrl url ->
             let
                 track =
-                    Regex.find (Regex.AtMost 1) (Regex.regex "https:\\/\\/www\\.youtube\\.com\\/watch\\?v=(.+)") url
-                        |> List.map .submatches
-                        |> List.concat
-                        |> List.filterMap identity
-                        |> List.head
+                    Youtube.extractYoutubeIdFromUrl url
                         |> Maybe.map
                             (\youtubeId ->
                                 { id = ""

@@ -2,6 +2,7 @@ module Model exposing (..)
 
 
 import Date exposing (Date)
+import Youtube exposing (YoutubeId)
 
 
 type alias TrackId = String
@@ -27,9 +28,6 @@ type StreamingInfo
 
 
 type alias StreamUrl = String
-
-
-type alias YoutubeId = String
 
 
 type alias NavigationItem =

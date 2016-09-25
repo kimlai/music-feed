@@ -1,7 +1,8 @@
 port module Radio.Ports exposing (..)
 
 
-import Model exposing (TrackId, YoutubeId)
+import Model exposing (TrackId)
+import Youtube exposing (YoutubeId)
 
 
 
