@@ -72,7 +72,12 @@ function *savedTracks() {
 function *publishedTracks() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;
-    this.body = yield fetchPublishedTracks(soundcloudUserId, this.request.query.offset);
+    var offset = parseInt(this.request.query.offset, 0) || 0;
+    var tracks = yield fetchPublishedTracks(soundcloudUserId, offset);
+    this.body = {
+        tracks: tracks,
+        next_href: '/feed/published_tracks?offset=' + (offset + 20),
+    };
 }
 
 function *connect() {

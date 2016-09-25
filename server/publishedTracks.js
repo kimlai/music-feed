@@ -19,12 +19,5 @@ module.exports = function fetchPublishedTracks(soundcloudUserId, offset) {
                 track.id = row.soundcloudTrackId;
                 return track;
             });
-        })
-        .then(function (tracks) {
-            var nextOffset = offset+20;
-            return {
-                tracks: tracks,
-                next_href: '/feed/published_tracks?offset=' + nextOffset,
-            };
         });
 };

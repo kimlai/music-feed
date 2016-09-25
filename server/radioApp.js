@@ -37,7 +37,12 @@ function *radioPlaylist() {
 
 function *latestTracks() {
     var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
-    this.body = yield fetchPublishedTracks(soundcloudUserId, this.request.query.offset);
+    var offset = parseInt(this.request.query.offset, 0) || 0;
+    var tracks = yield fetchPublishedTracks(soundcloudUserId, this.request.query.offset);
+    this.body = {
+        tracks: tracks,
+        next_href: '/latest-tracks?offset=' + (offset + 20),
+    };
 }
 
 module.exports = app;
