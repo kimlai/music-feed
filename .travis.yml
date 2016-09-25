@@ -1,0 +1,15 @@
+language: node_js
+
+node_js:
+    - "5.11"
+
+cache:
+    directories:
+        - elm-client/tests/elm-stuff/build-artifacts
+
+install:
+    - npm install -g elm elm-test
+    - npm install
+
+script:
+    - npm test
