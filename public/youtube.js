@@ -28,15 +28,17 @@ var Youtube = function(app) {
         app.ports.trackError.send(this.currentTrackId);
     };
 
+    this.onPlayerStateChange = function (e) {
+        if (e.data == YT.PlayerState.ENDED) {
+            app.ports.trackEnd.send(this.currentTrackId);
+        }
+    };
+
     this.video = new YT.Player('player', {
         height: '390',
         width: '620',
         events: {
-            'onStateChange': function (e) {
-                if (e.data == YT.PlayerState.ENDED) {
-                    app.ports.trackEnd.send(this.currentTrackId);
-                }
-            },
+            'onStateChange': this.onPlayerStateChange.bind(this),
             'onError': this.onPlayerError.bind(this),
             'onReady': this.onPlayerReady.bind(this),
         }
