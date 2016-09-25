@@ -11132,7 +11132,7 @@ var _user$project$Radio_View$viewMoreButton = function (playlistId) {
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$html$Html_Attributes$class('more-button'),
+				_elm_lang$html$Html_Attributes$class('view-more'),
 				_elm_lang$html$Html_Events$onClick(
 				_user$project$Radio_Update$FetchMore(playlistId))
 			]),
@@ -11145,7 +11145,7 @@ var _user$project$Radio_View$viewTrackPlaceHolder = A2(
 	_elm_lang$html$Html$div,
 	_elm_lang$core$Native_List.fromArray(
 		[
-			_elm_lang$html$Html_Attributes$class('track')
+			_elm_lang$html$Html_Attributes$class('latest-track')
 		]),
 	_elm_lang$core$Native_List.fromArray(
 		[
@@ -11158,30 +11158,39 @@ var _user$project$Radio_View$viewTrackPlaceHolder = A2(
 			_elm_lang$core$Native_List.fromArray(
 				[
 					A2(
-					_elm_lang$html$Html$img,
+					_elm_lang$html$Html$div,
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html_Attributes$src('/images/placeholder.jpg')
+							_elm_lang$html$Html_Attributes$class('cover')
 						]),
 					_elm_lang$core$Native_List.fromArray(
-						[]))
-				])),
-			A2(
-			_elm_lang$html$Html$div,
-			_elm_lang$core$Native_List.fromArray(
-				[
-					_elm_lang$html$Html_Attributes$class('progress-bar')
-				]),
-			_elm_lang$core$Native_List.fromArray(
-				[
+						[
+							A2(
+							_elm_lang$html$Html$img,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$src('/images/placeholder.jpg')
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[]))
+						])),
 					A2(
 					_elm_lang$html$Html$div,
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html_Attributes$class('outer')
+							_elm_lang$html$Html_Attributes$class('progress-bar')
 						]),
 					_elm_lang$core$Native_List.fromArray(
-						[]))
+						[
+							A2(
+							_elm_lang$html$Html$div,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$class('outer')
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[]))
+						]))
 				]))
 		]));
 var _user$project$Radio_View$viewTrack = F4(
@@ -11193,11 +11202,9 @@ var _user$project$Radio_View$viewTrack = F4(
 					_elm_lang$html$Html_Attributes$classList(
 					_elm_lang$core$Native_List.fromArray(
 						[
-							{ctor: '_Tuple2', _0: 'track', _1: true},
+							{ctor: '_Tuple2', _0: 'latest-track', _1: true},
 							{ctor: '_Tuple2', _0: 'error', _1: track.error}
-						])),
-					_elm_lang$html$Html_Events$onClick(
-					A2(_user$project$Radio_Update$PlayFromPlaylist, playlistId, position))
+						]))
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
@@ -11210,13 +11217,70 @@ var _user$project$Radio_View$viewTrack = F4(
 					_elm_lang$core$Native_List.fromArray(
 						[
 							A2(
-							_elm_lang$html$Html$img,
+							_elm_lang$html$Html$div,
 							_elm_lang$core$Native_List.fromArray(
 								[
-									_elm_lang$html$Html_Attributes$src(track.artwork_url)
+									_elm_lang$html$Html_Attributes$class('cover'),
+									_elm_lang$html$Html_Events$onClick(
+									A2(_user$project$Radio_Update$PlayFromPlaylist, playlistId, position))
 								]),
 							_elm_lang$core$Native_List.fromArray(
-								[])),
+								[
+									A2(
+									_elm_lang$html$Html$img,
+									_elm_lang$core$Native_List.fromArray(
+										[
+											_elm_lang$html$Html_Attributes$src(
+											A4(
+												_elm_lang$core$Regex$replace,
+												_elm_lang$core$Regex$All,
+												_elm_lang$core$Regex$regex('large'),
+												function (_p0) {
+													return 't200x200';
+												},
+												track.artwork_url))
+										]),
+									_elm_lang$core$Native_List.fromArray(
+										[]))
+								])),
+							A2(
+							_elm_lang$html$Html$div,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$class('progress-bar')
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[
+									A2(
+									_elm_lang$html$Html$div,
+									_elm_lang$core$Native_List.fromArray(
+										[
+											_elm_lang$html$Html_Attributes$class('outer')
+										]),
+									_elm_lang$core$Native_List.fromArray(
+										[
+											A2(
+											_elm_lang$html$Html$div,
+											_elm_lang$core$Native_List.fromArray(
+												[
+													_elm_lang$html$Html_Attributes$class('inner'),
+													_elm_lang$html$Html_Attributes$style(
+													_elm_lang$core$Native_List.fromArray(
+														[
+															{
+															ctor: '_Tuple2',
+															_0: 'width',
+															_1: A2(
+																_elm_lang$core$Basics_ops['++'],
+																_elm_lang$core$Basics$toString(track.progress),
+																'%')
+														}
+														]))
+												]),
+											_elm_lang$core$Native_List.fromArray(
+												[]))
+										]))
+								])),
 							A2(
 							_elm_lang$html$Html$div,
 							_elm_lang$core$Native_List.fromArray(
@@ -11234,7 +11298,9 @@ var _user$project$Radio_View$viewTrack = F4(
 											A2(
 											_elm_lang$html$Html$div,
 											_elm_lang$core$Native_List.fromArray(
-												[]),
+												[
+													_elm_lang$html$Html_Attributes$class('artist')
+												]),
 											_elm_lang$core$Native_List.fromArray(
 												[
 													_elm_lang$html$Html$text(track.artist)
@@ -11242,91 +11308,23 @@ var _user$project$Radio_View$viewTrack = F4(
 											A2(
 											_elm_lang$html$Html$div,
 											_elm_lang$core$Native_List.fromArray(
-												[]),
+												[
+													_elm_lang$html$Html_Attributes$class('title')
+												]),
 											_elm_lang$core$Native_List.fromArray(
 												[
 													_elm_lang$html$Html$text(track.title)
 												]))
-										])),
-									A2(
-									_elm_lang$html$Html$div,
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html_Attributes$class('actions')
-										]),
-									_elm_lang$core$Native_List.fromArray(
-										[
-											A2(
-											_elm_lang$html$Html$div,
-											_elm_lang$core$Native_List.fromArray(
-												[
-													A3(
-													_elm_lang$html$Html_Events$onWithOptions,
-													'click',
-													{stopPropagation: true, preventDefault: true},
-													_elm_lang$core$Json_Decode$succeed(
-														_user$project$Radio_Update$AddToCustomQueue(track.id)))
-												]),
-											_elm_lang$core$Native_List.fromArray(
-												[
-													_elm_lang$html$Html$text('Add to queue')
-												]))
 										]))
-								])),
-							A2(
-							_elm_lang$html$Html$div,
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html_Attributes$class('time-ago')
-								]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html$text(
-									A2(_user$project$TimeAgo$timeAgo, currentTime, track.createdAt))
-								]))
-						])),
-					A2(
-					_elm_lang$html$Html$div,
-					_elm_lang$core$Native_List.fromArray(
-						[
-							_elm_lang$html$Html_Attributes$class('progress-bar')
-						]),
-					_elm_lang$core$Native_List.fromArray(
-						[
-							A2(
-							_elm_lang$html$Html$div,
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html_Attributes$class('outer')
-								]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									A2(
-									_elm_lang$html$Html$div,
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html_Attributes$class('inner'),
-											_elm_lang$html$Html_Attributes$style(
-											_elm_lang$core$Native_List.fromArray(
-												[
-													{
-													ctor: '_Tuple2',
-													_0: 'width',
-													_1: A2(
-														_elm_lang$core$Basics_ops['++'],
-														_elm_lang$core$Basics$toString(track.progress),
-														'%')
-												}
-												]))
-										]),
-									_elm_lang$core$Native_List.fromArray(
-										[]))
 								]))
 						]))
 				]));
 	});
-var _user$project$Radio_View$viewPlaylist = F4(
+var _user$project$Radio_View$viewLatestTracks = F4(
 	function (currentTime, tracks, playlist, playlistContent) {
+		var moreButton = _elm_lang$core$Native_Utils.eq(playlist.loading, false) ? _user$project$Radio_View$viewMoreButton(playlist.id) : _elm_lang$html$Html$text('');
+		var placeholders = _elm_lang$core$Native_Utils.eq(playlist.loading, true) ? A2(_elm_lang$core$List$repeat, 10, _user$project$Radio_View$viewTrackPlaceHolder) : _elm_lang$core$Native_List.fromArray(
+			[]);
 		var playlistTracks = A2(
 			_elm_lang$core$List$filterMap,
 			function (trackId) {
@@ -11337,24 +11335,23 @@ var _user$project$Radio_View$viewPlaylist = F4(
 			_elm_lang$core$List$indexedMap,
 			A2(_user$project$Radio_View$viewTrack, currentTime, playlist.id),
 			playlistTracks);
-		return _elm_lang$core$Native_Utils.eq(playlist.loading, true) ? A2(
+		return A2(
 			_elm_lang$html$Html$div,
 			_elm_lang$core$Native_List.fromArray(
-				[]),
-			A2(
-				_elm_lang$core$List$append,
-				tracksView,
-				A2(_elm_lang$core$List$repeat, 10, _user$project$Radio_View$viewTrackPlaceHolder))) : A2(
-			_elm_lang$html$Html$div,
+				[
+					_elm_lang$html$Html_Attributes$class('latest-tracks')
+				]),
 			_elm_lang$core$Native_List.fromArray(
-				[]),
-			A2(
-				_elm_lang$core$List$append,
-				tracksView,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_user$project$Radio_View$viewMoreButton(playlist.id)
-					])));
+				[
+					A2(
+					_elm_lang$html$Html$div,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$class('content')
+						]),
+					A2(_elm_lang$core$List$append, tracksView, placeholders)),
+					moreButton
+				]));
 	});
 var _user$project$Radio_View$viewCustomPlaylistItem = F2(
 	function (position, track) {
@@ -11423,8 +11420,8 @@ var _user$project$Radio_View$viewCustomQueue = F2(
 	});
 var _user$project$Radio_View$viewRadioTrack = F2(
 	function (track, currentPlaylist) {
-		var _p0 = track;
-		if (_p0.ctor === 'Nothing') {
+		var _p1 = track;
+		if (_p1.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -11434,7 +11431,7 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 						_elm_lang$html$Html$text('...')
 					]));
 		} else {
-			var _p2 = _p0._0;
+			var _p3 = _p1._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -11453,10 +11450,10 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 									_elm_lang$core$Regex$replace,
 									_elm_lang$core$Regex$All,
 									_elm_lang$core$Regex$regex('large'),
-									function (_p1) {
+									function (_p2) {
 										return 't500x500';
 									},
-									_p2.artwork_url))
+									_p3.artwork_url))
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[])),
@@ -11476,7 +11473,7 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p2.artist)
+										_elm_lang$html$Html$text(_p3.artist)
 									])),
 								A2(
 								_elm_lang$html$Html$div,
@@ -11486,14 +11483,14 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p2.title)
+										_elm_lang$html$Html$text(_p3.title)
 									])),
 								A2(
 								_elm_lang$html$Html$a,
 								_elm_lang$core$Native_List.fromArray(
 									[
 										_elm_lang$html$Html_Attributes$class('source'),
-										_elm_lang$html$Html_Attributes$href(_p2.sourceUrl),
+										_elm_lang$html$Html_Attributes$href(_p3.sourceUrl),
 										_elm_lang$html$Html_Attributes$target('_blank')
 									]),
 								_elm_lang$core$Native_List.fromArray(
@@ -11540,21 +11537,17 @@ var _user$project$Radio_View$view = function (model) {
 				model.currentPage,
 				_user$project$Player$currentPlaylist(model.player)),
 				A2(
-				_user$project$Radio_View$viewCustomQueue,
-				model.tracks,
-				A2(_user$project$Player$playlistContent, _user$project$Radio_Model$CustomQueue, model.player)),
-				A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[
 						function () {
-						var _p3 = model.currentPage.playlist;
-						if (_p3.ctor === 'Just') {
-							var _p7 = _p3._0;
-							var _p4 = _p7;
-							if (_p4.ctor === 'Radio') {
+						var _p4 = model.currentPage.playlist;
+						if (_p4.ctor === 'Just') {
+							var _p8 = _p4._0;
+							var _p5 = _p8;
+							if (_p5.ctor === 'Radio') {
 								var currentRadioTrack = A2(
 									_elm_lang$core$Maybe$andThen,
 									A2(_user$project$Player$currentTrackOfPlaylist, _user$project$Radio_Model$Radio, model.player),
@@ -11567,35 +11560,26 @@ var _user$project$Radio_View$view = function (model) {
 								var currentPagePlaylist = _elm_lang$core$List$head(
 									A2(
 										_elm_lang$core$List$filter,
-										function (_p5) {
+										function (_p6) {
 											return A2(
 												F2(
 													function (x, y) {
 														return _elm_lang$core$Native_Utils.eq(x, y);
 													}),
-												_p7,
+												_p8,
 												function (_) {
 													return _.id;
-												}(_p5));
+												}(_p6));
 										},
 										model.playlists));
-								var _p6 = currentPagePlaylist;
-								if (_p6.ctor === 'Just') {
-									return A2(
-										_elm_lang$html$Html$div,
-										_elm_lang$core$Native_List.fromArray(
-											[
-												_elm_lang$html$Html_Attributes$class('playlist-container')
-											]),
-										_elm_lang$core$Native_List.fromArray(
-											[
-												A4(
-												_user$project$Radio_View$viewPlaylist,
-												model.currentTime,
-												model.tracks,
-												_p6._0,
-												A2(_user$project$Player$playlistContent, _p7, model.player))
-											]));
+								var _p7 = currentPagePlaylist;
+								if (_p7.ctor === 'Just') {
+									return A4(
+										_user$project$Radio_View$viewLatestTracks,
+										model.currentTime,
+										model.tracks,
+										_p7._0,
+										A2(_user$project$Player$playlistContent, _p8, model.player));
 								} else {
 									return A2(
 										_elm_lang$html$Html$div,

@@ -199,4 +199,61 @@ body {
   position: absolute;
   top: -620px; }
 
+.latest-tracks {
+  margin-top: 120px;
+  margin-bottom: 120px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 95%; }
+  .latest-tracks .content {
+    display: flex;
+    flex-wrap: wrap; }
+  .latest-tracks .view-more {
+    text-decoration: underline;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 24px; }
+
+.latest-track {
+  background: #fbfbfb;
+  border: 6px solid #fbfbfb;
+  margin: 0px 18px 24px 18px;
+  width: 200px;
+  min-width: 200px; }
+  .latest-track.error {
+    opacity: 0.5; }
+  .latest-track .cover {
+    cursor: pointer;
+    width: 200px;
+    height: 200px; }
+  .latest-track img {
+    width: 200px;
+    height: 200px; }
+  .latest-track .track-info {
+    position: relative;
+    padding: 6px;
+    padding-top: 6px;
+    padding-bottom: 0px;
+    text-align: center; }
+    .latest-track .track-info .artist {
+      font-size: 16px;
+      text-transform: uppercase; }
+    .latest-track .track-info .title {
+      font-size: 14px; }
+    .latest-track .track-info .time-ago {
+      opacity: 0.8;
+      font-size: 14px; }
+  .latest-track .extra-info {
+    opacity: 0.55; }
+  .latest-track .source {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 14px; }
+  .latest-track .time-ago {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    font-size: 14px; }
+
 /*# sourceMappingURL=style.css.map */

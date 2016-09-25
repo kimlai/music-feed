@@ -10,7 +10,7 @@ module.exports = function fetchPublishedTracks(soundcloudUserId, offset) {
         .where({soundcloudUserId: soundcloudUserId})
         .orderBy('savedAt', 'DESC')
         .offset(offset)
-        .limit(10)
+        .limit(20)
         .from('published_tracks')
         .then(function (rows) {
             return _.map(rows, function (row) {
@@ -21,7 +21,7 @@ module.exports = function fetchPublishedTracks(soundcloudUserId, offset) {
             });
         })
         .then(function (tracks) {
-            var nextOffset = offset+10;
+            var nextOffset = offset+20;
             return {
                 tracks: tracks,
                 next_href: '/feed/published_tracks?offset=' + nextOffset,
