@@ -268,8 +268,7 @@ body {
 }
 
 .latest-track {
-    background: #fbfbfb;
-    border: 6px solid #fbfbfb;
+    border: 9px solid white;
     margin: 0px 18px 24px 18px;
     width: 200px;
     min-width: 200px;
@@ -278,7 +277,7 @@ body {
     }
     &.selected {
         background: #d7d7d7;
-        border: 6px solid #d7d7d7;
+        border: 9px solid #d7d7d7;
     }
     .cover {
         cursor: pointer;
@@ -291,13 +290,13 @@ body {
     }
     .track-info {
         position: relative;
-        padding: 6px;
-        padding-top: 6px;
+        padding: 12px;
         padding-bottom: 0px;
-        text-align: center;
         .artist {
             font-size: 16px;
             text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 6px;
         }
         .title {
             font-size: 14px;

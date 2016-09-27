@@ -217,8 +217,7 @@ body {
     margin-top: 24px; }
 
 .latest-track {
-  background: #fbfbfb;
-  border: 6px solid #fbfbfb;
+  border: 9px solid white;
   margin: 0px 18px 24px 18px;
   width: 200px;
   min-width: 200px; }
@@ -226,7 +225,7 @@ body {
     opacity: 0.5; }
   .latest-track.selected {
     background: #d7d7d7;
-    border: 6px solid #d7d7d7; }
+    border: 9px solid #d7d7d7; }
   .latest-track .cover {
     cursor: pointer;
     width: 200px;
@@ -236,13 +235,13 @@ body {
     height: 200px; }
   .latest-track .track-info {
     position: relative;
-    padding: 6px;
-    padding-top: 6px;
-    padding-bottom: 0px;
-    text-align: center; }
+    padding: 12px;
+    padding-bottom: 0px; }
     .latest-track .track-info .artist {
       font-size: 16px;
-      text-transform: uppercase; }
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: 6px; }
     .latest-track .track-info .title {
       font-size: 14px; }
     .latest-track .track-info .time-ago {
