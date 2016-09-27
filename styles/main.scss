@@ -231,16 +231,21 @@ body {
         }
     }
     .track-info {
-        padding: 36px 0 0 36px;
+        padding: 36px;
         width: 50%;
+        max-width: 600px;
         line-height: 42px;
     }
     .artist {
         font-size: 36px;
         text-transform: uppercase;
+        line-height: 1;
+        padding-bottom: 24px;
     }
     .title {
-        font-size: 32px;
+        font-size: 24px;
+        line-height: 1;
+        padding-bottom: 24px;
     }
     .resume-radio {
         cursor: pointer;

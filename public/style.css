@@ -188,14 +188,19 @@ body {
       height: 400px;
       float: right; }
   .radio-track .track-info {
-    padding: 36px 0 0 36px;
+    padding: 36px;
     width: 50%;
+    max-width: 600px;
     line-height: 42px; }
   .radio-track .artist {
     font-size: 36px;
-    text-transform: uppercase; }
+    text-transform: uppercase;
+    line-height: 1;
+    padding-bottom: 24px; }
   .radio-track .title {
-    font-size: 32px; }
+    font-size: 24px;
+    line-height: 1;
+    padding-bottom: 24px; }
   .radio-track .resume-radio {
     cursor: pointer; }
 
