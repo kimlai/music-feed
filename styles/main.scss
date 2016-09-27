@@ -230,9 +230,12 @@ body {
             float: right;
         }
     }
-    .track-info {
-        padding: 36px 0px 36px 36px;
+    .track-info-wrapper {
         width: 50%;
+    }
+    .track-info {
+        padding: 36px;
+        max-width: 600px;
         line-height: 42px;
     }
     .artist {

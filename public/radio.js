@@ -11658,7 +11658,7 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 						_elm_lang$html$Html$div,
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html_Attributes$class('track-info')
+								_elm_lang$html$Html_Attributes$class('track-info-wrapper')
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[
@@ -11666,52 +11666,61 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 								_elm_lang$html$Html$div,
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html_Attributes$class('title')
+										_elm_lang$html$Html_Attributes$class('track-info')
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p4.title)
-									])),
-								A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html_Attributes$class('artist')
-									]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html$text(_p4.artist)
-									])),
-								A2(
-								_elm_lang$html$Html$a,
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html_Attributes$class('source'),
-										_elm_lang$html$Html_Attributes$href(_p4.sourceUrl),
-										_elm_lang$html$Html_Attributes$target('_blank')
-									]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html$text('Source')
-									])),
-								(!_elm_lang$core$Native_Utils.eq(
-								currentPlaylist,
-								_elm_lang$core$Maybe$Just(_user$project$Radio_Model$Radio))) ? A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html_Attributes$class('resume-radio'),
-										_elm_lang$html$Html_Events$onClick(_user$project$Radio_Update$ResumeRadio)
-									]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html$text('Resume Radio')
-									])) : A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[]),
-								_elm_lang$core$Native_List.fromArray(
-									[]))
+										A2(
+										_elm_lang$html$Html$div,
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html_Attributes$class('title')
+											]),
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html$text(_p4.title)
+											])),
+										A2(
+										_elm_lang$html$Html$div,
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html_Attributes$class('artist')
+											]),
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html$text(_p4.artist)
+											])),
+										A2(
+										_elm_lang$html$Html$a,
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html_Attributes$class('source'),
+												_elm_lang$html$Html_Attributes$href(_p4.sourceUrl),
+												_elm_lang$html$Html_Attributes$target('_blank')
+											]),
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html$text('Source')
+											])),
+										(!_elm_lang$core$Native_Utils.eq(
+										currentPlaylist,
+										_elm_lang$core$Maybe$Just(_user$project$Radio_Model$Radio))) ? A2(
+										_elm_lang$html$Html$div,
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html_Attributes$class('resume-radio'),
+												_elm_lang$html$Html_Events$onClick(_user$project$Radio_Update$ResumeRadio)
+											]),
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html$text('Resume Radio')
+											])) : A2(
+										_elm_lang$html$Html$div,
+										_elm_lang$core$Native_List.fromArray(
+											[]),
+										_elm_lang$core$Native_List.fromArray(
+											[]))
+									]))
 							]))
 					]));
 		}

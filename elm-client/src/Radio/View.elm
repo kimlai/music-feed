@@ -79,23 +79,26 @@ viewRadioTrack track currentPlaylist =
                         []
                     ]
                 , div
-                    [ class "track-info" ]
-                    [ div [ class "title" ] [ text track.title ]
-                    , div [ class "artist" ] [ text track.artist ]
-                    , a
-                        [ class "source"
-                        , href track.sourceUrl
-                        , target "_blank"
-                        ]
-                        [ text "Source" ]
-                    , if currentPlaylist /= Just Radio then
-                        div
-                            [ class "resume-radio"
-                            , onClick ResumeRadio
+                    [ class "track-info-wrapper" ]
+                    [ div
+                        [ class "track-info" ]
+                        [ div [ class "title" ] [ text track.title ]
+                        , div [ class "artist" ] [ text track.artist ]
+                        , a
+                            [ class "source"
+                            , href track.sourceUrl
+                            , target "_blank"
                             ]
-                            [ text "Resume Radio" ]
-                        else
-                            div [] []
+                            [ text "Source" ]
+                        , if currentPlaylist /= Just Radio then
+                            div
+                                [ class "resume-radio"
+                                , onClick ResumeRadio
+                                ]
+                                [ text "Resume Radio" ]
+                            else
+                                div [] []
+                        ]
                     ]
                 ]
 
