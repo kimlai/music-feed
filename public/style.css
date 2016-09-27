@@ -193,12 +193,12 @@ body {
     max-width: 600px;
     line-height: 42px; }
   .radio-track .artist {
-    font-size: 36px;
-    text-transform: uppercase;
+    font-size: 24px;
     line-height: 1;
     padding-bottom: 24px; }
   .radio-track .title {
-    font-size: 24px;
+    font-size: 36px;
+    text-transform: uppercase;
     line-height: 1;
     padding-bottom: 24px; }
   .radio-track .resume-radio {
