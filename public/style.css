@@ -181,13 +181,15 @@ body {
   display: flex;
   justify-content: center;
   margin-top: 120px; }
-  .radio-track .cover {
-    width: 400px;
-    height: 400px; }
+  .radio-track .radio-cover {
+    width: 50%; }
+    .radio-track .radio-cover img {
+      width: 400px;
+      height: 400px;
+      float: right; }
   .radio-track .track-info {
     padding: 36px 0 0 36px;
-    max-width: 500px;
-    min-width: 400px;
+    width: 50%;
     line-height: 42px; }
   .radio-track .artist {
     font-size: 36px;
@@ -243,17 +245,19 @@ body {
       line-height: 1;
       margin-bottom: 6px; }
     .latest-track .track-info .title {
-      font-size: 14px; }
+      font-size: 14px;
+      margin-bottom: 3px; }
     .latest-track .track-info .time-ago {
       opacity: 0.8;
       font-size: 14px; }
   .latest-track .extra-info {
     opacity: 0.55; }
   .latest-track .source {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    font-size: 14px; }
+    font-size: 14px;
+    opacity: 0.5;
+    text-decoration: none; }
+    .latest-track .source:hover {
+      text-decoration: underline; }
   .latest-track .time-ago {
     position: absolute;
     top: 6px;

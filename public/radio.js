@@ -11393,6 +11393,14 @@ var _user$project$Radio_View$viewTrackPlaceHolder = A2(
 		]));
 var _user$project$Radio_View$viewTrack = F5(
 	function (currentTrackId, currentTime, playlistId, position, track) {
+		var source = function () {
+			var _p0 = track.streamingInfo;
+			if (_p0.ctor === 'Soundcloud') {
+				return 'Soundcloud';
+			} else {
+				return 'Youtube';
+			}
+		}();
 		return A2(
 			_elm_lang$html$Html$div,
 			_elm_lang$core$Native_List.fromArray(
@@ -11440,7 +11448,7 @@ var _user$project$Radio_View$viewTrack = F5(
 												_elm_lang$core$Regex$replace,
 												_elm_lang$core$Regex$All,
 												_elm_lang$core$Regex$regex('large'),
-												function (_p0) {
+												function (_p1) {
 													return 't200x200';
 												},
 												track.artwork_url))
@@ -11482,6 +11490,18 @@ var _user$project$Radio_View$viewTrack = F5(
 											_elm_lang$core$Native_List.fromArray(
 												[
 													_elm_lang$html$Html$text(track.title)
+												])),
+											A2(
+											_elm_lang$html$Html$a,
+											_elm_lang$core$Native_List.fromArray(
+												[
+													_elm_lang$html$Html_Attributes$class('source'),
+													_elm_lang$html$Html_Attributes$target('_blank'),
+													_elm_lang$html$Html_Attributes$href(track.sourceUrl)
+												]),
+											_elm_lang$core$Native_List.fromArray(
+												[
+													_elm_lang$html$Html$text(source)
 												]))
 										]))
 								]))
@@ -11588,8 +11608,8 @@ var _user$project$Radio_View$viewCustomQueue = F2(
 	});
 var _user$project$Radio_View$viewRadioTrack = F2(
 	function (track, currentPlaylist) {
-		var _p1 = track;
-		if (_p1.ctor === 'Nothing') {
+		var _p2 = track;
+		if (_p2.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -11599,7 +11619,7 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 						_elm_lang$html$Html$text('...')
 					]));
 		} else {
-			var _p3 = _p1._0;
+			var _p4 = _p2._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -11609,22 +11629,31 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 				_elm_lang$core$Native_List.fromArray(
 					[
 						A2(
-						_elm_lang$html$Html$img,
+						_elm_lang$html$Html$div,
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html_Attributes$class('cover'),
-								_elm_lang$html$Html_Attributes$src(
-								A4(
-									_elm_lang$core$Regex$replace,
-									_elm_lang$core$Regex$All,
-									_elm_lang$core$Regex$regex('large'),
-									function (_p2) {
-										return 't500x500';
-									},
-									_p3.artwork_url))
+								_elm_lang$html$Html_Attributes$class('radio-cover')
 							]),
 						_elm_lang$core$Native_List.fromArray(
-							[])),
+							[
+								A2(
+								_elm_lang$html$Html$img,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$class('cover'),
+										_elm_lang$html$Html_Attributes$src(
+										A4(
+											_elm_lang$core$Regex$replace,
+											_elm_lang$core$Regex$All,
+											_elm_lang$core$Regex$regex('large'),
+											function (_p3) {
+												return 't500x500';
+											},
+											_p4.artwork_url))
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[]))
+							])),
 						A2(
 						_elm_lang$html$Html$div,
 						_elm_lang$core$Native_List.fromArray(
@@ -11641,7 +11670,7 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p3.artist)
+										_elm_lang$html$Html$text(_p4.artist)
 									])),
 								A2(
 								_elm_lang$html$Html$div,
@@ -11651,14 +11680,14 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p3.title)
+										_elm_lang$html$Html$text(_p4.title)
 									])),
 								A2(
 								_elm_lang$html$Html$a,
 								_elm_lang$core$Native_List.fromArray(
 									[
 										_elm_lang$html$Html_Attributes$class('source'),
-										_elm_lang$html$Html_Attributes$href(_p3.sourceUrl),
+										_elm_lang$html$Html_Attributes$href(_p4.sourceUrl),
 										_elm_lang$html$Html_Attributes$target('_blank')
 									]),
 								_elm_lang$core$Native_List.fromArray(
@@ -11715,11 +11744,11 @@ var _user$project$Radio_View$view = function (model) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						function () {
-						var _p4 = model.currentPage.playlist;
-						if (_p4.ctor === 'Just') {
-							var _p8 = _p4._0;
-							var _p5 = _p8;
-							if (_p5.ctor === 'Radio') {
+						var _p5 = model.currentPage.playlist;
+						if (_p5.ctor === 'Just') {
+							var _p9 = _p5._0;
+							var _p6 = _p9;
+							if (_p6.ctor === 'Radio') {
 								var currentRadioTrack = A2(
 									_elm_lang$core$Maybe$andThen,
 									A2(_user$project$Player$currentTrackOfPlaylist, _user$project$Radio_Model$Radio, model.player),
@@ -11732,27 +11761,27 @@ var _user$project$Radio_View$view = function (model) {
 								var currentPagePlaylist = _elm_lang$core$List$head(
 									A2(
 										_elm_lang$core$List$filter,
-										function (_p6) {
+										function (_p7) {
 											return A2(
 												F2(
 													function (x, y) {
 														return _elm_lang$core$Native_Utils.eq(x, y);
 													}),
-												_p8,
+												_p9,
 												function (_) {
 													return _.id;
-												}(_p6));
+												}(_p7));
 										},
 										model.playlists));
-								var _p7 = currentPagePlaylist;
-								if (_p7.ctor === 'Just') {
+								var _p8 = currentPagePlaylist;
+								if (_p8.ctor === 'Just') {
 									return A5(
 										_user$project$Radio_View$viewLatestTracks,
 										_user$project$Player$currentTrack(model.player),
 										model.currentTime,
 										model.tracks,
-										_p7._0,
-										A2(_user$project$Player$playlistContent, _p8, model.player));
+										_p8._0,
+										A2(_user$project$Player$playlistContent, _p9, model.player));
 								} else {
 									return A2(
 										_elm_lang$html$Html$div,

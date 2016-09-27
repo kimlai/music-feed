@@ -6,7 +6,7 @@ import Html exposing (Html, a, nav, li, ul, text, div, img)
 import Html.Attributes exposing (class, classList, href, src, style, target)
 import Json.Decode
 import Html.Events exposing (onClick, onWithOptions)
-import Model exposing (Track, TrackId)
+import Model exposing (Track, TrackId, StreamingInfo(..))
 import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..))
 import Regex
 import Player
@@ -70,11 +70,14 @@ viewRadioTrack track currentPlaylist =
         Just track ->
             div
                 [ class "radio-track" ]
-                [ img
-                    [ class "cover"
-                    , src (Regex.replace Regex.All (Regex.regex "large") (\_ -> "t500x500") track.artwork_url)
+                [ div
+                    [ class "radio-cover" ]
+                    [ img
+                        [ class "cover"
+                        , src (Regex.replace Regex.All (Regex.regex "large") (\_ -> "t500x500") track.artwork_url)
+                        ]
+                        []
                     ]
-                    []
                 , div
                     [ class "track-info" ]
                     [ div [ class "artist" ] [ text track.artist ]
@@ -153,6 +156,14 @@ viewLatestTracks currentTrackId currentTime tracks playlist playlistContent=
 
 viewTrack : Maybe TrackId -> Maybe Time -> PlaylistId -> Int -> Track -> Html Msg
 viewTrack currentTrackId currentTime playlistId position track =
+    let
+        source =
+            case track.streamingInfo of
+                Soundcloud url ->
+                    "Soundcloud"
+                Youtube id ->
+                    "Youtube"
+    in
     div
         [ classList
             [ ("latest-track", True)
@@ -177,6 +188,12 @@ viewTrack currentTrackId currentTime playlistId position track =
                     [ class "track-info" ]
                     [ div [ class "artist" ] [ text track.artist ]
                     , div [ class "title" ] [ text track.title ]
+                    , a
+                        [ class "source"
+                        , target "_blank"
+                        , href track.sourceUrl
+                        ]
+                        [ text source ]
                     ]
                 ]
             ]

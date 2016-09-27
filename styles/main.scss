@@ -222,14 +222,17 @@ body {
     display: flex;
     justify-content: center;
     margin-top: 120px;
-    .cover {
-        width: 400px;
-        height: 400px;
+    .radio-cover {
+        width: 50%;
+        img {
+            width: 400px;
+            height: 400px;
+            float: right;
+        }
     }
     .track-info {
         padding: 36px 0 0 36px;
-        max-width: 500px;
-        min-width: 400px;
+        width: 50%;
         line-height: 42px;
     }
     .artist {
@@ -300,6 +303,7 @@ body {
         }
         .title {
             font-size: 14px;
+            margin-bottom: 3px;
         }
         .time-ago {
             opacity: 0.8;
@@ -310,10 +314,12 @@ body {
         opacity: 0.55;
     }
     .source {
-        position: absolute;
-        top: 6px;
-        right: 6px;
         font-size: 14px;
+        opacity: 0.5;
+        text-decoration: none;
+        &:hover {
+            text-decoration: underline;
+        }
     }
     .time-ago {
         position: absolute;
