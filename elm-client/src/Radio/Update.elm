@@ -40,6 +40,7 @@ type Msg
     | FetchFail PlaylistId Http.Error
     | FetchSuccess PlaylistId ( List Track, String )
     | ResumeRadio
+    | SeekTo Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -186,6 +187,11 @@ update message model =
 
         ChangePage url ->
             ( model, Navigation.newUrl url )
+
+        SeekTo positionInPercentage ->
+            ( model
+            , PlayerEngine.seekToPercentage (Model.currentTrack model) positionInPercentage
+            )
 
         FastForward ->
             ( model

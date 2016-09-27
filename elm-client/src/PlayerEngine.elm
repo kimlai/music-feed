@@ -1,5 +1,5 @@
 port module PlayerEngine exposing
-    ( play, pause, changeCurrentTime
+    ( play, pause, changeCurrentTime, seekToPercentage
     , trackProgress, trackEnd, trackError
     )
 
@@ -17,6 +17,8 @@ port playYoutubeTrack : { id : TrackId, youtubeId : YoutubeId, currentTime : Flo
 port pause : Maybe TrackId -> Cmd msg
 port changeSoundcloudCurrentTime : Int -> Cmd msg
 port changeYoutubeCurrentTime : Int -> Cmd msg
+port seekSoundcloudToPercentage : Float -> Cmd msg
+port seekYoutubeToPercentage : Float -> Cmd msg
 
 
 
@@ -56,3 +58,16 @@ changeCurrentTime currentTrack amount =
                     changeSoundcloudCurrentTime amount
                 Youtube youtubeId ->
                     changeYoutubeCurrentTime amount
+
+
+seekToPercentage : Maybe Track -> Float -> Cmd msg
+seekToPercentage currentTrack positionInPercentage =
+    case currentTrack of
+        Nothing ->
+            Cmd.none
+        Just track ->
+            case track.streamingInfo of
+                Soundcloud streamUrl ->
+                    seekSoundcloudToPercentage positionInPercentage
+                Youtube youtubeId ->
+                    seekYoutubeToPercentage positionInPercentage

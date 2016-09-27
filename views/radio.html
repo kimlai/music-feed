@@ -36,8 +36,16 @@
                     soundcloud.seek(amount);
                 });
 
+                app.ports.seekSoundcloudToPercentage.subscribe(function(position) {
+                    soundcloud.seekTo(position);
+                });
+
                 app.ports.changeYoutubeCurrentTime.subscribe(function(amount) {
                     youtube.seek(amount);
+                });
+
+                app.ports.seekYoutubeToPercentage.subscribe(function(position) {
+                    youtube.seekTo(position);
                 });
 
                 app.ports.pause.subscribe(function(trackId) {

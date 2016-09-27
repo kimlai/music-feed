@@ -10414,6 +10414,30 @@ var _user$project$PlayerEngine$changeCurrentTime = F2(
 			}
 		}
 	});
+var _user$project$PlayerEngine$seekSoundcloudToPercentage = _elm_lang$core$Native_Platform.outgoingPort(
+	'seekSoundcloudToPercentage',
+	function (v) {
+		return v;
+	});
+var _user$project$PlayerEngine$seekYoutubeToPercentage = _elm_lang$core$Native_Platform.outgoingPort(
+	'seekYoutubeToPercentage',
+	function (v) {
+		return v;
+	});
+var _user$project$PlayerEngine$seekToPercentage = F2(
+	function (currentTrack, positionInPercentage) {
+		var _p3 = currentTrack;
+		if (_p3.ctor === 'Nothing') {
+			return _elm_lang$core$Platform_Cmd$none;
+		} else {
+			var _p4 = _p3._0.streamingInfo;
+			if (_p4.ctor === 'Soundcloud') {
+				return _user$project$PlayerEngine$seekSoundcloudToPercentage(positionInPercentage);
+			} else {
+				return _user$project$PlayerEngine$seekYoutubeToPercentage(positionInPercentage);
+			}
+		}
+	});
 var _user$project$PlayerEngine$trackProgress = _elm_lang$core$Native_Platform.incomingPort(
 	'trackProgress',
 	A4(
@@ -10474,6 +10498,9 @@ var _user$project$Radio_Ports$scroll = _elm_lang$core$Native_Platform.outgoingPo
 		return v;
 	});
 
+var _user$project$Radio_Update$SeekTo = function (a) {
+	return {ctor: 'SeekTo', _0: a};
+};
 var _user$project$Radio_Update$ResumeRadio = {ctor: 'ResumeRadio'};
 var _user$project$Radio_Update$FetchSuccess = F2(
 	function (a, b) {
@@ -10741,6 +10768,15 @@ var _user$project$Radio_Update$update = F2(
 						_0: model,
 						_1: _elm_lang$navigation$Navigation$newUrl(_p0._0)
 					};
+				case 'SeekTo':
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: A2(
+							_user$project$PlayerEngine$seekToPercentage,
+							_user$project$Radio_Model$currentTrack(model),
+							_p0._0)
+					};
 				case 'FastForward':
 					return {
 						ctor: '_Tuple2',
@@ -10990,10 +11026,125 @@ var _user$project$View$viewNavigation = F5(
 						A3(_user$project$View$viewNavigationItem, changePage, currentPage, currentPlaylistPage),
 						navigationItems))));
 	});
-var _user$project$View$viewGlobalPlayer = F4(
-	function (tooglePlayback, next, track, playing) {
-		var _p2 = track;
-		if (_p2.ctor === 'Nothing') {
+var _user$project$View$Element = function (a) {
+	return {ctor: 'Element', _0: a};
+};
+var _user$project$View$instanciateElement = F2(
+	function (offsetLeft, offsetParent) {
+		return _user$project$View$Element(
+			{offsetLeft: offsetLeft, offsetParent: offsetParent});
+	});
+var _user$project$View$decodeElement = A2(
+	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+	A2(
+		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+		_elm_lang$core$Json_Decode$succeed(_user$project$View$instanciateElement),
+		A2(_elm_lang$core$Json_Decode_ops[':='], 'offsetLeft', _elm_lang$core$Json_Decode$float)),
+	A2(
+		_elm_lang$core$Json_Decode_ops[':='],
+		'offsetParent',
+		_elm_community$elm_json_extra$Json_Decode_Extra$maybeNull(
+			_elm_community$elm_json_extra$Json_Decode_Extra$lazy(
+				function (_p2) {
+					return _user$project$View$decodeElement;
+				}))));
+var _user$project$View$decodeClickXPosition = function () {
+	var totalOffset = function (_p3) {
+		var _p4 = _p3;
+		var _p6 = _p4._0.offsetLeft;
+		var _p5 = _p4._0.offsetParent;
+		if (_p5.ctor === 'Nothing') {
+			return _p6;
+		} else {
+			return _p6 + totalOffset(_p5._0);
+		}
+	};
+	return A2(
+		_elm_lang$core$Json_Decode$map,
+		F2(
+			function (x, y) {
+				return x * y;
+			})(100),
+		A3(
+			_elm_lang$core$Json_Decode$object2,
+			F2(
+				function (x, y) {
+					return x / y;
+				}),
+			A3(
+				_elm_lang$core$Json_Decode$object2,
+				F2(
+					function (x, y) {
+						return x - y;
+					}),
+				A2(
+					_elm_lang$core$Json_Decode$at,
+					_elm_lang$core$Native_List.fromArray(
+						['pageX']),
+					_elm_lang$core$Json_Decode$float),
+				A2(
+					_elm_lang$core$Json_Decode$map,
+					totalOffset,
+					A2(
+						_elm_lang$core$Json_Decode$at,
+						_elm_lang$core$Native_List.fromArray(
+							['target']),
+						_user$project$View$decodeElement))),
+			A2(
+				_elm_lang$core$Json_Decode$at,
+				_elm_lang$core$Native_List.fromArray(
+					['target', 'offsetWidth']),
+				_elm_lang$core$Json_Decode$float)));
+}();
+var _user$project$View$viewProgressBar = F2(
+	function (seekTo, track) {
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('progress-bar'),
+					A2(
+					_elm_lang$html$Html_Events$on,
+					'click',
+					A2(_elm_lang$core$Json_Decode$map, seekTo, _user$project$View$decodeClickXPosition))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(
+					_elm_lang$html$Html$div,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$class('outer')
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_elm_lang$html$Html$div,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$class('inner'),
+									_elm_lang$html$Html_Attributes$style(
+									_elm_lang$core$Native_List.fromArray(
+										[
+											{
+											ctor: '_Tuple2',
+											_0: 'width',
+											_1: A2(
+												_elm_lang$core$Basics_ops['++'],
+												_elm_lang$core$Basics$toString(track.progress),
+												'%')
+										}
+										]))
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[]))
+						]))
+				]));
+	});
+var _user$project$View$viewGlobalPlayer = F5(
+	function (tooglePlayback, next, seekTo, track, playing) {
+		var _p7 = track;
+		if (_p7.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -11074,7 +11225,7 @@ var _user$project$View$viewGlobalPlayer = F4(
 							[]))
 					]));
 		} else {
-			var _p3 = _p2._0;
+			var _p8 = _p7._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -11102,9 +11253,9 @@ var _user$project$View$viewGlobalPlayer = F4(
 												{
 												ctor: '_Tuple2',
 												_0: 'playing',
-												_1: playing && _elm_lang$core$Basics$not(_p3.error)
+												_1: playing && _elm_lang$core$Basics$not(_p8.error)
 											},
-												{ctor: '_Tuple2', _0: 'error', _1: _p3.error}
+												{ctor: '_Tuple2', _0: 'error', _1: _p8.error}
 											])),
 										_elm_lang$html$Html_Events$onClick(tooglePlayback)
 									]),
@@ -11128,7 +11279,7 @@ var _user$project$View$viewGlobalPlayer = F4(
 						_elm_lang$html$Html$img,
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html_Attributes$src(_p3.artwork_url)
+								_elm_lang$html$Html_Attributes$src(_p8.artwork_url)
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[])),
@@ -11148,7 +11299,7 @@ var _user$project$View$viewGlobalPlayer = F4(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p3.artist)
+										_elm_lang$html$Html$text(_p8.artist)
 									])),
 								A2(
 								_elm_lang$html$Html$div,
@@ -11158,47 +11309,10 @@ var _user$project$View$viewGlobalPlayer = F4(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p3.title)
+										_elm_lang$html$Html$text(_p8.title)
 									]))
 							])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$class('progress-bar')
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html_Attributes$class('outer')
-									]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										A2(
-										_elm_lang$html$Html$div,
-										_elm_lang$core$Native_List.fromArray(
-											[
-												_elm_lang$html$Html_Attributes$class('inner'),
-												_elm_lang$html$Html_Attributes$style(
-												_elm_lang$core$Native_List.fromArray(
-													[
-														{
-														ctor: '_Tuple2',
-														_0: 'width',
-														_1: A2(
-															_elm_lang$core$Basics_ops['++'],
-															_elm_lang$core$Basics$toString(_p3.progress),
-															'%')
-													}
-													]))
-											]),
-										_elm_lang$core$Native_List.fromArray(
-											[]))
-									]))
-							])),
+						A2(_user$project$View$viewProgressBar, seekTo, _p8),
 						A2(
 						_elm_lang$html$Html$div,
 						_elm_lang$core$Native_List.fromArray(
@@ -11334,44 +11448,7 @@ var _user$project$Radio_View$viewTrack = F5(
 									_elm_lang$core$Native_List.fromArray(
 										[]))
 								])),
-							A2(
-							_elm_lang$html$Html$div,
-							_elm_lang$core$Native_List.fromArray(
-								[
-									_elm_lang$html$Html_Attributes$class('progress-bar')
-								]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									A2(
-									_elm_lang$html$Html$div,
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html_Attributes$class('outer')
-										]),
-									_elm_lang$core$Native_List.fromArray(
-										[
-											A2(
-											_elm_lang$html$Html$div,
-											_elm_lang$core$Native_List.fromArray(
-												[
-													_elm_lang$html$Html_Attributes$class('inner'),
-													_elm_lang$html$Html_Attributes$style(
-													_elm_lang$core$Native_List.fromArray(
-														[
-															{
-															ctor: '_Tuple2',
-															_0: 'width',
-															_1: A2(
-																_elm_lang$core$Basics_ops['++'],
-																_elm_lang$core$Basics$toString(track.progress),
-																'%')
-														}
-														]))
-												]),
-											_elm_lang$core$Native_List.fromArray(
-												[]))
-										]))
-								])),
+							A2(_user$project$View$viewProgressBar, _user$project$Radio_Update$SeekTo, track),
 							A2(
 							_elm_lang$html$Html$div,
 							_elm_lang$core$Native_List.fromArray(
@@ -11617,10 +11694,11 @@ var _user$project$Radio_View$view = function (model) {
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				A4(
+				A5(
 				_user$project$View$viewGlobalPlayer,
 				_user$project$Radio_Update$TogglePlayback,
 				_user$project$Radio_Update$Next,
+				_user$project$Radio_Update$SeekTo,
 				_user$project$Radio_Model$currentTrack(model),
 				model.playing),
 				A5(

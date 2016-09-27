@@ -31,5 +31,9 @@ var Soundcloud = function (soundcloudClientId, app) {
         seek: function (amount) {
             audio.currentTime = audio.currentTime + amount;
         },
+
+        seekTo: function (positionInPercentage) {
+            audio.currentTime = audio.duration * positionInPercentage / 100;
+        },
     };
 };

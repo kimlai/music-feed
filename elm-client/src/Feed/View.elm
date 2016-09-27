@@ -19,7 +19,7 @@ view : Model -> Html Msg
 view model =
     div
         []
-        [ View.viewGlobalPlayer TogglePlayback Next (Model.currentTrack model) model.playing
+        [ View.viewGlobalPlayer TogglePlayback Next SeekTo (Model.currentTrack model) model.playing
         , View.viewNavigation
             ChangePage
             model.navigation

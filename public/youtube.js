@@ -64,4 +64,8 @@ var Youtube = function(app) {
     this.seek = function(amount) {
         if (this.video.seekTo) this.video.seekTo(this.video.getCurrentTime() + amount);
     };
+
+    this.seekTo = function(positionInPercentage) {
+        if (this.video.seekTo) this.video.seekTo(this.video.getDuration() * positionInPercentage / 100);
+    };
 };

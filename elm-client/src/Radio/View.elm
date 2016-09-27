@@ -20,7 +20,7 @@ view : Model -> Html Msg
 view model =
     div
         []
-        [ View.viewGlobalPlayer TogglePlayback Next (Model.currentTrack model) model.playing
+        [ View.viewGlobalPlayer TogglePlayback Next SeekTo (Model.currentTrack model) model.playing
         , View.viewNavigation
             ChangePage
             model.navigation
@@ -170,17 +170,7 @@ viewTrack currentTrackId currentTime playlistId position track =
                     [ src (Regex.replace Regex.All (Regex.regex "large") (\_ -> "t200x200") track.artwork_url) ]
                     []
                 ]
-            , div
-                [ class "progress-bar" ]
-                [ div
-                    [ class "outer" ]
-                    [ div
-                        [ class "inner"
-                        , style [ ( "width", (toString track.progress) ++ "%" ) ]
-                        ]
-                        []
-                    ]
-                ]
+            , View.viewProgressBar SeekTo track
             , div
                 []
                 [ div

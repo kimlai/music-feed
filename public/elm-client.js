@@ -10276,65 +10276,93 @@ var _user$project$Player$select = F3(
 				currentTrack: currentTrack$
 			});
 	});
-var _user$project$Player$next = function (_p23) {
-	var _p24 = _p23;
-	var _p30 = _p24._0.currentPlaylist;
-	var updatePlaylist = function (_p25) {
-		var _p26 = _p25;
-		var _p28 = _p26._1;
-		var _p27 = _p26._0;
+var _user$project$Player$selectPlaylist = F2(
+	function (playlistId, _p23) {
+		var _p24 = _p23;
+		var _p26 = _p24._0.playlists;
+		var selectedPlaylist = A2(
+			_elm_lang$core$Maybe$map,
+			_elm_lang$core$Basics$snd,
+			_elm_lang$core$List$head(
+				A2(
+					_elm_lang$core$List$filter,
+					function (_p25) {
+						return A2(
+							F2(
+								function (x, y) {
+									return _elm_lang$core$Native_Utils.eq(x, y);
+								}),
+							playlistId,
+							_elm_lang$core$Basics$fst(_p25));
+					},
+					_p26)));
+		var currentTrack$ = A2(_elm_lang$core$Maybe$andThen, selectedPlaylist, _user$project$Playlist$currentItem);
+		return _user$project$Player$Player(
+			{
+				playlists: _p26,
+				currentPlaylist: _elm_lang$core$Maybe$Just(playlistId),
+				currentTrack: currentTrack$
+			});
+	});
+var _user$project$Player$next = function (_p27) {
+	var _p28 = _p27;
+	var _p34 = _p28._0.currentPlaylist;
+	var updatePlaylist = function (_p29) {
+		var _p30 = _p29;
+		var _p32 = _p30._1;
+		var _p31 = _p30._0;
 		return (_elm_lang$core$Native_Utils.eq(
-			_elm_lang$core$Maybe$Just(_p27),
-			_p30) && _elm_lang$core$Native_Utils.eq(
-			_user$project$Playlist$currentItem(_p28),
-			_p24._0.currentTrack)) ? {
+			_elm_lang$core$Maybe$Just(_p31),
+			_p34) && _elm_lang$core$Native_Utils.eq(
+			_user$project$Playlist$currentItem(_p32),
+			_p28._0.currentTrack)) ? {
 			ctor: '_Tuple2',
-			_0: _p27,
-			_1: _user$project$Playlist$next(_p28)
-		} : {ctor: '_Tuple2', _0: _p27, _1: _p28};
+			_0: _p31,
+			_1: _user$project$Playlist$next(_p32)
+		} : {ctor: '_Tuple2', _0: _p31, _1: _p32};
 	};
-	var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p24._0.playlists);
+	var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p28._0.playlists);
 	var items = A2(
 		_elm_lang$core$Maybe$map,
 		_elm_lang$core$Basics$snd,
 		_elm_lang$core$List$head(
 			A2(
 				_elm_lang$core$List$filter,
-				function (_p29) {
+				function (_p33) {
 					return A2(
 						F2(
 							function (x, y) {
 								return _elm_lang$core$Native_Utils.eq(x, y);
 							}),
-						_p30,
+						_p34,
 						_elm_lang$core$Maybe$Just(
-							_elm_lang$core$Basics$fst(_p29)));
+							_elm_lang$core$Basics$fst(_p33)));
 				},
 				playlists$)));
 	var currentTrack$ = A2(_elm_lang$core$Maybe$andThen, items, _user$project$Playlist$currentItem);
 	return _user$project$Player$Player(
-		{playlists: playlists$, currentPlaylist: _p30, currentTrack: currentTrack$});
+		{playlists: playlists$, currentPlaylist: _p34, currentTrack: currentTrack$});
 };
 var _user$project$Player$moveTrack = F3(
-	function (playlistId, track, _p31) {
-		var _p32 = _p31;
-		var updatePlaylist = function (_p33) {
-			var _p34 = _p33;
-			var _p36 = _p34._1;
-			var _p35 = _p34._0;
-			return _elm_lang$core$Native_Utils.eq(_p35, playlistId) ? {
+	function (playlistId, track, _p35) {
+		var _p36 = _p35;
+		var updatePlaylist = function (_p37) {
+			var _p38 = _p37;
+			var _p40 = _p38._1;
+			var _p39 = _p38._0;
+			return _elm_lang$core$Native_Utils.eq(_p39, playlistId) ? {
 				ctor: '_Tuple2',
-				_0: _p35,
-				_1: A2(_user$project$Playlist$prepend, track, _p36)
+				_0: _p39,
+				_1: A2(_user$project$Playlist$prepend, track, _p40)
 			} : {
 				ctor: '_Tuple2',
-				_0: _p35,
-				_1: A2(_user$project$Playlist$remove, track, _p36)
+				_0: _p39,
+				_1: A2(_user$project$Playlist$remove, track, _p40)
 			};
 		};
-		var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p32._0.playlists);
+		var playlists$ = A2(_elm_lang$core$List$map, updatePlaylist, _p36._0.playlists);
 		return _user$project$Player$Player(
-			{playlists: playlists$, currentPlaylist: _p32._0.currentPlaylist, currentTrack: _p32._0.currentTrack});
+			{playlists: playlists$, currentPlaylist: _p36._0.currentPlaylist, currentTrack: _p36._0.currentTrack});
 	});
 
 var _user$project$Feed_Model$currentTrack = function (model) {
@@ -10467,6 +10495,30 @@ var _user$project$PlayerEngine$changeCurrentTime = F2(
 			}
 		}
 	});
+var _user$project$PlayerEngine$seekSoundcloudToPercentage = _elm_lang$core$Native_Platform.outgoingPort(
+	'seekSoundcloudToPercentage',
+	function (v) {
+		return v;
+	});
+var _user$project$PlayerEngine$seekYoutubeToPercentage = _elm_lang$core$Native_Platform.outgoingPort(
+	'seekYoutubeToPercentage',
+	function (v) {
+		return v;
+	});
+var _user$project$PlayerEngine$seekToPercentage = F2(
+	function (currentTrack, positionInPercentage) {
+		var _p3 = currentTrack;
+		if (_p3.ctor === 'Nothing') {
+			return _elm_lang$core$Platform_Cmd$none;
+		} else {
+			var _p4 = _p3._0.streamingInfo;
+			if (_p4.ctor === 'Soundcloud') {
+				return _user$project$PlayerEngine$seekSoundcloudToPercentage(positionInPercentage);
+			} else {
+				return _user$project$PlayerEngine$seekYoutubeToPercentage(positionInPercentage);
+			}
+		}
+	});
 var _user$project$PlayerEngine$trackProgress = _elm_lang$core$Native_Platform.incomingPort(
 	'trackProgress',
 	A4(
@@ -10542,6 +10594,7 @@ var _user$project$Soundcloud$resolve = F2(
 					A2(_elm_lang$core$Basics_ops['++'], '&client_id=', clientId))));
 	});
 
+var _user$project$Feed_Update$SeekTo = {ctor: 'SeekTo'};
 var _user$project$Feed_Update$PublishYoutubeTrackSuccess = function (a) {
 	return {ctor: 'PublishYoutubeTrackSuccess', _0: a};
 };
@@ -10881,6 +10934,8 @@ var _user$project$Feed_Update$update = F2(
 						_0: model,
 						_1: _elm_lang$navigation$Navigation$newUrl(_p2._0)
 					};
+				case 'SeekTo':
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				case 'FastForward':
 					return {
 						ctor: '_Tuple2',
@@ -11423,10 +11478,125 @@ var _user$project$View$viewNavigation = F5(
 						A3(_user$project$View$viewNavigationItem, changePage, currentPage, currentPlaylistPage),
 						navigationItems))));
 	});
-var _user$project$View$viewGlobalPlayer = F4(
-	function (tooglePlayback, next, track, playing) {
-		var _p2 = track;
-		if (_p2.ctor === 'Nothing') {
+var _user$project$View$Element = function (a) {
+	return {ctor: 'Element', _0: a};
+};
+var _user$project$View$instanciateElement = F2(
+	function (offsetLeft, offsetParent) {
+		return _user$project$View$Element(
+			{offsetLeft: offsetLeft, offsetParent: offsetParent});
+	});
+var _user$project$View$decodeElement = A2(
+	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+	A2(
+		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+		_elm_lang$core$Json_Decode$succeed(_user$project$View$instanciateElement),
+		A2(_elm_lang$core$Json_Decode_ops[':='], 'offsetLeft', _elm_lang$core$Json_Decode$float)),
+	A2(
+		_elm_lang$core$Json_Decode_ops[':='],
+		'offsetParent',
+		_elm_community$elm_json_extra$Json_Decode_Extra$maybeNull(
+			_elm_community$elm_json_extra$Json_Decode_Extra$lazy(
+				function (_p2) {
+					return _user$project$View$decodeElement;
+				}))));
+var _user$project$View$decodeClickXPosition = function () {
+	var totalOffset = function (_p3) {
+		var _p4 = _p3;
+		var _p6 = _p4._0.offsetLeft;
+		var _p5 = _p4._0.offsetParent;
+		if (_p5.ctor === 'Nothing') {
+			return _p6;
+		} else {
+			return _p6 + totalOffset(_p5._0);
+		}
+	};
+	return A2(
+		_elm_lang$core$Json_Decode$map,
+		F2(
+			function (x, y) {
+				return x * y;
+			})(100),
+		A3(
+			_elm_lang$core$Json_Decode$object2,
+			F2(
+				function (x, y) {
+					return x / y;
+				}),
+			A3(
+				_elm_lang$core$Json_Decode$object2,
+				F2(
+					function (x, y) {
+						return x - y;
+					}),
+				A2(
+					_elm_lang$core$Json_Decode$at,
+					_elm_lang$core$Native_List.fromArray(
+						['pageX']),
+					_elm_lang$core$Json_Decode$float),
+				A2(
+					_elm_lang$core$Json_Decode$map,
+					totalOffset,
+					A2(
+						_elm_lang$core$Json_Decode$at,
+						_elm_lang$core$Native_List.fromArray(
+							['target']),
+						_user$project$View$decodeElement))),
+			A2(
+				_elm_lang$core$Json_Decode$at,
+				_elm_lang$core$Native_List.fromArray(
+					['target', 'offsetWidth']),
+				_elm_lang$core$Json_Decode$float)));
+}();
+var _user$project$View$viewProgressBar = F2(
+	function (seekTo, track) {
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('progress-bar'),
+					A2(
+					_elm_lang$html$Html_Events$on,
+					'click',
+					A2(_elm_lang$core$Json_Decode$map, seekTo, _user$project$View$decodeClickXPosition))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(
+					_elm_lang$html$Html$div,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$class('outer')
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_elm_lang$html$Html$div,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$class('inner'),
+									_elm_lang$html$Html_Attributes$style(
+									_elm_lang$core$Native_List.fromArray(
+										[
+											{
+											ctor: '_Tuple2',
+											_0: 'width',
+											_1: A2(
+												_elm_lang$core$Basics_ops['++'],
+												_elm_lang$core$Basics$toString(track.progress),
+												'%')
+										}
+										]))
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[]))
+						]))
+				]));
+	});
+var _user$project$View$viewGlobalPlayer = F5(
+	function (tooglePlayback, next, seekTo, track, playing) {
+		var _p7 = track;
+		if (_p7.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -11507,7 +11677,7 @@ var _user$project$View$viewGlobalPlayer = F4(
 							[]))
 					]));
 		} else {
-			var _p3 = _p2._0;
+			var _p8 = _p7._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -11535,9 +11705,9 @@ var _user$project$View$viewGlobalPlayer = F4(
 												{
 												ctor: '_Tuple2',
 												_0: 'playing',
-												_1: playing && _elm_lang$core$Basics$not(_p3.error)
+												_1: playing && _elm_lang$core$Basics$not(_p8.error)
 											},
-												{ctor: '_Tuple2', _0: 'error', _1: _p3.error}
+												{ctor: '_Tuple2', _0: 'error', _1: _p8.error}
 											])),
 										_elm_lang$html$Html_Events$onClick(tooglePlayback)
 									]),
@@ -11561,7 +11731,7 @@ var _user$project$View$viewGlobalPlayer = F4(
 						_elm_lang$html$Html$img,
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html_Attributes$src(_p3.artwork_url)
+								_elm_lang$html$Html_Attributes$src(_p8.artwork_url)
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[])),
@@ -11581,7 +11751,7 @@ var _user$project$View$viewGlobalPlayer = F4(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p3.artist)
+										_elm_lang$html$Html$text(_p8.artist)
 									])),
 								A2(
 								_elm_lang$html$Html$div,
@@ -11591,47 +11761,10 @@ var _user$project$View$viewGlobalPlayer = F4(
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html$text(_p3.title)
+										_elm_lang$html$Html$text(_p8.title)
 									]))
 							])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$class('progress-bar')
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html_Attributes$class('outer')
-									]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										A2(
-										_elm_lang$html$Html$div,
-										_elm_lang$core$Native_List.fromArray(
-											[
-												_elm_lang$html$Html_Attributes$class('inner'),
-												_elm_lang$html$Html_Attributes$style(
-												_elm_lang$core$Native_List.fromArray(
-													[
-														{
-														ctor: '_Tuple2',
-														_0: 'width',
-														_1: A2(
-															_elm_lang$core$Basics_ops['++'],
-															_elm_lang$core$Basics$toString(_p3.progress),
-															'%')
-													}
-													]))
-											]),
-										_elm_lang$core$Native_List.fromArray(
-											[]))
-									]))
-							])),
+						A2(_user$project$View$viewProgressBar, seekTo, _p8),
 						A2(
 						_elm_lang$html$Html$div,
 						_elm_lang$core$Native_List.fromArray(
@@ -12104,10 +12237,11 @@ var _user$project$Feed_View$view = function (model) {
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				A4(
+				A5(
 				_user$project$View$viewGlobalPlayer,
 				_user$project$Feed_Update$TogglePlayback,
 				_user$project$Feed_Update$Next,
+				_user$project$Feed_Update$SeekTo,
 				_user$project$Feed_Model$currentTrack(model),
 				model.playing),
 				A5(

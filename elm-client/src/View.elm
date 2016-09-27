@@ -3,13 +3,14 @@ module View exposing (..)
 
 import Html exposing (Html, div, text, img, ul, li, nav, a)
 import Html.Attributes exposing (class, src, classList, style, href)
-import Html.Events exposing (onClick, onWithOptions)
-import Json.Decode
+import Html.Events exposing (onClick, onWithOptions, on)
+import Json.Decode exposing ((:=))
+import Json.Decode.Extra exposing ((|:))
 import Model exposing (Track, Page, NavigationItem, Page)
 
 
-viewGlobalPlayer : msg -> msg -> Maybe Track -> Bool -> Html msg
-viewGlobalPlayer tooglePlayback next track playing =
+viewGlobalPlayer : msg ->msg -> (Float -> msg) -> Maybe Track -> Bool -> Html msg
+viewGlobalPlayer tooglePlayback next seekTo track playing =
     case track of
         Nothing ->
             div
@@ -64,21 +65,65 @@ viewGlobalPlayer tooglePlayback next track playing =
                     [ div [ class "artist" ] [ text track.artist ]
                     , div [ class "title" ] [ text track.title ]
                     ]
-                , div
-                    [ class "progress-bar" ]
-                    [ div
-                        [ class "outer" ]
-                        [ div
-                            [ class "inner"
-                            , style [ ( "width", (toString track.progress) ++ "%" ) ]
-                            ]
-                            []
-                        ]
-                    ]
+                , viewProgressBar seekTo track
                 , div
                     [ class "actions" ]
                     []
                 ]
+
+
+viewProgressBar : (Float -> msg) -> Track -> Html msg
+viewProgressBar seekTo track =
+        div
+            [ class "progress-bar"
+            , on "click" (decodeClickXPosition |> Json.Decode.map seekTo)
+            ]
+            [ div
+                [ class "outer" ]
+                [ div
+                    [ class "inner"
+                    , style [ ( "width", (toString track.progress) ++ "%" ) ]
+                    ]
+                    []
+                ]
+            ]
+
+
+decodeClickXPosition : Json.Decode.Decoder Float
+decodeClickXPosition =
+    let
+        totalOffset (Element { offsetLeft, offsetParent }) =
+            case offsetParent of
+                Nothing ->
+                    offsetLeft
+                Just element ->
+                    offsetLeft + (totalOffset element)
+    in
+        Json.Decode.object2 (/)
+            (Json.Decode.object2 (-)
+                (Json.Decode.at [ "pageX" ] Json.Decode.float)
+                ((Json.Decode.at [ "target" ] decodeElement) |> Json.Decode.map totalOffset)
+            )
+            (Json.Decode.at [ "target", "offsetWidth" ] Json.Decode.float)
+            |> Json.Decode.map ((*) 100)
+
+
+type Element =
+    Element { offsetLeft: Float, offsetParent : Maybe Element }
+
+instanciateElement : Float -> (Maybe Element) -> Element
+instanciateElement offsetLeft offsetParent =
+    Element
+        { offsetLeft = offsetLeft
+        , offsetParent = offsetParent
+        }
+
+
+decodeElement : Json.Decode.Decoder Element
+decodeElement =
+    Json.Decode.succeed instanciateElement
+        |: ("offsetLeft" := Json.Decode.float)
+        |: ("offsetParent" := Json.Decode.Extra.maybeNull (Json.Decode.Extra.lazy (\_ -> decodeElement)))
 
 
 viewNavigation : (String -> msg) -> List NavigationItem -> List (Page a) -> Page a -> Maybe a -> Html msg
