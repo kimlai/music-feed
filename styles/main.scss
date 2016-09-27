@@ -248,6 +248,15 @@ body {
     }
     .resume-radio {
         cursor: pointer;
+        &:before {
+            background: url("/images/play.svg") no-repeat 0% center;
+            width: 18px;
+            height: 12px;
+            background-size: 12px 12px;
+            display: inline-block;
+            content: "";
+            opacity: 0.9;
+        }
     }
 }
 

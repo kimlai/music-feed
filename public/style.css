@@ -188,9 +188,8 @@ body {
       height: 400px;
       float: right; }
   .radio-track .track-info {
-    padding: 36px;
+    padding: 36px 0px 36px 36px;
     width: 50%;
-    max-width: 600px;
     line-height: 42px; }
   .radio-track .artist {
     font-size: 24px;
@@ -203,6 +202,14 @@ body {
     padding-bottom: 24px; }
   .radio-track .resume-radio {
     cursor: pointer; }
+    .radio-track .resume-radio:before {
+      background: url("/images/play.svg") no-repeat 0% center;
+      width: 18px;
+      height: 12px;
+      background-size: 12px 12px;
+      display: inline-block;
+      content: "";
+      opacity: 0.9; }
 
 #youtube-player {
   position: absolute;
