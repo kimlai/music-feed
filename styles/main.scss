@@ -279,8 +279,8 @@ body {
         opacity: 0.5;
     }
     &.selected {
-        background: #d7d7d7;
-        border: 9px solid #d7d7d7;
+        background: rgb(240, 240, 240);
+        border: 9px solid rgb(240, 240, 240);
     }
     .cover {
         cursor: pointer;

@@ -226,8 +226,8 @@ body {
   .latest-track.error {
     opacity: 0.5; }
   .latest-track.selected {
-    background: #d7d7d7;
-    border: 9px solid #d7d7d7; }
+    background: #f0f0f0;
+    border: 9px solid #f0f0f0; }
   .latest-track .cover {
     cursor: pointer;
     width: 200px;
