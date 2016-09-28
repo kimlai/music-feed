@@ -8,6 +8,7 @@
         <script>try{Typekit.load({ async: false });}catch(e){}</script>
         <script src="/soundcloud.js"></script>
         <script src="/youtube.js"></script>
+        <script src="/initializePlayer.js"></script>
         <script src="/elm-client.js"></script>
         <script src="https://code.ospry.io/v1/ospry.js"></script>
     </head>
@@ -26,31 +27,8 @@
             function onYouTubeIframeAPIReady() {
                 var soundcloudClientId = '<%=client_id%>';
                 var app = Elm.Feed.Main.fullscreen(soundcloudClientId);
-                var soundcloud = new Soundcloud(soundcloudClientId, app);
-                var youtube = new Youtube(app);
 
-                app.ports.playSoundcloudTrack.subscribe(function(track) {
-                    youtube.pause();
-                    soundcloud.play(track);
-                });
-
-                app.ports.changeSoundcloudCurrentTime.subscribe(function(amount) {
-                    soundcloud.seek(amount);
-                });
-
-                app.ports.changeYoutubeCurrentTime.subscribe(function(amount) {
-                    youtube.seek(amount);
-                });
-
-                app.ports.pause.subscribe(function(trackId) {
-                    soundcloud.pause();
-                    youtube.pause();
-                });
-
-                app.ports.playYoutubeTrack.subscribe(function(track) {
-                    soundcloud.pause();
-                    youtube.play(track);
-                });
+                app = initializePlayer(soundcloudClientId, app);
 
                 app.ports.scroll.subscribe(function(offset) {
                     window.scrollBy(0, offset);

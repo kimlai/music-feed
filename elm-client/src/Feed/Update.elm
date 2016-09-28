@@ -60,7 +60,7 @@ type Msg
     | PublishYoutubeTrack Track
     | PublishYoutubeTrackFailure Http.Error
     | PublishYoutubeTrackSuccess Track
-    | SeekTo
+    | SeekTo Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -206,8 +206,10 @@ update message model =
         ChangePage url ->
             ( model, Navigation.newUrl url )
 
-        SeekTo ->
-            ( model, Cmd.none )
+        SeekTo positionInPercentage ->
+            ( model
+            , PlayerEngine.seekToPercentage (Model.currentTrack model) positionInPercentage
+            )
 
         FastForward ->
             ( model
