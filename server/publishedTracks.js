@@ -7,7 +7,10 @@ module.exports = function fetchPublishedTracks(soundcloudUserId, offset) {
     offset = offset || 0;
     offset = parseInt(offset, 10);
     return knex.select('soundcloudTrackId', 'track', 'savedAt')
-        .where({soundcloudUserId: soundcloudUserId})
+        .where({
+            soundcloudUserId: soundcloudUserId,
+            dead: false
+        })
         .orderBy('savedAt', 'DESC')
         .offset(offset)
         .limit(20)
