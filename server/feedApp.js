@@ -181,41 +181,6 @@ function *publishTrack() {
     this.body = "OK";
 }
 
-function *publishTrack() {
-    var token = this.state.token;
-    var soundcloudUserId = this.state.user.id;
-    var soundcloudTrackId = this.request.body.soundcloudTrackId;
-    yield Promise.all([
-        soundcloud.track(soundcloudTrackId)
-        .then(function (trackInfo) {
-            return knex.insert({
-                soundcloudUserId: soundcloudUserId,
-                soundcloudTrackId: soundcloudTrackId,
-                track: {
-                    source: trackInfo.permalink_url,
-                    artist: trackInfo.user.username,
-                    title: trackInfo.title,
-                    cover: trackInfo.artwork_url,
-                    created_at: trackInfo.created_at,
-                    soundcloud: {
-                        id: trackInfo.id,
-                        stream_url: trackInfo.stream_url
-                    }
-                },
-                savedAt: new Date(),
-            }).into('published_tracks');
-        }),
-        knex.del()
-            .where({
-                soundcloudUserId: soundcloudUserId,
-                soundcloudTrackId: soundcloudTrackId,
-            })
-            .from('saved_tracks')
-    ]);
-    this.status = 201;
-    this.body = "OK";
-}
-
 function *publishCustomTrack() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;

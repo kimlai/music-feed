@@ -105,3 +105,23 @@ publishTrackBody track =
             |> Json.Encode.object
             |> Json.Encode.encode 0
             |> Http.string
+
+
+reportDeadTrack : TrackId -> Task Http.Error String
+reportDeadTrack trackId =
+    Http.send
+        Http.defaultSettings
+        { verb = "POST"
+        , headers = [ ( "Content-Type", "application/json" ) ]
+        , url = "/report-dead-track"
+        , body = (reportDeadTrackBody trackId)
+        }
+        |> Http.fromJson (Json.Decode.succeed "ok")
+
+
+reportDeadTrackBody : TrackId -> Http.Body
+reportDeadTrackBody trackId =
+    [ ( "trackId", Json.Encode.string trackId ) ]
+    |> Json.Encode.object
+    |> Json.Encode.encode 0
+    |> Http.string

@@ -39,6 +39,8 @@ type Msg
     | FetchMore PlaylistId
     | FetchFail PlaylistId Http.Error
     | FetchSuccess PlaylistId ( List Track, String )
+    | ReportDeadTrackFail Http.Error
+    | ReportDeadTrackSuccess
     | ResumeRadio
     | SeekTo Float
 
@@ -142,18 +144,24 @@ update message model =
         TrackError trackId ->
             let
                 newModel =
-                    { model
-                        | tracks =
-                            Dict.update
-                                trackId
-                                (Maybe.map (\track -> { track | error = True }))
-                                model.tracks
+                    { model | tracks =
+                        Dict.update
+                            trackId
+                            (Maybe.map (\track -> { track | error = True }))
+                            model.tracks
                     }
+
 
                 ( newModel', command ) =
                     update Next newModel
             in
-                ( newModel', command )
+                newModel' ! [ command, reportDeadTrack trackId ]
+
+        ReportDeadTrackFail error ->
+            ( model, Cmd.none)
+
+        ReportDeadTrackSuccess ->
+            ( model, Cmd.none)
 
         TogglePlayback ->
             if model.playing then
@@ -263,3 +271,9 @@ fetchMore : Model.Playlist -> Cmd Msg
 fetchMore playlist =
     Api.fetchPlaylist playlist.nextLink Api.decodeTrack
         |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
+
+
+reportDeadTrack : TrackId -> Cmd Msg
+reportDeadTrack trackId =
+    Api.reportDeadTrack trackId
+        |> Task.perform ReportDeadTrackFail (\_ -> ReportDeadTrackSuccess)

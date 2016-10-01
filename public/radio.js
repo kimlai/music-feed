@@ -9869,6 +9869,38 @@ var _user$project$Model$Soundcloud = function (a) {
 	return {ctor: 'Soundcloud', _0: a};
 };
 
+var _user$project$Api$reportDeadTrackBody = function (trackId) {
+	return _evancz$elm_http$Http$string(
+		A2(
+			_elm_lang$core$Json_Encode$encode,
+			0,
+			_elm_lang$core$Json_Encode$object(
+				_elm_lang$core$Native_List.fromArray(
+					[
+						{
+						ctor: '_Tuple2',
+						_0: 'trackId',
+						_1: _elm_lang$core$Json_Encode$string(trackId)
+					}
+					]))));
+};
+var _user$project$Api$reportDeadTrack = function (trackId) {
+	return A2(
+		_evancz$elm_http$Http$fromJson,
+		_elm_lang$core$Json_Decode$succeed('ok'),
+		A2(
+			_evancz$elm_http$Http$send,
+			_evancz$elm_http$Http$defaultSettings,
+			{
+				verb: 'POST',
+				headers: _elm_lang$core$Native_List.fromArray(
+					[
+						{ctor: '_Tuple2', _0: 'Content-Type', _1: 'application/json'}
+					]),
+				url: '/report-dead-track',
+				body: _user$project$Api$reportDeadTrackBody(trackId)
+			}));
+};
 var _user$project$Api$publishTrackBody = function (track) {
 	var streamInfo = function () {
 		var _p0 = track.streamingInfo;
@@ -10502,6 +10534,19 @@ var _user$project$Radio_Update$SeekTo = function (a) {
 	return {ctor: 'SeekTo', _0: a};
 };
 var _user$project$Radio_Update$ResumeRadio = {ctor: 'ResumeRadio'};
+var _user$project$Radio_Update$ReportDeadTrackSuccess = {ctor: 'ReportDeadTrackSuccess'};
+var _user$project$Radio_Update$ReportDeadTrackFail = function (a) {
+	return {ctor: 'ReportDeadTrackFail', _0: a};
+};
+var _user$project$Radio_Update$reportDeadTrack = function (trackId) {
+	return A3(
+		_elm_lang$core$Task$perform,
+		_user$project$Radio_Update$ReportDeadTrackFail,
+		function (_p0) {
+			return _user$project$Radio_Update$ReportDeadTrackSuccess;
+		},
+		_user$project$Api$reportDeadTrack(trackId));
+};
 var _user$project$Radio_Update$FetchSuccess = F2(
 	function (a, b) {
 		return {ctor: 'FetchSuccess', _0: a, _1: b};
@@ -10557,11 +10602,11 @@ var _user$project$Radio_Update$update = F2(
 	function (message, model) {
 		update:
 		while (true) {
-			var _p0 = message;
-			switch (_p0.ctor) {
+			var _p1 = message;
+			switch (_p1.ctor) {
 				case 'FetchSuccess':
-					var _p2 = _p0._1._0;
-					var _p1 = _p0._0;
+					var _p3 = _p1._1._0;
+					var _p2 = _p1._0;
 					var updatedTracks = A2(
 						_elm_lang$core$Dict$union,
 						model.tracks,
@@ -10571,11 +10616,11 @@ var _user$project$Radio_Update$update = F2(
 								function (track) {
 									return {ctor: '_Tuple2', _0: track.id, _1: track};
 								},
-								_p2)));
+								_p3)));
 					var updatePlaylist = function (playlist) {
-						return _elm_lang$core$Native_Utils.eq(playlist.id, _p1) ? _elm_lang$core$Native_Utils.update(
+						return _elm_lang$core$Native_Utils.eq(playlist.id, _p2) ? _elm_lang$core$Native_Utils.update(
 							playlist,
-							{nextLink: _p0._1._1, loading: false}) : playlist;
+							{nextLink: _p1._1._1, loading: false}) : playlist;
 					};
 					var updatedPlaylists = A2(_elm_lang$core$List$map, updatePlaylist, model.playlists);
 					return {
@@ -10587,13 +10632,13 @@ var _user$project$Radio_Update$update = F2(
 								tracks: updatedTracks,
 								player: A3(
 									_user$project$Player$appendTracksToPlaylist,
-									_p1,
+									_p2,
 									A2(
 										_elm_lang$core$List$map,
 										function (_) {
 											return _.id;
 										},
-										_p2),
+										_p3),
 									model.player)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
@@ -10601,7 +10646,7 @@ var _user$project$Radio_Update$update = F2(
 				case 'FetchFail':
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				case 'PlayFromPlaylist':
-					var player = A3(_user$project$Player$select, _p0._0, _p0._1, model.player);
+					var player = A3(_user$project$Player$select, _p1._0, _p1._1, model.player);
 					var msg = _elm_lang$core$Native_Utils.eq(
 						_user$project$Player$currentTrack(player),
 						_user$project$Player$currentTrack(model.player)) ? _user$project$Radio_Update$TogglePlayback : _user$project$Radio_Update$Play;
@@ -10622,18 +10667,18 @@ var _user$project$Radio_Update$update = F2(
 									_user$project$Player$appendTracksToPlaylist,
 									_user$project$Radio_Model$CustomQueue,
 									_elm_lang$core$Native_List.fromArray(
-										[_p0._0]),
+										[_p1._0]),
 									model.player)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				case 'FetchMore':
-					var _p3 = _p0._0;
+					var _p4 = _p1._0;
 					var fetchMoreHelp = function (playlist) {
-						return _elm_lang$core$Native_Utils.eq(playlist.id, _p3) ? _user$project$Radio_Update$fetchMore(playlist) : _elm_lang$core$Platform_Cmd$none;
+						return _elm_lang$core$Native_Utils.eq(playlist.id, _p4) ? _user$project$Radio_Update$fetchMore(playlist) : _elm_lang$core$Platform_Cmd$none;
 					};
 					var updatePlaylist = function (playlist) {
-						return _elm_lang$core$Native_Utils.eq(playlist.id, _p3) ? _elm_lang$core$Native_Utils.update(
+						return _elm_lang$core$Native_Utils.eq(playlist.id, _p4) ? _elm_lang$core$Native_Utils.update(
 							playlist,
 							{loading: true}) : playlist;
 					};
@@ -10652,13 +10697,13 @@ var _user$project$Radio_Update$update = F2(
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								currentTime: _elm_lang$core$Maybe$Just(_p0._0)
+								currentTime: _elm_lang$core$Maybe$Just(_p1._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				case 'Play':
-					var _p4 = _user$project$Radio_Model$currentTrack(model);
-					if (_p4.ctor === 'Nothing') {
+					var _p5 = _user$project$Radio_Model$currentTrack(model);
+					if (_p5.ctor === 'Nothing') {
 						return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 					} else {
 						return {
@@ -10666,7 +10711,7 @@ var _user$project$Radio_Update$update = F2(
 							_0: _elm_lang$core$Native_Utils.update(
 								model,
 								{playing: true}),
-							_1: _user$project$PlayerEngine$play(_p4._0)
+							_1: _user$project$PlayerEngine$play(_p5._0)
 						};
 					}
 				case 'Pause':
@@ -10690,12 +10735,13 @@ var _user$project$Radio_Update$update = F2(
 					model = _v5;
 					continue update;
 				case 'TrackError':
+					var _p7 = _p1._0;
 					var newModel = _elm_lang$core$Native_Utils.update(
 						model,
 						{
 							tracks: A3(
 								_elm_lang$core$Dict$update,
-								_p0._0,
+								_p7,
 								_elm_lang$core$Maybe$map(
 									function (track) {
 										return _elm_lang$core$Native_Utils.update(
@@ -10704,10 +10750,21 @@ var _user$project$Radio_Update$update = F2(
 									}),
 								model.tracks)
 						});
-					var _p5 = A2(_user$project$Radio_Update$update, _user$project$Radio_Update$Next, newModel);
-					var newModel$ = _p5._0;
-					var command = _p5._1;
-					return {ctor: '_Tuple2', _0: newModel$, _1: command};
+					var _p6 = A2(_user$project$Radio_Update$update, _user$project$Radio_Update$Next, newModel);
+					var newModel$ = _p6._0;
+					var command = _p6._1;
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						newModel$,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								command,
+								_user$project$Radio_Update$reportDeadTrack(_p7)
+							]));
+				case 'ReportDeadTrackFail':
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				case 'ReportDeadTrackSuccess':
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				case 'TogglePlayback':
 					if (model.playing) {
 						var _v6 = _user$project$Radio_Update$Pause,
@@ -10739,9 +10796,9 @@ var _user$project$Radio_Update$update = F2(
 							model,
 							{
 								playing: true,
-								player: A3(_user$project$Player$select, _user$project$Radio_Model$CustomQueue, _p0._0, model.player)
+								player: A3(_user$project$Player$select, _user$project$Radio_Model$CustomQueue, _p1._0, model.player)
 							}),
-						_1: _user$project$PlayerEngine$play(_p0._1)
+						_1: _user$project$PlayerEngine$play(_p1._1)
 					};
 				case 'TrackProgress':
 					return {
@@ -10751,12 +10808,12 @@ var _user$project$Radio_Update$update = F2(
 							{
 								tracks: A3(
 									_elm_lang$core$Dict$update,
-									_p0._0._0,
+									_p1._0._0,
 									_elm_lang$core$Maybe$map(
 										function (track) {
 											return _elm_lang$core$Native_Utils.update(
 												track,
-												{progress: _p0._0._1, currentTime: _p0._0._2});
+												{progress: _p1._0._1, currentTime: _p1._0._2});
 										}),
 									model.tracks)
 							}),
@@ -10766,7 +10823,7 @@ var _user$project$Radio_Update$update = F2(
 					return {
 						ctor: '_Tuple2',
 						_0: model,
-						_1: _elm_lang$navigation$Navigation$newUrl(_p0._0)
+						_1: _elm_lang$navigation$Navigation$newUrl(_p1._0)
 					};
 				case 'SeekTo':
 					return {
@@ -10775,7 +10832,7 @@ var _user$project$Radio_Update$update = F2(
 						_1: A2(
 							_user$project$PlayerEngine$seekToPercentage,
 							_user$project$Radio_Model$currentTrack(model),
-							_p0._0)
+							_p1._0)
 					};
 				case 'FastForward':
 					return {
@@ -10796,8 +10853,8 @@ var _user$project$Radio_Update$update = F2(
 							-10)
 					};
 				default:
-					var _p6 = _elm_lang$core$Char$fromCode(_p0._0);
-					switch (_p6.valueOf()) {
+					var _p8 = _elm_lang$core$Char$fromCode(_p1._0);
+					switch (_p8.valueOf()) {
 						case 'n':
 							var _v13 = _user$project$Radio_Update$Next,
 								_v14 = model;
@@ -10823,9 +10880,9 @@ var _user$project$Radio_Update$update = F2(
 							model = _v20;
 							continue update;
 						case 'm':
-							var _p7 = model.currentPage.playlist;
-							if (_p7.ctor === 'Just') {
-								var _v22 = _user$project$Radio_Update$FetchMore(_p7._0),
+							var _p9 = model.currentPage.playlist;
+							if (_p9.ctor === 'Just') {
+								var _v22 = _user$project$Radio_Update$FetchMore(_p9._0),
 									_v23 = model;
 								message = _v22;
 								model = _v23;
