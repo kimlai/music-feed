@@ -180,7 +180,7 @@ body {
 .radio-track {
   display: flex;
   justify-content: center;
-  margin-top: 120px; }
+  margin-top: 9.5%; }
   .radio-track .radio-cover {
     width: 50%; }
     .radio-track .radio-cover img {
