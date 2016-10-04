@@ -11195,6 +11195,20 @@ var _user$project$View$viewProgressBar = F2(
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[]))
+						])),
+					A2(
+					_elm_lang$html$Html$div,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$class('drag'),
+							A2(
+							_elm_lang$html$Html_Events$on,
+							'click',
+							A2(_elm_lang$core$Json_Decode$map, seekTo, _user$project$View$decodeClickXPosition))
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text('')
 						]))
 				]));
 	});

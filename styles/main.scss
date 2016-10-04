@@ -165,6 +165,7 @@ body {
 }
 
 .progress-bar {
+    position: relative;
     .outer {
         background: #e5e5e5;
         width: 100%;
@@ -175,6 +176,15 @@ body {
         background-color: #02779E;
         height: 100%;
     }
+    .drag {
+      width: 100%;
+      position: absolute;
+      height: 10px;
+      margin-top: -5px;
+      top: 0;
+      cursor: pointer;
+      z-index: 100;
+  }
 }
 
 .more-button {

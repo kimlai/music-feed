@@ -133,14 +133,24 @@ body {
     .playlist-container .track.error {
       opacity: 0.5; }
 
-.progress-bar .outer {
-  background: #e5e5e5;
-  width: 100%;
-  height: 5px;
-  cursor: pointer; }
-.progress-bar .inner {
-  background-color: #02779E;
-  height: 100%; }
+.progress-bar {
+  position: relative; }
+  .progress-bar .outer {
+    background: #e5e5e5;
+    width: 100%;
+    height: 5px;
+    cursor: pointer; }
+  .progress-bar .inner {
+    background-color: #02779E;
+    height: 100%; }
+  .progress-bar .drag {
+    width: 100%;
+    position: absolute;
+    height: 10px;
+    margin-top: -5px;
+    top: 0;
+    cursor: pointer;
+    z-index: 100; }
 
 .more-button {
   text-align: center;

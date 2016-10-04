@@ -86,6 +86,11 @@ viewProgressBar seekTo track =
                     ]
                     []
                 ]
+            , div
+                [ class "drag"
+                , on "click" (decodeClickXPosition |> Json.Decode.map seekTo)
+                ]
+                [ text "" ]
             ]
 
 
