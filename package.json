@@ -37,8 +37,9 @@
   "scripts": {
     "test": "npm run test:client && npm run test:server",
     "test:client": "elm test elm-client/tests/Main.elm",
-    "test:server": "mocha --harmony server/tests/end-to-end/",
+    "test:server": "NODE_ENV=test mocha --harmony server/tests/end-to-end/",
     "start": "node --harmony server.js",
+    "setup": "knex migrate:latest",
     "postinstall": "npm run build:uglifyjs && npm run build:postcss",
     "build:uglifyjs": "uglifyjs public/radio.js --compress --mangle --output public/radio.js",
     "build:postcss": "postcss --use autoprefixer -o public/style.css public/style.css"

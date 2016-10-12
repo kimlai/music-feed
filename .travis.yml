@@ -11,5 +11,23 @@ install:
     - npm install -g elm elm-test
     - npm install
 
+env:
+  - CXX=g++-4.8 DATABASE_URL="postgres://postgres:@localhost:5432/travis_ci_test" JWT_SECRET=jwtsecret
+
+addons:
+    postgresql: "9.4"
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - g++-4.8
+
+services:
+    - postgresql
+
+before_script:
+    - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
+    - npm run setup
+
 script:
     - npm test
