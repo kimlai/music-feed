@@ -98,8 +98,8 @@ subscriptions model =
 
 playlists : List Radio.Model.Playlist
 playlists =
-    [ Radio.Model.emptyPlaylist Radio "/playlist" "fake-url"
-    , Radio.Model.emptyPlaylist LatestTracks "/latest-tracks" "fake-url"
+    [ Radio.Model.emptyPlaylist Radio "/api/playlist" "fake-url"
+    , Radio.Model.emptyPlaylist LatestTracks "/api/latest-tracks" "fake-url"
     ]
 
 

@@ -11906,8 +11906,8 @@ var _user$project$Radio_Main$pages = _elm_lang$core$Native_List.fromArray(
 	]);
 var _user$project$Radio_Main$playlists = _elm_lang$core$Native_List.fromArray(
 	[
-		A3(_user$project$Radio_Model$emptyPlaylist, _user$project$Radio_Model$Radio, '/playlist', 'fake-url'),
-		A3(_user$project$Radio_Model$emptyPlaylist, _user$project$Radio_Model$LatestTracks, '/latest-tracks', 'fake-url')
+		A3(_user$project$Radio_Model$emptyPlaylist, _user$project$Radio_Model$Radio, '/api/playlist', 'fake-url'),
+		A3(_user$project$Radio_Model$emptyPlaylist, _user$project$Radio_Model$LatestTracks, '/api/latest-tracks', 'fake-url')
 	]);
 var _user$project$Radio_Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
