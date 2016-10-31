@@ -61,6 +61,8 @@ init radioPlaylistJsonString page =
             , player = Player.initialize [ Radio, LatestTracks, CustomQueue ]
             , pages = pages
             , navigation = navigation
+            , signup = { username = "", email = "", password = "" }
+            , token = Nothing
             }
         decodedRadioPayload =
             Json.Decode.decodeString (Api.decodePlaylist Api.decodeTrack) radioPlaylistJsonString
@@ -107,6 +109,7 @@ pages : List (Page Radio.Model.PlaylistId)
 pages =
     [ Model.Page "/" (Just Radio)
     , Model.Page "/latest" (Just LatestTracks)
+    , Model.Page "/sign-up" Nothing
     ]
 
 

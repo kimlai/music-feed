@@ -7,6 +7,7 @@ import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Model exposing (Track, StreamingInfo(..), TrackId)
+import Radio.Model exposing (SignupModel, Token)
 import Task exposing (Task)
 
 
@@ -122,6 +123,51 @@ reportDeadTrack trackId =
 reportDeadTrackBody : TrackId -> Http.Body
 reportDeadTrackBody trackId =
     [ ( "trackId", Json.Encode.string trackId ) ]
+    |> Json.Encode.object
+    |> Json.Encode.encode 0
+    |> Http.string
+
+
+signup : SignupModel -> Task Http.Error String
+signup signupModel =
+    Http.send
+        Http.defaultSettings
+        { verb = "POST"
+        , headers = [ ( "Content-Type", "application/json" ) ]
+        , url = "/api/users"
+        , body = (signupBody signupModel)
+        }
+        |> Http.fromJson (Json.Decode.succeed "ok")
+
+
+signupBody : SignupModel -> Http.Body
+signupBody signupModel =
+    [ ( "username", Json.Encode.string signupModel.username )
+    , ( "email", Json.Encode.string signupModel.email )
+    , ( "password", Json.Encode.string signupModel.password )
+    ]
+    |> Json.Encode.object
+    |> Json.Encode.encode 0
+    |> Http.string
+
+
+login : String -> String -> Task Http.Error String
+login usernameOrEmail password =
+    Http.send
+        Http.defaultSettings
+        { verb = "POST"
+        , headers = [ ( "Content-Type", "application/json" ) ]
+        , url = "/api/login"
+        , body = (loginBody usernameOrEmail password)
+        }
+        |> Http.fromJson (Json.Decode.at ["token"] Json.Decode.string)
+
+
+loginBody : String -> String -> Http.Body
+loginBody usernameOrEmail password =
+    [ ( "usernameOrEmail", Json.Encode.string usernameOrEmail )
+    , ( "password", Json.Encode.string password )
+    ]
     |> Json.Encode.object
     |> Json.Encode.encode 0
     |> Http.string

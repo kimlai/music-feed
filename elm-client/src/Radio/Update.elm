@@ -14,7 +14,7 @@ import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
 import PlayerEngine
-import Radio.Model as Model exposing (Model, PlaylistId(..))
+import Radio.Model as Model exposing (Model, PlaylistId(..), Token)
 import Radio.Ports as Ports
 import Task exposing (Task)
 import Time exposing (Time)
@@ -43,6 +43,14 @@ type Msg
     | ReportDeadTrackSuccess
     | ResumeRadio
     | SeekTo Float
+    | SignupUpdateUsername String
+    | SignupUpdateEmail String
+    | SignupUpdatePassword String
+    | SignupSubmit
+    | SignupFail Http.Error
+    | SignupSuccess String
+    | LoginFail Http.Error
+    | LoginSuccess Token
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -211,6 +219,61 @@ update message model =
             , PlayerEngine.changeCurrentTime (Model.currentTrack model) -10
             )
 
+        SignupUpdateUsername username ->
+            let
+                signup =
+                    model.signup
+                updatedSignup =
+                    { signup | username = username }
+            in
+                ( { model | signup = updatedSignup }
+                , Cmd.none
+                )
+
+        SignupUpdateEmail email ->
+            let
+                signup =
+                    model.signup
+                updatedSignup =
+                    { signup | email = email }
+            in
+                ( { model | signup = updatedSignup }
+                , Cmd.none
+                )
+
+        SignupUpdatePassword password ->
+            let
+                signup =
+                    model.signup
+                updatedSignup =
+                    { signup | password = password }
+            in
+                ( { model | signup = updatedSignup }
+                , Cmd.none
+                )
+
+        SignupSubmit ->
+            ( model
+            , signup model.signup
+            )
+
+        SignupFail error ->
+            let _ = Debug.log "error" error in
+            ( model, Cmd.none )
+
+        SignupSuccess response ->
+            ( model
+            , login model.signup.username model.signup.password
+            )
+
+        LoginFail error ->
+            ( model, Cmd.none )
+
+        LoginSuccess token ->
+            ( { model | token = Just token }
+            , Ports.storeToken token
+            )
+
         KeyPressed keyCode ->
             case (Char.fromCode keyCode) of
                 'n' ->
@@ -277,3 +340,15 @@ reportDeadTrack : TrackId -> Cmd Msg
 reportDeadTrack trackId =
     Api.reportDeadTrack trackId
         |> Task.perform ReportDeadTrackFail (\_ -> ReportDeadTrackSuccess)
+
+
+signup : Model.SignupModel -> Cmd Msg
+signup signupModel =
+    Api.signup signupModel
+        |> Task.perform SignupFail SignupSuccess
+
+
+login : String -> String -> Cmd Msg
+login usernameOrEmail password =
+    Api.login usernameOrEmail password
+        |> Task.perform LoginFail LoginSuccess

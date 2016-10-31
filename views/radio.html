@@ -31,6 +31,10 @@
                 app.ports.scroll.subscribe(function(offset) {
                     window.scrollBy(0, offset);
                 });
+
+                app.ports.storeToken.subscribe(function(token) {
+                    window.localStorage.setItem('token', token);
+                });
             }
         </script>
         <% if (includeTracking) { %>
