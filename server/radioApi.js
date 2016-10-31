@@ -74,6 +74,7 @@ function *signup() {
 
     yield knex.insert({
         uuid: uuid(),
+        username: submitted.username,
         email: submitted.email,
         password: hash,
     }).into('users'),
@@ -88,7 +89,8 @@ function *login() {
 
     var user = yield knex('users')
         .first('*')
-        .where('email', '=', submitted.email)
+        .where('email', '=', submitted.usernameOrEmail)
+        .orWhere('username', '=', submitted.usernameOrEmail)
 
     this.assert(user, 400, 'non registered email');
 
@@ -96,7 +98,7 @@ function *login() {
 
     this.assert(match, 400, 'invalid password');
 
-    var token = jwt.sign({ email: user.email, uuid: user.uuid }, process.env.JWT_SECRET);
+    var token = jwt.sign({ username: user.username, email: user.email, uuid: user.uuid }, process.env.JWT_SECRET);
 
     this.status = 200;
     this.body = { token: token };
