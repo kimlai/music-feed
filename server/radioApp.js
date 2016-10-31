@@ -17,6 +17,7 @@ app.use(function *redirectNotFoundToIndex(next) {
     var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
     var playlist = yield fetchRadioPlaylist(soundcloudUserId);
     yield this.render('radio', {
+        includeTracking: process.env.NODE_ENV === 'production',
         client_id: process.env.SOUNDCLOUD_CLIENT_ID,
         playlist: JSON.stringify(playlist)
     });
