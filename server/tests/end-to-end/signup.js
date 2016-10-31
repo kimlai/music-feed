@@ -45,7 +45,7 @@ describe('POST /login', function () {
             .expect(200)
             .then(function (res) {
                 return request(app)
-                    .get('/protected')
+                    .get('/me')
                     .set('Authorization', 'Bearer ' + res.body.token)
                     .expect(200);
             });
@@ -58,9 +58,27 @@ describe('POST /login', function () {
             .expect(200)
             .then(function (res) {
                 return request(app)
-                    .get('/protected')
+                    .get('/me')
                     .set('Authorization', 'Bearer ' + res.body.token)
                     .expect(200);
+            });
+    });
+
+    it('stores information about the user in a token', function () {
+        return request(app)
+            .post('/login')
+            .send({ usernameOrEmail: 'foo', password: 'plain' })
+            .expect(200)
+            .then(function (res) {
+                return request(app)
+                    .get('/me')
+                    .set('Authorization', 'Bearer ' + res.body.token)
+                    .expect(200)
+                    .then(function (response) {
+                        assert.equal('foo', response.body.username);
+                        assert.equal('me@example.org', response.body.email);
+                        assert.ok(response.body.uuid);
+                    });
             });
     });
 

@@ -63,6 +63,7 @@ init { token, radioPlaylistJsonString } page =
             , navigation = navigation
             , signup = { username = "", email = "", password = "" }
             , token = token
+            , currentUser = Nothing
             }
         decodedRadioPayload =
             Json.Decode.decodeString (Api.decodePlaylist Api.decodeTrack) radioPlaylistJsonString
@@ -76,12 +77,20 @@ init { token, radioPlaylistJsonString } page =
                 ( model', command )
         ( model''', command'' ) =
             Update.update (FetchMore LatestTracks) model''
+        whoAmICmd =
+            case token of
+                Nothing ->
+                    Cmd.none
+                Just token ->
+                    Update.whoAmI token
+
     in
         model''' !
             [ command
             , command'
             , command''
             , Time.now |> Task.perform (\_ -> UpdateCurrentTimeFail) UpdateCurrentTime
+            , whoAmICmd
             ]
 
 

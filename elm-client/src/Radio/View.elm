@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, classList, href, src, style, target)
 import Json.Decode
 import Html.Events exposing (onClick, onWithOptions, onInput)
 import Model exposing (Track, TrackId, StreamingInfo(..))
-import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..))
+import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), User)
 import Regex
 import Player
 import Time exposing (Time)
@@ -27,6 +27,7 @@ view model =
             model.pages
             model.currentPage
             (Player.currentPlaylist model.player)
+        , viewUser model.currentUser
         , div
             []
             [ case model.currentPage.url of
@@ -250,3 +251,14 @@ viewSignup signupModel =
             [ onClick SignupSubmit ]
             [ text "Submit" ]
         ]
+
+
+viewUser : Maybe User -> Html Msg
+viewUser user =
+    case user of
+        Nothing ->
+            text ""
+        Just user ->
+            div
+                [ class "current-user" ]
+                [ text user.username ]

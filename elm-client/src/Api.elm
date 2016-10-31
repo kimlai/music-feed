@@ -7,7 +7,7 @@ import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Model exposing (Track, StreamingInfo(..), TrackId)
-import Radio.Model exposing (SignupModel, Token)
+import Radio.Model exposing (SignupModel, Token, User)
 import Task exposing (Task)
 
 
@@ -171,3 +171,25 @@ loginBody usernameOrEmail password =
     |> Json.Encode.object
     |> Json.Encode.encode 0
     |> Http.string
+
+
+me : String -> Task Http.Error User
+me token =
+    Http.send
+        Http.defaultSettings
+        { verb = "GET"
+        , headers =
+            [ ( "Content-Type", "application/json" )
+            , ( "Authorization", "Bearer " ++ token )
+            ]
+        , url = "/api/me"
+        , body = Http.empty
+        }
+        |> Http.fromJson decodeUser
+
+
+decodeUser : Json.Decode.Decoder User
+decodeUser =
+    Json.Decode.succeed User
+        |: ("username" := Json.Decode.string)
+        |: ("email" := Json.Decode.string)

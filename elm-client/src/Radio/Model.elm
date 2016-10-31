@@ -20,6 +20,7 @@ type alias Model =
     , navigation : List NavigationItem
     , signup : SignupModel
     , token : Maybe Token
+    , currentUser : Maybe User
     }
 
 
@@ -31,6 +32,12 @@ type alias SignupModel =
 
 
 type alias Token = String
+
+
+type alias User =
+    { username : String
+    , email : String
+    }
 
 
 type alias Playlist =

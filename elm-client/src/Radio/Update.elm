@@ -14,7 +14,7 @@ import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
 import PlayerEngine
-import Radio.Model as Model exposing (Model, PlaylistId(..), Token)
+import Radio.Model as Model exposing (Model, PlaylistId(..), Token, User)
 import Radio.Ports as Ports
 import Task exposing (Task)
 import Time exposing (Time)
@@ -51,6 +51,8 @@ type Msg
     | SignupSuccess String
     | LoginFail Http.Error
     | LoginSuccess Token
+    | WhoAmIFail Http.Error
+    | WhoAmISuccess User
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -270,8 +272,18 @@ update message model =
             ( model, Cmd.none )
 
         LoginSuccess token ->
-            ( { model | token = Just token }
-            , Ports.storeToken token
+            { model | token = Just token }
+            !
+            [ Ports.storeToken token
+            , whoAmI token
+            ]
+
+        WhoAmIFail error ->
+            ( model, Cmd.none )
+
+        WhoAmISuccess user ->
+            ( { model | currentUser = Just user }
+            , Cmd.none
             )
 
         KeyPressed keyCode ->
@@ -352,3 +364,9 @@ login : String -> String -> Cmd Msg
 login usernameOrEmail password =
     Api.login usernameOrEmail password
         |> Task.perform LoginFail LoginSuccess
+
+
+whoAmI : Token -> Cmd Msg
+whoAmI token =
+    Api.me token
+        |> Task.perform WhoAmIFail WhoAmISuccess

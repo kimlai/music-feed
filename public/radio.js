@@ -10200,7 +10200,9 @@ var _user$project$Radio_Model$Model = function (a) {
 								return function (i) {
 									return function (j) {
 										return function (k) {
-											return {tracks: a, playlists: b, playing: c, currentPage: d, lastKeyPressed: e, currentTime: f, player: g, pages: h, navigation: i, signup: j, token: k};
+											return function (l) {
+												return {tracks: a, playlists: b, playing: c, currentPage: d, lastKeyPressed: e, currentTime: f, player: g, pages: h, navigation: i, signup: j, token: k, currentUser: l};
+											};
 										};
 									};
 								};
@@ -10216,6 +10218,10 @@ var _user$project$Radio_Model$SignupModel = F3(
 	function (a, b, c) {
 		return {username: a, email: b, password: c};
 	});
+var _user$project$Radio_Model$User = F2(
+	function (a, b) {
+		return {username: a, email: b};
+	});
 var _user$project$Radio_Model$Playlist = F4(
 	function (a, b, c, d) {
 		return {id: a, loading: b, nextLink: c, addTrackUrl: d};
@@ -10224,6 +10230,35 @@ var _user$project$Radio_Model$CustomQueue = {ctor: 'CustomQueue'};
 var _user$project$Radio_Model$LatestTracks = {ctor: 'LatestTracks'};
 var _user$project$Radio_Model$Radio = {ctor: 'Radio'};
 
+var _user$project$Api$decodeUser = A2(
+	_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+	A2(
+		_elm_community$elm_json_extra$Json_Decode_Extra_ops['|:'],
+		_elm_lang$core$Json_Decode$succeed(_user$project$Radio_Model$User),
+		A2(_elm_lang$core$Json_Decode_ops[':='], 'username', _elm_lang$core$Json_Decode$string)),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'email', _elm_lang$core$Json_Decode$string));
+var _user$project$Api$me = function (token) {
+	return A2(
+		_evancz$elm_http$Http$fromJson,
+		_user$project$Api$decodeUser,
+		A2(
+			_evancz$elm_http$Http$send,
+			_evancz$elm_http$Http$defaultSettings,
+			{
+				verb: 'GET',
+				headers: _elm_lang$core$Native_List.fromArray(
+					[
+						{ctor: '_Tuple2', _0: 'Content-Type', _1: 'application/json'},
+						{
+						ctor: '_Tuple2',
+						_0: 'Authorization',
+						_1: A2(_elm_lang$core$Basics_ops['++'], 'Bearer ', token)
+					}
+					]),
+				url: '/api/me',
+				body: _evancz$elm_http$Http$empty
+			}));
+};
 var _user$project$Api$loginBody = F2(
 	function (usernameOrEmail, password) {
 		return _evancz$elm_http$Http$string(
@@ -10643,6 +10678,19 @@ var _user$project$Radio_Ports$storeToken = _elm_lang$core$Native_Platform.outgoi
 		return v;
 	});
 
+var _user$project$Radio_Update$WhoAmISuccess = function (a) {
+	return {ctor: 'WhoAmISuccess', _0: a};
+};
+var _user$project$Radio_Update$WhoAmIFail = function (a) {
+	return {ctor: 'WhoAmIFail', _0: a};
+};
+var _user$project$Radio_Update$whoAmI = function (token) {
+	return A3(
+		_elm_lang$core$Task$perform,
+		_user$project$Radio_Update$WhoAmIFail,
+		_user$project$Radio_Update$WhoAmISuccess,
+		_user$project$Api$me(token));
+};
 var _user$project$Radio_Update$LoginSuccess = function (a) {
 	return {ctor: 'LoginSuccess', _0: a};
 };
@@ -11057,14 +11105,29 @@ var _user$project$Radio_Update$update = F2(
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				case 'LoginSuccess':
 					var _p9 = _p1._0;
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								token: _elm_lang$core$Maybe$Just(_p9)
+							}),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_user$project$Radio_Ports$storeToken(_p9),
+								_user$project$Radio_Update$whoAmI(_p9)
+							]));
+				case 'WhoAmIFail':
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				case 'WhoAmISuccess':
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								token: _elm_lang$core$Maybe$Just(_p9)
+								currentUser: _elm_lang$core$Maybe$Just(_p1._0)
 							}),
-						_1: _user$project$Radio_Ports$storeToken(_p9)
+						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				default:
 					var _p10 = _elm_lang$core$Char$fromCode(_p1._0);
@@ -11610,6 +11673,23 @@ var _user$project$View$viewGlobalPlayer = F5(
 		}
 	});
 
+var _user$project$Radio_View$viewUser = function (user) {
+	var _p0 = user;
+	if (_p0.ctor === 'Nothing') {
+		return _elm_lang$html$Html$text('');
+	} else {
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('current-user')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text(_p0._0.username)
+				]));
+	}
+};
 var _user$project$Radio_View$viewSignup = function (signupModel) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -11756,8 +11836,8 @@ var _user$project$Radio_View$viewTrackPlaceHolder = A2(
 var _user$project$Radio_View$viewTrack = F5(
 	function (currentTrackId, currentTime, playlistId, position, track) {
 		var source = function () {
-			var _p0 = track.streamingInfo;
-			if (_p0.ctor === 'Soundcloud') {
+			var _p1 = track.streamingInfo;
+			if (_p1.ctor === 'Soundcloud') {
 				return 'Soundcloud';
 			} else {
 				return 'Youtube';
@@ -11810,7 +11890,7 @@ var _user$project$Radio_View$viewTrack = F5(
 												_elm_lang$core$Regex$replace,
 												_elm_lang$core$Regex$All,
 												_elm_lang$core$Regex$regex('large'),
-												function (_p1) {
+												function (_p2) {
 													return 't200x200';
 												},
 												track.artwork_url))
@@ -11970,8 +12050,8 @@ var _user$project$Radio_View$viewCustomQueue = F2(
 	});
 var _user$project$Radio_View$viewRadioTrack = F2(
 	function (track, currentPlaylist) {
-		var _p2 = track;
-		if (_p2.ctor === 'Nothing') {
+		var _p3 = track;
+		if (_p3.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -11981,7 +12061,7 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 						_elm_lang$html$Html$text('...')
 					]));
 		} else {
-			var _p4 = _p2._0;
+			var _p5 = _p3._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -12008,10 +12088,10 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 											_elm_lang$core$Regex$replace,
 											_elm_lang$core$Regex$All,
 											_elm_lang$core$Regex$regex('large'),
-											function (_p3) {
+											function (_p4) {
 												return 't500x500';
 											},
-											_p4.artwork_url))
+											_p5.artwork_url))
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[]))
@@ -12040,7 +12120,7 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 											]),
 										_elm_lang$core$Native_List.fromArray(
 											[
-												_elm_lang$html$Html$text(_p4.title)
+												_elm_lang$html$Html$text(_p5.title)
 											])),
 										A2(
 										_elm_lang$html$Html$div,
@@ -12050,14 +12130,14 @@ var _user$project$Radio_View$viewRadioTrack = F2(
 											]),
 										_elm_lang$core$Native_List.fromArray(
 											[
-												_elm_lang$html$Html$text(_p4.artist)
+												_elm_lang$html$Html$text(_p5.artist)
 											])),
 										A2(
 										_elm_lang$html$Html$a,
 										_elm_lang$core$Native_List.fromArray(
 											[
 												_elm_lang$html$Html_Attributes$class('source'),
-												_elm_lang$html$Html_Attributes$href(_p4.sourceUrl),
+												_elm_lang$html$Html_Attributes$href(_p5.sourceUrl),
 												_elm_lang$html$Html_Attributes$target('_blank')
 											]),
 										_elm_lang$core$Native_List.fromArray(
@@ -12108,6 +12188,7 @@ var _user$project$Radio_View$view = function (model) {
 				model.pages,
 				model.currentPage,
 				_user$project$Player$currentPlaylist(model.player)),
+				_user$project$Radio_View$viewUser(model.currentUser),
 				A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -12115,8 +12196,8 @@ var _user$project$Radio_View$view = function (model) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						function () {
-						var _p5 = model.currentPage.url;
-						switch (_p5) {
+						var _p6 = model.currentPage.url;
+						switch (_p6) {
 							case '/':
 								var currentRadioTrack = A2(
 									_elm_lang$core$Maybe$andThen,
@@ -12130,7 +12211,7 @@ var _user$project$Radio_View$view = function (model) {
 								var latestTracksPlaylist = _elm_lang$core$List$head(
 									A2(
 										_elm_lang$core$List$filter,
-										function (_p6) {
+										function (_p7) {
 											return A2(
 												F2(
 													function (x, y) {
@@ -12139,17 +12220,17 @@ var _user$project$Radio_View$view = function (model) {
 												_user$project$Radio_Model$LatestTracks,
 												function (_) {
 													return _.id;
-												}(_p6));
+												}(_p7));
 										},
 										model.playlists));
-								var _p7 = latestTracksPlaylist;
-								if (_p7.ctor === 'Just') {
+								var _p8 = latestTracksPlaylist;
+								if (_p8.ctor === 'Just') {
 									return A5(
 										_user$project$Radio_View$viewLatestTracks,
 										_user$project$Player$currentTrack(model.player),
 										model.currentTime,
 										model.tracks,
-										_p7._0,
+										_p8._0,
 										A2(_user$project$Player$playlistContent, _user$project$Radio_Model$LatestTracks, model.player));
 								} else {
 									return A2(
@@ -12216,6 +12297,15 @@ var _user$project$Radio_Main$subscriptions = function (model) {
 var _user$project$Radio_Main$init = F2(
 	function (_p1, page) {
 		var _p2 = _p1;
+		var _p8 = _p2.token;
+		var whoAmICmd = function () {
+			var _p3 = _p8;
+			if (_p3.ctor === 'Nothing') {
+				return _elm_lang$core$Platform_Cmd$none;
+			} else {
+				return _user$project$Radio_Update$whoAmI(_p3._0);
+			}
+		}();
 		var decodedRadioPayload = A2(
 			_elm_lang$core$Result$withDefault,
 			{
@@ -12241,28 +12331,29 @@ var _user$project$Radio_Main$init = F2(
 			pages: _user$project$Radio_Main$pages,
 			navigation: _user$project$Radio_Main$navigation,
 			signup: {username: '', email: '', password: ''},
-			token: A2(_elm_lang$core$Debug$log, 'token', _p2.token)
+			token: _p8,
+			currentUser: _elm_lang$core$Maybe$Nothing
 		};
-		var _p3 = A2(
+		var _p4 = A2(
 			_user$project$Radio_Update$update,
 			A2(_user$project$Radio_Update$FetchSuccess, _user$project$Radio_Model$Radio, decodedRadioPayload),
 			model);
-		var model$ = _p3._0;
-		var command = _p3._1;
-		var _p4 = _elm_lang$core$Native_Utils.eq(
+		var model$ = _p4._0;
+		var command = _p4._1;
+		var _p5 = _elm_lang$core$Native_Utils.eq(
 			page.playlist,
 			_elm_lang$core$Maybe$Just(_user$project$Radio_Model$Radio)) ? A2(
 			_user$project$Radio_Update$update,
 			A2(_user$project$Radio_Update$PlayFromPlaylist, _user$project$Radio_Model$Radio, 0),
 			model$) : {ctor: '_Tuple2', _0: model$, _1: command};
-		var model$$ = _p4._0;
-		var command$ = _p4._1;
-		var _p5 = A2(
+		var model$$ = _p5._0;
+		var command$ = _p5._1;
+		var _p6 = A2(
 			_user$project$Radio_Update$update,
 			_user$project$Radio_Update$FetchMore(_user$project$Radio_Model$LatestTracks),
 			model$$);
-		var model$$$ = _p5._0;
-		var command$$ = _p5._1;
+		var model$$$ = _p6._0;
+		var command$$ = _p6._1;
 		return A2(
 			_elm_lang$core$Platform_Cmd_ops['!'],
 			model$$$,
@@ -12273,11 +12364,12 @@ var _user$project$Radio_Main$init = F2(
 					command$$,
 					A3(
 					_elm_lang$core$Task$perform,
-					function (_p6) {
+					function (_p7) {
 						return _user$project$Radio_Update$UpdateCurrentTimeFail;
 					},
 					_user$project$Radio_Update$UpdateCurrentTime,
-					_elm_lang$core$Time$now)
+					_elm_lang$core$Time$now),
+					whoAmICmd
 				]));
 	});
 var _user$project$Radio_Main$urlUpdate = F2(
@@ -12291,8 +12383,8 @@ var _user$project$Radio_Main$urlUpdate = F2(
 		};
 	});
 var _user$project$Radio_Main$urlParser = _elm_lang$navigation$Navigation$makeParser(
-	function (_p7) {
-		var _p8 = _p7;
+	function (_p9) {
+		var _p10 = _p9;
 		return A2(
 			_elm_lang$core$Maybe$withDefault,
 			A2(
@@ -12302,16 +12394,16 @@ var _user$project$Radio_Main$urlParser = _elm_lang$navigation$Navigation$makePar
 			_elm_lang$core$List$head(
 				A2(
 					_elm_lang$core$List$filter,
-					function (_p9) {
+					function (_p11) {
 						return A2(
 							F2(
 								function (x, y) {
 									return _elm_lang$core$Native_Utils.eq(x, y);
 								}),
-							_p8.pathname,
+							_p10.pathname,
 							function (_) {
 								return _.url;
-							}(_p9));
+							}(_p11));
 					},
 					_user$project$Radio_Main$pages)));
 	});
