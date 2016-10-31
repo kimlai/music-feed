@@ -113,7 +113,7 @@ reportDeadTrack trackId =
         Http.defaultSettings
         { verb = "POST"
         , headers = [ ( "Content-Type", "application/json" ) ]
-        , url = "/report-dead-track"
+        , url = "/api/report-dead-track"
         , body = (reportDeadTrackBody trackId)
         }
         |> Http.fromJson (Json.Decode.succeed "ok")
