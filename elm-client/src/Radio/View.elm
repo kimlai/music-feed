@@ -2,8 +2,8 @@ module Radio.View exposing (..)
 
 import Date exposing (Date)
 import Dict exposing (Dict)
-import Html exposing (Html, a, nav, li, ul, text, div, img, label, input, p, button)
-import Html.Attributes exposing (class, classList, href, src, style, target)
+import Html exposing (Html, a, nav, li, ul, text, div, img, label, input, p, button, h1)
+import Html.Attributes exposing (class, classList, href, src, style, target, placeholder)
 import Json.Decode
 import Html.Events exposing (onClick, onWithOptions, onInput)
 import Model exposing (Track, TrackId, StreamingInfo(..))
@@ -56,6 +56,8 @@ view model =
                                 div [] [ text "Well, this is awkward..." ]
                 "/sign-up" ->
                     viewSignup model.signup
+                "/log-in" ->
+                    viewLogin model.login
                 _ ->
                     div [] [ text "404" ]
 
@@ -235,20 +237,44 @@ viewSignup signupModel =
     div
         [ class "signup" ]
         [ p [] [ text "Create an account to save the tracks you like" ]
-        , label [] [ text "Username"]
         , input
-            [ onInput (SignupUpdateUsername)]
+            [ onInput (SignupUpdateUsername)
+            , placeholder "Username"
+            ]
             []
-        , label [] [ text "Email"]
         , input
-            [ onInput (SignupUpdateEmail)]
+            [ onInput (SignupUpdateEmail)
+            , placeholder "Email"
+            ]
             []
-        , label [] [ text "Password"]
         , input
-            [ onInput (SignupUpdatePassword)]
+            [ onInput (SignupUpdatePassword)
+            , placeholder "Password"
+            ]
             []
         , button
             [ onClick SignupSubmit ]
+            [ text "Submit" ]
+        ]
+
+
+viewLogin : Model.LoginModel -> Html Msg
+viewLogin loginModel =
+    div
+        [ class "signup" ]
+        [ h1 [] [ text "Log in to Me Likey Radio" ]
+        , input
+            [ onInput (LoginUpdateUsernameOrEmail)
+            , placeholder "Email or username"
+            ]
+            []
+        , input
+            [ onInput (LoginUpdatePassword)
+            , placeholder "Password"
+            ]
+            []
+        , button
+            [ onClick LoginSubmit ]
             [ text "Submit" ]
         ]
 

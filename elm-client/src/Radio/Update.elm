@@ -49,6 +49,9 @@ type Msg
     | SignupSubmit
     | SignupFail Http.Error
     | SignupSuccess String
+    | LoginUpdateUsernameOrEmail String
+    | LoginUpdatePassword String
+    | LoginSubmit
     | LoginFail Http.Error
     | LoginSuccess Token
     | WhoAmIFail Http.Error
@@ -266,6 +269,33 @@ update message model =
         SignupSuccess response ->
             ( model
             , login model.signup.username model.signup.password
+            )
+
+        LoginUpdateUsernameOrEmail usernameOrEmail ->
+            let
+                login =
+                    model.login
+                updatedLogin =
+                    { login | usernameOrEmail = usernameOrEmail }
+            in
+                ( { model | login = updatedLogin }
+                , Cmd.none
+                )
+
+        LoginUpdatePassword password ->
+            let
+                login =
+                    model.login
+                updatedLogin =
+                    { login | password = password }
+            in
+                ( { model | login = updatedLogin }
+                , Cmd.none
+                )
+
+        LoginSubmit ->
+            ( model
+            , login model.login.usernameOrEmail model.login.password
             )
 
         LoginFail error ->

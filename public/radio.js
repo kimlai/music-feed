@@ -10201,7 +10201,9 @@ var _user$project$Radio_Model$Model = function (a) {
 									return function (j) {
 										return function (k) {
 											return function (l) {
-												return {tracks: a, playlists: b, playing: c, currentPage: d, lastKeyPressed: e, currentTime: f, player: g, pages: h, navigation: i, signup: j, token: k, currentUser: l};
+												return function (m) {
+													return {tracks: a, playlists: b, playing: c, currentPage: d, lastKeyPressed: e, currentTime: f, player: g, pages: h, navigation: i, signup: j, login: k, token: l, currentUser: m};
+												};
 											};
 										};
 									};
@@ -10217,6 +10219,10 @@ var _user$project$Radio_Model$Model = function (a) {
 var _user$project$Radio_Model$SignupModel = F3(
 	function (a, b, c) {
 		return {username: a, email: b, password: c};
+	});
+var _user$project$Radio_Model$LoginModel = F2(
+	function (a, b) {
+		return {usernameOrEmail: a, password: b};
 	});
 var _user$project$Radio_Model$User = F2(
 	function (a, b) {
@@ -10705,6 +10711,13 @@ var _user$project$Radio_Update$login = F2(
 			_user$project$Radio_Update$LoginSuccess,
 			A2(_user$project$Api$login, usernameOrEmail, password));
 	});
+var _user$project$Radio_Update$LoginSubmit = {ctor: 'LoginSubmit'};
+var _user$project$Radio_Update$LoginUpdatePassword = function (a) {
+	return {ctor: 'LoginUpdatePassword', _0: a};
+};
+var _user$project$Radio_Update$LoginUpdateUsernameOrEmail = function (a) {
+	return {ctor: 'LoginUpdateUsernameOrEmail', _0: a};
+};
 var _user$project$Radio_Update$SignupSuccess = function (a) {
 	return {ctor: 'SignupSuccess', _0: a};
 };
@@ -11100,6 +11113,36 @@ var _user$project$Radio_Update$update = F2(
 						ctor: '_Tuple2',
 						_0: model,
 						_1: A2(_user$project$Radio_Update$login, model.signup.username, model.signup.password)
+					};
+				case 'LoginUpdateUsernameOrEmail':
+					var login = model.login;
+					var updatedLogin = _elm_lang$core$Native_Utils.update(
+						login,
+						{usernameOrEmail: _p1._0});
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{login: updatedLogin}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'LoginUpdatePassword':
+					var login = model.login;
+					var updatedLogin = _elm_lang$core$Native_Utils.update(
+						login,
+						{password: _p1._0});
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{login: updatedLogin}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'LoginSubmit':
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: A2(_user$project$Radio_Update$login, model.login.usernameOrEmail, model.login.password)
 					};
 				case 'LoginFail':
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
@@ -11690,6 +11733,53 @@ var _user$project$Radio_View$viewUser = function (user) {
 				]));
 	}
 };
+var _user$project$Radio_View$viewLogin = function (loginModel) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html_Attributes$class('signup')
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$h1,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Log in to Me Likey Radio')
+					])),
+				A2(
+				_elm_lang$html$Html$input,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Events$onInput(_user$project$Radio_Update$LoginUpdateUsernameOrEmail),
+						_elm_lang$html$Html_Attributes$placeholder('Email or username')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[])),
+				A2(
+				_elm_lang$html$Html$input,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Events$onInput(_user$project$Radio_Update$LoginUpdatePassword),
+						_elm_lang$html$Html_Attributes$placeholder('Password')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[])),
+				A2(
+				_elm_lang$html$Html$button,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Events$onClick(_user$project$Radio_Update$LoginSubmit)
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Submit')
+					]))
+			]));
+};
 var _user$project$Radio_View$viewSignup = function (signupModel) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -11708,50 +11798,29 @@ var _user$project$Radio_View$viewSignup = function (signupModel) {
 						_elm_lang$html$Html$text('Create an account to save the tracks you like')
 					])),
 				A2(
-				_elm_lang$html$Html$label,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('Username')
-					])),
-				A2(
 				_elm_lang$html$Html$input,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onInput(_user$project$Radio_Update$SignupUpdateUsername)
+						_elm_lang$html$Html_Events$onInput(_user$project$Radio_Update$SignupUpdateUsername),
+						_elm_lang$html$Html_Attributes$placeholder('Username')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[])),
 				A2(
-				_elm_lang$html$Html$label,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('Email')
-					])),
-				A2(
 				_elm_lang$html$Html$input,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onInput(_user$project$Radio_Update$SignupUpdateEmail)
+						_elm_lang$html$Html_Events$onInput(_user$project$Radio_Update$SignupUpdateEmail),
+						_elm_lang$html$Html_Attributes$placeholder('Email')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[])),
 				A2(
-				_elm_lang$html$Html$label,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('Password')
-					])),
-				A2(
 				_elm_lang$html$Html$input,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onInput(_user$project$Radio_Update$SignupUpdatePassword)
+						_elm_lang$html$Html_Events$onInput(_user$project$Radio_Update$SignupUpdatePassword),
+						_elm_lang$html$Html_Attributes$placeholder('Password')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[])),
@@ -12244,6 +12313,8 @@ var _user$project$Radio_View$view = function (model) {
 								}
 							case '/sign-up':
 								return _user$project$Radio_View$viewSignup(model.signup);
+							case '/log-in':
+								return _user$project$Radio_View$viewLogin(model.login);
 							default:
 								return A2(
 									_elm_lang$html$Html$div,
@@ -12274,7 +12345,8 @@ var _user$project$Radio_Main$pages = _elm_lang$core$Native_List.fromArray(
 		_user$project$Model$Page,
 		'/latest',
 		_elm_lang$core$Maybe$Just(_user$project$Radio_Model$LatestTracks)),
-		A2(_user$project$Model$Page, '/sign-up', _elm_lang$core$Maybe$Nothing)
+		A2(_user$project$Model$Page, '/sign-up', _elm_lang$core$Maybe$Nothing),
+		A2(_user$project$Model$Page, '/log-in', _elm_lang$core$Maybe$Nothing)
 	]);
 var _user$project$Radio_Main$playlists = _elm_lang$core$Native_List.fromArray(
 	[
@@ -12331,6 +12403,7 @@ var _user$project$Radio_Main$init = F2(
 			pages: _user$project$Radio_Main$pages,
 			navigation: _user$project$Radio_Main$navigation,
 			signup: {username: '', email: '', password: ''},
+			login: {usernameOrEmail: '', password: ''},
 			token: _p8,
 			currentUser: _elm_lang$core$Maybe$Nothing
 		};

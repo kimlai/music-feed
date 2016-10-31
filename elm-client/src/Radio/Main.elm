@@ -62,6 +62,7 @@ init { token, radioPlaylistJsonString } page =
             , pages = pages
             , navigation = navigation
             , signup = { username = "", email = "", password = "" }
+            , login = { usernameOrEmail = "", password = "" }
             , token = token
             , currentUser = Nothing
             }
@@ -119,6 +120,7 @@ pages =
     [ Model.Page "/" (Just Radio)
     , Model.Page "/latest" (Just LatestTracks)
     , Model.Page "/sign-up" Nothing
+    , Model.Page "/log-in" Nothing
     ]
 
 
