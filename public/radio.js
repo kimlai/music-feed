@@ -12214,7 +12214,8 @@ var _user$project$Radio_Main$subscriptions = function (model) {
 			]));
 };
 var _user$project$Radio_Main$init = F2(
-	function (radioPlaylistJsonString, page) {
+	function (_p1, page) {
+		var _p2 = _p1;
 		var decodedRadioPayload = A2(
 			_elm_lang$core$Result$withDefault,
 			{
@@ -12226,7 +12227,7 @@ var _user$project$Radio_Main$init = F2(
 			A2(
 				_elm_lang$core$Json_Decode$decodeString,
 				_user$project$Api$decodePlaylist(_user$project$Api$decodeTrack),
-				radioPlaylistJsonString));
+				_p2.radioPlaylistJsonString));
 		var model = {
 			tracks: _elm_lang$core$Dict$empty,
 			playlists: _user$project$Radio_Main$playlists,
@@ -12240,28 +12241,28 @@ var _user$project$Radio_Main$init = F2(
 			pages: _user$project$Radio_Main$pages,
 			navigation: _user$project$Radio_Main$navigation,
 			signup: {username: '', email: '', password: ''},
-			token: _elm_lang$core$Maybe$Nothing
+			token: A2(_elm_lang$core$Debug$log, 'token', _p2.token)
 		};
-		var _p1 = A2(
+		var _p3 = A2(
 			_user$project$Radio_Update$update,
 			A2(_user$project$Radio_Update$FetchSuccess, _user$project$Radio_Model$Radio, decodedRadioPayload),
 			model);
-		var model$ = _p1._0;
-		var command = _p1._1;
-		var _p2 = _elm_lang$core$Native_Utils.eq(
+		var model$ = _p3._0;
+		var command = _p3._1;
+		var _p4 = _elm_lang$core$Native_Utils.eq(
 			page.playlist,
 			_elm_lang$core$Maybe$Just(_user$project$Radio_Model$Radio)) ? A2(
 			_user$project$Radio_Update$update,
 			A2(_user$project$Radio_Update$PlayFromPlaylist, _user$project$Radio_Model$Radio, 0),
 			model$) : {ctor: '_Tuple2', _0: model$, _1: command};
-		var model$$ = _p2._0;
-		var command$ = _p2._1;
-		var _p3 = A2(
+		var model$$ = _p4._0;
+		var command$ = _p4._1;
+		var _p5 = A2(
 			_user$project$Radio_Update$update,
 			_user$project$Radio_Update$FetchMore(_user$project$Radio_Model$LatestTracks),
 			model$$);
-		var model$$$ = _p3._0;
-		var command$$ = _p3._1;
+		var model$$$ = _p5._0;
+		var command$$ = _p5._1;
 		return A2(
 			_elm_lang$core$Platform_Cmd_ops['!'],
 			model$$$,
@@ -12272,7 +12273,7 @@ var _user$project$Radio_Main$init = F2(
 					command$$,
 					A3(
 					_elm_lang$core$Task$perform,
-					function (_p4) {
+					function (_p6) {
 						return _user$project$Radio_Update$UpdateCurrentTimeFail;
 					},
 					_user$project$Radio_Update$UpdateCurrentTime,
@@ -12290,8 +12291,8 @@ var _user$project$Radio_Main$urlUpdate = F2(
 		};
 	});
 var _user$project$Radio_Main$urlParser = _elm_lang$navigation$Navigation$makeParser(
-	function (_p5) {
-		var _p6 = _p5;
+	function (_p7) {
+		var _p8 = _p7;
 		return A2(
 			_elm_lang$core$Maybe$withDefault,
 			A2(
@@ -12301,16 +12302,16 @@ var _user$project$Radio_Main$urlParser = _elm_lang$navigation$Navigation$makePar
 			_elm_lang$core$List$head(
 				A2(
 					_elm_lang$core$List$filter,
-					function (_p7) {
+					function (_p9) {
 						return A2(
 							F2(
 								function (x, y) {
 									return _elm_lang$core$Native_Utils.eq(x, y);
 								}),
-							_p6.pathname,
+							_p8.pathname,
 							function (_) {
 								return _.url;
-							}(_p7));
+							}(_p9));
 					},
 					_user$project$Radio_Main$pages)));
 	});
@@ -12319,7 +12320,26 @@ var _user$project$Radio_Main$main = {
 		_elm_lang$navigation$Navigation$programWithFlags,
 		_user$project$Radio_Main$urlParser,
 		{init: _user$project$Radio_Main$init, view: _user$project$Radio_View$view, update: _user$project$Radio_Update$update, urlUpdate: _user$project$Radio_Main$urlUpdate, subscriptions: _user$project$Radio_Main$subscriptions}),
-	flags: _elm_lang$core$Json_Decode$string
+	flags: A2(
+		_elm_lang$core$Json_Decode$andThen,
+		A2(_elm_lang$core$Json_Decode_ops[':='], 'radioPlaylistJsonString', _elm_lang$core$Json_Decode$string),
+		function (radioPlaylistJsonString) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				A2(
+					_elm_lang$core$Json_Decode_ops[':='],
+					'token',
+					_elm_lang$core$Json_Decode$oneOf(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+								A2(_elm_lang$core$Json_Decode$map, _elm_lang$core$Maybe$Just, _elm_lang$core$Json_Decode$string)
+							]))),
+				function (token) {
+					return _elm_lang$core$Json_Decode$succeed(
+						{radioPlaylistJsonString: radioPlaylistJsonString, token: token});
+				});
+		})
 };
 
 var Elm = {};

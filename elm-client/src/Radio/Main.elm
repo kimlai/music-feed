@@ -15,7 +15,7 @@ import Task
 import Time exposing (Time)
 
 
-main : Program String
+main : Program { token : Maybe String, radioPlaylistJsonString : String }
 main =
     Navigation.programWithFlags urlParser
         { init = init
@@ -48,8 +48,8 @@ urlUpdate page model =
     )
 
 
-init : String -> Page Radio.Model.PlaylistId -> ( Radio.Model.Model, Cmd Msg )
-init radioPlaylistJsonString page =
+init : { token: Maybe String, radioPlaylistJsonString: String } -> Page Radio.Model.PlaylistId -> ( Radio.Model.Model, Cmd Msg )
+init { token, radioPlaylistJsonString } page =
     let
         model =
             { tracks = Dict.empty
@@ -62,7 +62,7 @@ init radioPlaylistJsonString page =
             , pages = pages
             , navigation = navigation
             , signup = { username = "", email = "", password = "" }
-            , token = Nothing
+            , token = token
             }
         decodedRadioPayload =
             Json.Decode.decodeString (Api.decodePlaylist Api.decodeTrack) radioPlaylistJsonString
