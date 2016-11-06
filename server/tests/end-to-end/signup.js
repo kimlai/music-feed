@@ -7,7 +7,7 @@ const app = require('../../radioApi').listen();
 
 describe('POST /users', function () {
     beforeEach(function () {
-        return knex('users').truncate();
+        return knex.raw('TRUNCATE TABLE users CASCADE');
     });
 
     it('registers a new user', function () {
@@ -30,7 +30,7 @@ describe('POST /users', function () {
 
 describe('POST /login', function () {
     beforeEach(function () {
-        return knex('users').truncate()
+        return knex.raw('TRUNCATE TABLE users CASCADE')
             .then(function () {
                 return request(app)
                 .post('/users')

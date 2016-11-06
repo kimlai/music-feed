@@ -21,6 +21,8 @@ router.post('/report-dead-track', reportDeadTrack);
 router.post('/users', signup);
 router.post('/login', login);
 router.get('/me', jwt({ secret: process.env.JWT_SECRET }), me);
+router.post('/likes', jwt({ secret: process.env.JWT_SECRET }), addLike);
+router.get('/likes', jwt({ secret: process.env.JWT_SECRET }), likes);
 
 app.use(router.routes());
 
@@ -107,6 +109,28 @@ function *login() {
 function *me() {
     this.status = 200;
     this.body = this.state.user;
+}
+
+function *addLike() {
+    var submitted = this.request.body;
+    var userUuid = this.state.user.uuid;
+
+    yield knex.insert({
+        user_uuid: userUuid,
+        track_id: submitted.trackId,
+        created_at: new Date(),
+    }).into('likes'),
+
+    this.status = 201;
+    this.body = {};
+}
+
+function *likes() {
+    var userUuid = this.state.user.uuid;
+
+    this.body = yield knex.select('published_tracks.*', 'likes.created_at')
+        .from('likes')
+        .innerJoin('published_tracks', 'likes.track_id', 'published_tracks.soundcloudTrackId');
 }
 
 module.exports = app;
