@@ -2,36 +2,35 @@ module Api exposing (..)
 
 
 import Http
-import Json.Decode
-import Json.Decode exposing ((:=))
+import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Model exposing (Track, StreamingInfo(..), TrackId)
 import Task exposing (Task)
 
 
-fetchPlaylist : String -> Json.Decode.Decoder Track -> Task Http.Error ( List Track, String )
+fetchPlaylist : String -> Json.Decode.Decoder Track -> Http.Request ( List Track, String )
 fetchPlaylist url trackDecoder =
-    Http.get (decodePlaylist trackDecoder) url
+    Http.get url (decodePlaylist trackDecoder)
 
 
 decodePlaylist : Json.Decode.Decoder Track -> Json.Decode.Decoder ( List Track, String )
 decodePlaylist trackDecoder =
-    Json.Decode.object2 (,)
-        ("tracks" := Json.Decode.list trackDecoder)
-        ("next_href" := Json.Decode.string)
+    Json.Decode.map2 (,)
+        (field "tracks" (Json.Decode.list trackDecoder))
+        (field "next_href" Json.Decode.string)
 
 
 decodeTrack : Json.Decode.Decoder Track
 decodeTrack =
     Json.Decode.succeed Track
-        |: ("id" := Json.Decode.string)
-        |: ("artist" := Json.Decode.string)
-        |: ("cover" := Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string)
-        |: ("title" := Json.Decode.string)
+        |: (field "id" Json.Decode.string)
+        |: (field "artist" Json.Decode.string)
+        |: (field "cover" (Json.Decode.Extra.withDefault "/images/placeholder.jpg" Json.Decode.string))
+        |: (field "title" Json.Decode.string)
         |: decodeStreamingInfo
-        |: ("source" := Json.Decode.string)
-        |: ("created_at" := Json.Decode.Extra.date)
+        |: (field "source" Json.Decode.string)
+        |: (field "created_at" Json.Decode.Extra.date)
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed False
@@ -45,45 +44,36 @@ decodeStreamingInfo =
 decodeSoundcloudStreamingInfo : Json.Decode.Decoder StreamingInfo
 decodeSoundcloudStreamingInfo =
     (Json.Decode.at [ "soundcloud", "stream_url" ] Json.Decode.string)
-    `Json.Decode.andThen` \url -> Json.Decode.succeed (Soundcloud url)
+        |> Json.Decode.andThen (\url -> Json.Decode.succeed (Soundcloud url))
 
 
 decodeYoutubeStreamingInfo : Json.Decode.Decoder StreamingInfo
 decodeYoutubeStreamingInfo =
     (Json.Decode.at [ "youtube", "id" ] Json.Decode.string)
-    `Json.Decode.andThen` \id -> Json.Decode.succeed (Youtube id)
+        |> Json.Decode.andThen (\id -> Json.Decode.succeed (Youtube id))
 
 
-addTrack : String -> TrackId -> Task Http.Error String
+addTrack : String -> TrackId -> Http.Request String
 addTrack addTrackUrl trackId =
-    Http.send
-        Http.defaultSettings
-        { verb = "POST"
-        , headers = [ ( "Content-Type", "application/json" ) ]
-        , url = addTrackUrl
-        , body = (addTrackBody trackId)
-        }
-        |> Http.fromJson (Json.Decode.succeed "ok")
+    Http.post
+        addTrackUrl
+        (addTrackBody trackId)
+        (Json.Decode.succeed "ok")
 
 
 addTrackBody : TrackId -> Http.Body
 addTrackBody trackId =
     Json.Encode.object
         [ ( "soundcloudTrackId", Json.Encode.string trackId ) ]
-        |> Json.Encode.encode 0
-        |> Http.string
+        |> Http.jsonBody
 
 
-publishTrack : Track -> Task Http.Error Track
+publishTrack : Track -> Http.Request Track
 publishTrack track =
-    Http.send
-        Http.defaultSettings
-        { verb = "POST"
-        , headers = [ ( "Content-Type", "application/json" ) ]
-        , url = "/feed/publish_custom_track"
-        , body = (publishTrackBody track)
-        }
-        |> Http.fromJson decodeTrack
+    Http.post
+        "/feed/publish_custom_track"
+        (publishTrackBody track)
+        decodeTrack
 
 
 publishTrackBody : Track -> Http.Body
@@ -103,25 +93,19 @@ publishTrackBody track =
             ]
             |> (++) streamInfo
             |> Json.Encode.object
-            |> Json.Encode.encode 0
-            |> Http.string
+            |> Http.jsonBody
 
 
-reportDeadTrack : TrackId -> Task Http.Error String
+reportDeadTrack : TrackId -> Http.Request String
 reportDeadTrack trackId =
-    Http.send
-        Http.defaultSettings
-        { verb = "POST"
-        , headers = [ ( "Content-Type", "application/json" ) ]
-        , url = "/report-dead-track"
-        , body = (reportDeadTrackBody trackId)
-        }
-        |> Http.fromJson (Json.Decode.succeed "ok")
+    Http.post
+        "/report-dead-track"
+        (reportDeadTrackBody trackId)
+        (Json.Decode.succeed "ok")
 
 
 reportDeadTrackBody : TrackId -> Http.Body
 reportDeadTrackBody trackId =
     [ ( "trackId", Json.Encode.string trackId ) ]
     |> Json.Encode.object
-    |> Json.Encode.encode 0
-    |> Http.string
+    |> Http.jsonBody

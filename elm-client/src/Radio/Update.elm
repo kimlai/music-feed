@@ -5,13 +5,8 @@ import Api
 import Char
 import Dict
 import Http
-import Json.Decode
-import Json.Decode exposing ((:=))
-import Json.Decode.Extra exposing ((|:))
-import Json.Encode
 import Keyboard
-import Model exposing (Track, TrackId, StreamingInfo(..))
-import Navigation
+import Model exposing (Track, TrackId, StreamingInfo(..), Page)
 import Player
 import PlayerEngine
 import Radio.Model as Model exposing (Model, PlaylistId(..))
@@ -32,15 +27,12 @@ type Msg
     | ChangePage String
     | KeyPressed Keyboard.KeyCode
     | UpdateCurrentTime Time
-    | UpdateCurrentTimeFail
     | PlayFromCustomQueue Int Track
     | PlayFromPlaylist PlaylistId Int
     | AddToCustomQueue TrackId
     | FetchMore PlaylistId
-    | FetchFail PlaylistId Http.Error
-    | FetchSuccess PlaylistId ( List Track, String )
-    | ReportDeadTrackFail Http.Error
-    | ReportDeadTrackSuccess
+    | FetchedMore PlaylistId (Result Http.Error ( List Track, String ))
+    | ReportedDeadTrack (Result Http.Error String)
     | ResumeRadio
     | SeekTo Float
 
@@ -48,7 +40,7 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
-        FetchSuccess playlistId ( tracks, nextLink ) ->
+        FetchedMore playlistId (Ok ( tracks, nextLink )) ->
             let
                 updatePlaylist playlist =
                     if playlist.id == playlistId then
@@ -74,7 +66,7 @@ update message model =
                 , Cmd.none
                 )
 
-        FetchFail playlistId error ->
+        FetchedMore playlistId (Err error)->
             ( model, Cmd.none )
 
         PlayFromPlaylist playlistId position ->
@@ -114,9 +106,6 @@ update message model =
                 { model | playlists = updatedPlaylists }
                 ! List.map fetchMoreHelp model.playlists
 
-        UpdateCurrentTimeFail ->
-            ( model, Cmd.none )
-
         UpdateCurrentTime newTime ->
             ( { model | currentTime = Just newTime }, Cmd.none )
 
@@ -135,11 +124,7 @@ update message model =
             )
 
         ResumeRadio ->
-            let
-                model' =
-                    { model | player = Player.selectPlaylist Radio model.player }
-            in
-                update Play model'
+            update Play { model | player = Player.selectPlaylist Radio model.player }
 
         TrackError trackId ->
             let
@@ -151,16 +136,12 @@ update message model =
                             model.tracks
                     }
 
-
-                ( newModel', command ) =
+                ( newModelWithNext, command ) =
                     update Next newModel
             in
-                newModel' ! [ command, reportDeadTrack trackId ]
+                newModelWithNext ! [ command, reportDeadTrack trackId ]
 
-        ReportDeadTrackFail error ->
-            ( model, Cmd.none)
-
-        ReportDeadTrackSuccess ->
+        ReportedDeadTrack _ ->
             ( model, Cmd.none)
 
         TogglePlayback ->
@@ -194,7 +175,16 @@ update message model =
             )
 
         ChangePage url ->
-            ( model, Navigation.newUrl url )
+            let
+                newPage =
+                    model.pages
+                        |> List.filter ((==) url << .url)
+                        |> List.head
+                        |> Maybe.withDefault (Page "/" (Just Radio))
+            in
+                ( { model | currentPage = newPage }
+                , Cmd.none
+                )
 
         SeekTo positionInPercentage ->
             ( model
@@ -269,11 +259,9 @@ update message model =
 
 fetchMore : Model.Playlist -> Cmd Msg
 fetchMore playlist =
-    Api.fetchPlaylist playlist.nextLink Api.decodeTrack
-        |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
+    Http.send (FetchedMore playlist.id) (Api.fetchPlaylist playlist.nextLink Api.decodeTrack)
 
 
 reportDeadTrack : TrackId -> Cmd Msg
 reportDeadTrack trackId =
-    Api.reportDeadTrack trackId
-        |> Task.perform ReportDeadTrackFail (\_ -> ReportDeadTrackSuccess)
+    Http.send ReportedDeadTrack (Api.reportDeadTrack trackId)

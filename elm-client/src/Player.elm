@@ -45,38 +45,36 @@ select playlistId position (Player { playlists, currentPlaylist, currentTrack })
                 ( id, Playlist.select position playlist )
             else
                 ( id, playlist )
-        playlists' =
+        updatedPlaylists =
             List.map updatePlaylist playlists
-        newCurrentPlaylist =
-            playlists'
-                |> List.filter ((==) playlistId << fst)
+        selectedTrack =
+            updatedPlaylists
+                |> List.filter ((==) playlistId << Tuple.first)
                 |> List.head
-                |> Maybe.map snd
-        currentTrack' =
-            newCurrentPlaylist `Maybe.andThen` Playlist.currentItem
+                |> Maybe.map Tuple.second
+                |> Maybe.andThen Playlist.currentItem
     in
         Player
-            { playlists = playlists'
+            { playlists = updatedPlaylists
             , currentPlaylist = Just playlistId
-            , currentTrack = currentTrack'
+            , currentTrack = selectedTrack
             }
 
 
 selectPlaylist : a -> Player a b -> Player a b
 selectPlaylist playlistId (Player { playlists, currentPlaylist, currentTrack }) =
     let
-        selectedPlaylist =
+        newCurrentTrack =
             playlists
-                |> List.filter ((==) playlistId << fst)
+                |> List.filter ((==) playlistId << Tuple.first)
                 |> List.head
-                |> Maybe.map snd
-        currentTrack' =
-            selectedPlaylist `Maybe.andThen` Playlist.currentItem
+                |> Maybe.map Tuple.second
+                |> Maybe.andThen Playlist.currentItem
     in
         Player
             { playlists = playlists
             , currentPlaylist = Just playlistId
-            , currentTrack = currentTrack'
+            , currentTrack = newCurrentTrack
             }
 
 
@@ -89,20 +87,19 @@ next (Player { playlists, currentPlaylist, currentTrack}) =
                 ( id, Playlist.next playlist )
             else
                 ( id, playlist )
-        playlists' =
+        updatedPlaylists =
             List.map updatePlaylist playlists
-        items =
-            playlists'
-                |> List.filter ((==) currentPlaylist << Just << fst)
+        newCurrentTrack =
+            updatedPlaylists
+                |> List.filter ((==) currentPlaylist << Just << Tuple.first)
                 |> List.head
-                |> Maybe.map snd
-        currentTrack' =
-            items `Maybe.andThen` Playlist.currentItem
+                |> Maybe.map Tuple.second
+                |> Maybe.andThen Playlist.currentItem
     in
         Player
-            { playlists = playlists'
+            { playlists = updatedPlaylists
             , currentPlaylist = currentPlaylist
-            , currentTrack = currentTrack'
+            , currentTrack = newCurrentTrack
             }
 
 moveTrack : a -> b -> Player a b -> Player a b
@@ -113,11 +110,11 @@ moveTrack playlistId track (Player { playlists, currentPlaylist, currentTrack })
                 ( id, Playlist.prepend track playlist )
             else
                 ( id, Playlist.remove track playlist )
-        playlists' =
+        updatedPlaylists =
             List.map updatePlaylist playlists
     in
         Player
-            { playlists = playlists'
+            { playlists = updatedPlaylists
             , currentPlaylist = currentPlaylist
             , currentTrack = currentTrack
             }
@@ -136,18 +133,18 @@ currentTrack (Player { currentTrack }) =
 currentTrackOfPlaylist : a -> Player a b -> Maybe b
 currentTrackOfPlaylist playlistId (Player { playlists }) =
     playlists
-        |> List.filter ((==) playlistId << fst)
+        |> List.filter ((==) playlistId << Tuple.first)
         |> List.head
         |> Maybe.withDefault ( playlistId, Playlist.empty )
-        |> snd
+        |> Tuple.second
         |> Playlist.currentItem
 
 
 playlistContent : a -> Player a b -> List b
 playlistContent playlistId (Player { playlists }) =
     playlists
-        |> List.filter ((==) playlistId << fst)
+        |> List.filter ((==) playlistId << Tuple.first)
         |> List.head
         |> Maybe.withDefault ( playlistId, Playlist.empty )
-        |> snd
+        |> Tuple.second
         |> Playlist.items

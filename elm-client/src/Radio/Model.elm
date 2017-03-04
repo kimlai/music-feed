@@ -53,4 +53,4 @@ currentPlaylist model =
 currentTrack : Model -> Maybe Track
 currentTrack model =
     Player.currentTrack model.player
-        `Maybe.andThen` (flip Dict.get) model.tracks
+        |> Maybe.andThen ((flip Dict.get) model.tracks)

@@ -4,7 +4,7 @@ module View exposing (..)
 import Html exposing (Html, div, text, img, ul, li, nav, a)
 import Html.Attributes exposing (class, src, classList, style, href)
 import Html.Events exposing (onClick, onWithOptions, on)
-import Json.Decode exposing ((:=))
+import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
 import Model exposing (Track, Page, NavigationItem, Page)
 
@@ -104,8 +104,8 @@ decodeClickXPosition =
                 Just element ->
                     offsetLeft + (totalOffset element)
     in
-        Json.Decode.object2 (/)
-            (Json.Decode.object2 (-)
+        Json.Decode.map2 (/)
+            (Json.Decode.map2 (-)
                 (Json.Decode.at [ "pageX" ] Json.Decode.float)
                 ((Json.Decode.at [ "target" ] decodeElement) |> Json.Decode.map totalOffset)
             )
@@ -127,8 +127,8 @@ instanciateElement offsetLeft offsetParent =
 decodeElement : Json.Decode.Decoder Element
 decodeElement =
     Json.Decode.succeed instanciateElement
-        |: ("offsetLeft" := Json.Decode.float)
-        |: ("offsetParent" := Json.Decode.Extra.maybeNull (Json.Decode.Extra.lazy (\_ -> decodeElement)))
+        |: (field "offsetLeft" Json.Decode.float)
+        |: (field "offsetParent" (Json.Decode.nullable (Json.Decode.lazy (\_ -> decodeElement))))
 
 
 viewNavigation : (String -> msg) -> List NavigationItem -> List (Page a) -> Page a -> Maybe a -> Html msg

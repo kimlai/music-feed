@@ -5,7 +5,7 @@ import Dict exposing (Dict)
 import Feed.Model as Model exposing (Model, Playlist, PlaylistId(..))
 import Feed.Update exposing (Msg(..))
 import Html exposing (Html, a, nav, li, ul, text, div, img, input, label, form, button)
-import Html.Attributes exposing (class, classList, href, src, style, value, id, type')
+import Html.Attributes exposing (class, classList, href, src, style, value, id, type_)
 import Html.Events exposing (onClick, onWithOptions, onInput)
 import Json.Decode
 import Model exposing (Track, TrackId)
@@ -217,7 +217,7 @@ viewNewTrackForm newTrack =
                     ]
                 , form
                     [ id "cover-upload" ]
-                    [ input [ type' "file" ] []
+                    [ input [ type_ "file" ] []
                     , div
                         [ onClick UploadImage ]
                         [ text "Upload" ]

@@ -6,67 +6,52 @@ import Feed.Ports as Ports
 import Feed.Update as Update exposing (Msg(..))
 import Feed.View as View
 import Keyboard
-import Navigation
+import Navigation exposing (Location)
 import Player
 import PlayerEngine
 import Task
 import Time exposing (Time)
 
 
-main : Program String
+main : Program String Model Msg
 main =
-    Navigation.programWithFlags urlParser
+    Navigation.programWithFlags
+        (\location -> ChangePage location.pathname)
         { init = init
         , view = View.view
         , update = Update.update
-        , urlUpdate = urlUpdate
         , subscriptions = subscriptions
         }
 
 
 
--- URL PARSERS
-
-
-urlParser : Navigation.Parser Model.Page
-urlParser =
-    Navigation.makeParser
-        (\{ pathname } ->
+init : String -> Location -> ( Model, Cmd Msg )
+init soundcloudClientId location =
+    let
+        page =
             pages
-                |> List.filter ((==) pathname << .url)
+                |> List.filter ((==) location.pathname << .url)
                 |> List.head
                 |> Maybe.withDefault (Model.Page "/feed" (Just Feed))
+    in
+        ( { tracks = Dict.empty
+          , playlists = playlists
+          , playing = False
+          , currentPage = page
+          , lastKeyPressed = Nothing
+          , currentTime = Nothing
+          , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist, CustomQueue ]
+          , pages = pages
+          , navigation = navigation
+          , soundcloudClientId = soundcloudClientId
+          , youtubeTrackPublication = Nothing
+        }
+        , Cmd.batch
+            (List.append
+                (List.map Update.fetchMore playlists)
+                [Time.now |> Task.perform UpdateCurrentTime]
+            )
         )
-
-
-urlUpdate : Model.Page -> Model -> ( Model, Cmd Update.Msg )
-urlUpdate page model =
-    ( { model | currentPage = page }
-    , Cmd.none
-    )
-
-
-
-init : String -> Model.Page -> ( Model, Cmd Msg )
-init soundcloudClientId page =
-    ( { tracks = Dict.empty
-      , playlists = playlists
-      , playing = False
-      , currentPage = page
-      , lastKeyPressed = Nothing
-      , currentTime = Nothing
-      , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist, CustomQueue ]
-      , pages = pages
-      , navigation = navigation
-      , soundcloudClientId = soundcloudClientId
-      , youtubeTrackPublication = Nothing
-    }
-    , Cmd.batch
-        (List.append
-            (List.map Update.fetchMore playlists)
-            [Time.now |> Task.perform (\_ -> UpdateCurrentTimeFail) UpdateCurrentTime]
-        )
-    )
 
 
 

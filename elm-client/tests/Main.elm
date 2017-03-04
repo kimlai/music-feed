@@ -1,22 +1,13 @@
 port module Main exposing (..)
 
-import ApiTest
-import ViewTest
-import YoutubeTest
-import Test exposing (concat)
-import Test.Runner.Node exposing (run)
+import Tests
+import Test.Runner.Node exposing (run, TestProgram)
 import Json.Encode exposing (Value)
 
 
-main : Program Value
+main : TestProgram
 main =
-    run emit
-        ( concat
-            [ ApiTest.all
-            , ViewTest.all
-            , YoutubeTest.all
-            ]
-        )
+    run emit Tests.all
 
 
 port emit : ( String, Value ) -> Cmd msg

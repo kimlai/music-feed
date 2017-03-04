@@ -44,15 +44,15 @@ timeAgo currentTime date =
                         else
                             Just (toString valueInUnit ++ " " ++ (pluralize valueInUnit unitName) ++ " ago")
             in
-                Maybe.oneOf
-                    (List.map
-                        (inUnitAgo timeAgo)
-                        [ ( "year", year )
-                        , ( "month", month )
-                        , ( "week", week )
-                        , ( "day", day )
-                        , ( "hour", Time.hour )
-                        , ( "minute", Time.minute )
-                        ]
-                    )
+                (List.filterMap
+                    (inUnitAgo timeAgo)
+                    [ ( "year", year )
+                    , ( "month", month )
+                    , ( "week", week )
+                    , ( "day", day )
+                    , ( "hour", Time.hour )
+                    , ( "minute", Time.minute )
+                    ]
+                )
+                    |> List.head
                     |> Maybe.withDefault "Just now"

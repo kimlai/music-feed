@@ -5,52 +5,36 @@ import Dict exposing (Dict)
 import Json.Decode
 import Keyboard
 import Model exposing (Page)
-import Navigation
+import Navigation exposing (Location)
 import Player
 import PlayerEngine
-import Radio.Model exposing (PlaylistId(..))
+import Radio.Model exposing (Model, PlaylistId(..))
 import Radio.Update as Update exposing (Msg(..))
 import Radio.View as View
 import Task
 import Time exposing (Time)
 
 
-main : Program String
+main : Program String Model Msg
 main =
-    Navigation.programWithFlags urlParser
+    Navigation.programWithFlags
+        (\location -> ChangePage location.pathname)
         { init = init
         , view = View.view
         , update = Update.update
-        , urlUpdate = urlUpdate
         , subscriptions = subscriptions
         }
 
 
 
--- URL PARSERS
-
-
-urlParser : Navigation.Parser (Page Radio.Model.PlaylistId)
-urlParser =
-    Navigation.makeParser
-        (\{ pathname } ->
+init : String -> Location -> ( Radio.Model.Model, Cmd Msg )
+init radioPlaylistJsonString location =
+    let
+        page =
             pages
-                |> List.filter ((==) pathname << .url)
+                |> List.filter ((==) location.pathname << .url)
                 |> List.head
                 |> Maybe.withDefault (Page "/" (Just Radio))
-        )
-
-
-urlUpdate : (Page Radio.Model.PlaylistId) -> Radio.Model.Model -> ( Radio.Model.Model, Cmd Msg )
-urlUpdate page model =
-    ( { model | currentPage = page }
-    , Cmd.none
-    )
-
-
-init : String -> Page Radio.Model.PlaylistId -> ( Radio.Model.Model, Cmd Msg )
-init radioPlaylistJsonString page =
-    let
         model =
             { tracks = Dict.empty
             , playlists = playlists
@@ -65,21 +49,21 @@ init radioPlaylistJsonString page =
         decodedRadioPayload =
             Json.Decode.decodeString (Api.decodePlaylist Api.decodeTrack) radioPlaylistJsonString
                 |> Result.withDefault ( [], "/playlist" )
-        ( model', command ) =
-            Update.update (FetchSuccess Radio decodedRadioPayload) model
-        ( model'', command' ) =
+        ( model_, command ) =
+            Update.update (FetchedMore Radio (Ok decodedRadioPayload)) model
+        ( model__, command_ ) =
             if page.playlist == Just Radio then
-                Update.update (PlayFromPlaylist Radio 0) model'
+                Update.update (PlayFromPlaylist Radio 0) model_
             else
-                ( model', command )
-        ( model''', command'' ) =
-            Update.update (FetchMore LatestTracks) model''
+                ( model_, command )
+        ( model___, command__ ) =
+            Update.update (FetchMore LatestTracks) model__
     in
-        model''' !
+        model___ !
             [ command
-            , command'
-            , command''
-            , Time.now |> Task.perform (\_ -> UpdateCurrentTimeFail) UpdateCurrentTime
+            , command_
+            , command__
+            , Time.now |> Task.perform UpdateCurrentTime
             ]
 
 

@@ -5,13 +5,9 @@ import Api
 import Char
 import Date
 import Dict
-import Feed.Model as Model exposing (Model, PlaylistId(..))
+import Feed.Model as Model exposing (Model, PlaylistId(..), Page)
 import Feed.Ports as Ports
 import Http
-import Json.Decode
-import Json.Decode exposing ((:=))
-import Json.Decode.Extra exposing ((|:))
-import Json.Encode
 import Keyboard
 import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
@@ -45,28 +41,24 @@ type Msg
     | PlayFromPlaylist PlaylistId Int Track
     | AddToCustomQueue TrackId
     | FetchMore PlaylistId
-    | FetchFail PlaylistId Http.Error
-    | FetchSuccess PlaylistId ( List Track, String )
-    | AddTrackFail Http.Error
-    | AddTrackSuccess
+    | FetchedMore PlaylistId (Result Http.Error ( List Track, String ))
+    | AddedTrack (Result Http.Error String)
     | PublishFromSoundcloudUrl String
-    | PublishFromSoundcloudUrlFailure Http.Error
-    | PublishFromSoundcloudUrlSuccess Track
+    | PublishedFromSoundcloudUrl (Result Http.Error Track)
     | ParseYoutubeUrl String
     | UpdateNewTrackArtist String
     | UpdateNewTrackTitle String
     | UploadImage
     | ImageUploaded String
     | PublishYoutubeTrack Track
-    | PublishYoutubeTrackFailure Http.Error
-    | PublishYoutubeTrackSuccess Track
+    | PublishedYoutubeTrack (Result Http.Error Track)
     | SeekTo Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
-        FetchSuccess playlistId ( tracks, nextLink ) ->
+        FetchedMore playlistId (Ok ( tracks, nextLink )) ->
             let
                 updatePlaylist playlist =
                     if playlist.id == playlistId then
@@ -92,13 +84,13 @@ update message model =
                 , Cmd.none
                 )
 
-        FetchFail playlistId error ->
+        FetchedMore playlistId (Err error) ->
             ( model, Cmd.none )
 
-        AddTrackSuccess ->
+        AddedTrack (Ok _) ->
             ( model, Cmd.none )
 
-        AddTrackFail error ->
+        AddedTrack (Err _) ->
             ( model, Cmd.none )
 
         PlayFromPlaylist playlistId position track ->
@@ -168,10 +160,10 @@ update message model =
                                 model.tracks
                     }
 
-                ( newModel', command ) =
+                ( newModel_, command ) =
                     update Next newModel
             in
-                ( newModel', command )
+                ( newModel_, command )
 
         TogglePlayback ->
             if model.playing then
@@ -204,7 +196,16 @@ update message model =
             )
 
         ChangePage url ->
-            ( model, Navigation.newUrl url )
+            let
+                newPage =
+                    model.pages
+                        |> List.filter ((==) url << .url)
+                        |> List.head
+                        |> Maybe.withDefault (Page "/feed" (Just Feed))
+            in
+                ( { model | currentPage = newPage }
+                , Cmd.none
+                )
 
         SeekTo positionInPercentage ->
             ( model
@@ -255,31 +256,31 @@ update message model =
                 ( newModel, command ) =
                     update Next model
 
-                ( newModel', command' ) =
+                ( newModel_, command_ ) =
                     update (MoveToPlaylist Blacklist trackId) newModel
             in
-                ( newModel', Cmd.batch [ command, command' ] )
+                ( newModel_, Cmd.batch [ command, command_ ] )
 
         PublishFromSoundcloudUrl url ->
             ( model
             , publishFromSoundcloudUrl model.soundcloudClientId url
             )
 
-        PublishFromSoundcloudUrlFailure error ->
+        PublishedFromSoundcloudUrl (Err _) ->
             ( model
             , Cmd.none
             )
 
-        PublishFromSoundcloudUrlSuccess track ->
+        PublishedFromSoundcloudUrl (Ok track) ->
             let
-                model' =
+                model_ =
                     { model | tracks = Dict.insert track.id track model.tracks }
-                ( model'', command ) =
-                    update (MoveToPlaylist PublishedTracks track.id) model'
-                ( model''', command' ) =
-                    update (ChangePage "published-tracks") model''
+                ( model__, command ) =
+                    update (MoveToPlaylist PublishedTracks track.id) model_
+                ( model___, command_ ) =
+                    update (ChangePage "published-tracks") model__
             in
-                model''' ! [ command, command' ]
+                model___ ! [ command, command_ ]
 
         ParseYoutubeUrl url ->
             let
@@ -339,19 +340,19 @@ update message model =
             , publishYoutubeTrack track
             )
 
-        PublishYoutubeTrackFailure error ->
+        PublishedYoutubeTrack (Err error) ->
             ( model, Cmd.none )
 
-        PublishYoutubeTrackSuccess track ->
+        PublishedYoutubeTrack (Ok track) ->
             let
-                model' =
+                model_ =
                     { model | tracks = Dict.insert track.id track model.tracks }
-                ( model'', command ) =
-                    update (MoveToPlaylist PublishedTracks track.id) model'
-                ( model''', command' ) =
-                    update (ChangePage "published-tracks") model''
+                ( model__, command ) =
+                    update (MoveToPlaylist PublishedTracks track.id) model_
+                ( model___, command_ ) =
+                    update (ChangePage "published-tracks") model__
             in
-                model''' ! [ command, command' ]
+                model___ ! [ command, command_ ]
 
         KeyPressed keyCode ->
             case (Char.fromCode keyCode) of
@@ -485,23 +486,19 @@ fetchMore playlist =
                 _ ->
                     Soundcloud.decodeTrack
     in
-        Api.fetchPlaylist playlist.nextLink trackDecoder
-            |> Task.perform (FetchFail playlist.id) (FetchSuccess playlist.id)
+        Http.send (FetchedMore playlist.id) (Api.fetchPlaylist playlist.nextLink trackDecoder)
 
 
 addTrack : String -> TrackId -> Cmd Msg
 addTrack addTrackUrl trackId =
-    Api.addTrack addTrackUrl trackId
-        |> Task.perform AddTrackFail (\_ -> AddTrackSuccess)
+    Http.send AddedTrack (Api.addTrack addTrackUrl trackId)
 
 
 publishFromSoundcloudUrl : String -> String -> Cmd Msg
 publishFromSoundcloudUrl soundcloudClientId url =
-    Soundcloud.resolve soundcloudClientId url
-        |> Task.perform PublishFromSoundcloudUrlFailure PublishFromSoundcloudUrlSuccess
+    Http.send PublishedFromSoundcloudUrl (Soundcloud.resolve soundcloudClientId url)
 
 
 publishYoutubeTrack : Track -> Cmd Msg
 publishYoutubeTrack track =
-    Api.publishTrack track
-        |> Task.perform PublishYoutubeTrackFailure PublishYoutubeTrackSuccess
+    Http.send PublishedYoutubeTrack (Api.publishTrack track)

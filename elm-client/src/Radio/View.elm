@@ -36,7 +36,7 @@ view model =
                             let
                                 currentRadioTrack =
                                     Player.currentTrackOfPlaylist Radio model.player
-                                        `Maybe.andThen` (flip Dict.get) model.tracks
+                                        |> Maybe.andThen ((flip Dict.get) model.tracks)
                             in
                                 viewRadioTrack currentRadioTrack (Player.currentPlaylist model.player)
                         _ ->

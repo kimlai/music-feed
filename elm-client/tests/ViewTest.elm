@@ -13,16 +13,18 @@ all =
             \() ->
                 let
                     event =
-                        "{ \"pageX\": 40
-                        , \"target\":
-                            { \"offsetWidth\": 10
-                            , \"offsetLeft\": 20
-                            , \"offsetParent\" :
-                                { \"offsetLeft\": 10
-                                , \"offsetParent\": null
+                        """
+                        { "pageX": 40
+                        , "target":
+                            { "offsetWidth": 10
+                            , "offsetLeft": 20
+                            , "offsetParent" :
+                                { "offsetLeft": 10
+                                , "offsetParent": null
                                 }
                             }
-                        }"
+                        }
+                        """
                 in
                     Json.Decode.decodeString View.decodeClickXPosition event
                         |> Expect.equal (Ok 100)
