@@ -20,7 +20,9 @@ router.get('/latest-tracks', latestTracks);
 router.post('/report-dead-track', reportDeadTrack);
 router.post('/users', signup);
 router.post('/login', login);
-router.get('/protected', jwt({ secret: process.env.JWT_SECRET }), protectedRoute);
+router.get('/me', jwt({ secret: process.env.JWT_SECRET }), me);
+router.post('/likes', jwt({ secret: process.env.JWT_SECRET }), addLike);
+router.get('/likes', jwt({ secret: process.env.JWT_SECRET }), likes);
 
 app.use(router.routes());
 
@@ -74,6 +76,7 @@ function *signup() {
 
     yield knex.insert({
         uuid: uuid(),
+        username: submitted.username,
         email: submitted.email,
         password: hash,
     }).into('users'),
@@ -88,7 +91,8 @@ function *login() {
 
     var user = yield knex('users')
         .first('*')
-        .where('email', '=', submitted.email)
+        .where('email', '=', submitted.usernameOrEmail)
+        .orWhere('username', '=', submitted.usernameOrEmail)
 
     this.assert(user, 400, 'non registered email');
 
@@ -96,15 +100,52 @@ function *login() {
 
     this.assert(match, 400, 'invalid password');
 
-    var token = jwt.sign({ email: user.email, uuid: user.uuid }, process.env.JWT_SECRET);
+    var token = jwt.sign({ username: user.username, email: user.email, uuid: user.uuid }, process.env.JWT_SECRET);
 
     this.status = 200;
     this.body = { token: token };
 }
 
-function *protectedRoute() {
+function *me() {
     this.status = 200;
-    this.body = "Protected";
+    this.body = this.state.user;
+}
+
+function *addLike() {
+    var submitted = this.request.body;
+    var userUuid = this.state.user.uuid;
+
+    yield knex.insert({
+        user_uuid: userUuid,
+        track_id: submitted.trackId,
+        created_at: new Date(),
+    }).into('likes'),
+
+    this.status = 201;
+    this.body = {};
+}
+
+function *likes() {
+    var userUuid = this.state.user.uuid;
+
+    var likedTracks = yield knex.select('published_tracks.*', 'likes.created_at')
+        .from('likes')
+        .innerJoin('published_tracks', 'likes.track_id', 'published_tracks.soundcloudTrackId')
+        .orderBy('likes.created_at', 'asc')
+        .then(function (rows) {
+            return _.map(rows, function (row) {
+                console.log(row);
+                var track = row.track;
+                track.created_at = row.created_at;
+                track.id = row.soundcloudTrackId;
+                return track;
+            });
+        });
+
+    this.body = {
+        tracks: likedTracks,
+        next_href: ''
+    };
 }
 
 module.exports = app;
