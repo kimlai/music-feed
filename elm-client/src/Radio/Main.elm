@@ -15,7 +15,7 @@ import Task
 import Time exposing (Time)
 
 
-main : Program String
+main : Program { token : Maybe String, radioPlaylistJsonString : String }
 main =
     Navigation.programWithFlags urlParser
         { init = init
@@ -48,8 +48,8 @@ urlUpdate page model =
     )
 
 
-init : String -> Page Radio.Model.PlaylistId -> ( Radio.Model.Model, Cmd Msg )
-init radioPlaylistJsonString page =
+init : { token: Maybe String, radioPlaylistJsonString: String } -> Page Radio.Model.PlaylistId -> ( Radio.Model.Model, Cmd Msg )
+init { token, radioPlaylistJsonString } page =
     let
         model =
             { tracks = Dict.empty
@@ -61,6 +61,10 @@ init radioPlaylistJsonString page =
             , player = Player.initialize [ Radio, LatestTracks, CustomQueue ]
             , pages = pages
             , navigation = navigation
+            , signup = { username = "", email = "", password = "" }
+            , login = { usernameOrEmail = "", password = "" }
+            , token = token
+            , currentUser = Nothing
             }
         decodedRadioPayload =
             Json.Decode.decodeString (Api.decodePlaylist Api.decodeTrack) radioPlaylistJsonString
@@ -74,12 +78,20 @@ init radioPlaylistJsonString page =
                 ( model', command )
         ( model''', command'' ) =
             Update.update (FetchMore LatestTracks) model''
+        whoAmICmd =
+            case token of
+                Nothing ->
+                    Cmd.none
+                Just token ->
+                    Update.whoAmI token
+
     in
         model''' !
             [ command
             , command'
             , command''
             , Time.now |> Task.perform (\_ -> UpdateCurrentTimeFail) UpdateCurrentTime
+            , whoAmICmd
             ]
 
 
@@ -107,6 +119,8 @@ pages : List (Page Radio.Model.PlaylistId)
 pages =
     [ Model.Page "/" (Just Radio)
     , Model.Page "/latest" (Just LatestTracks)
+    , Model.Page "/sign-up" Nothing
+    , Model.Page "/log-in" Nothing
     ]
 
 

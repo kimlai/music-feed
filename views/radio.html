@@ -24,12 +24,20 @@
             function onYouTubeIframeAPIReady() {
                 var soundcloudClientId = '<%=client_id%>';
                 var playlist = <%=playlist%>;
-                var app = Elm.Radio.Main.fullscreen(JSON.stringify(playlist));
+                var token = window.localStorage.getItem('token');
+                var app = Elm.Radio.Main.fullscreen({
+                    token: token,
+                    radioPlaylistJsonString: JSON.stringify(playlist)
+                });
 
                 app = initializePlayer(soundcloudClientId, app);
 
                 app.ports.scroll.subscribe(function(offset) {
                     window.scrollBy(0, offset);
+                });
+
+                app.ports.storeToken.subscribe(function(token) {
+                    window.localStorage.setItem('token', token);
                 });
             }
         </script>

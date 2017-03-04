@@ -18,6 +18,32 @@ type alias Model =
     , player : Player PlaylistId TrackId
     , pages : List (Page PlaylistId)
     , navigation : List NavigationItem
+    , signup : SignupModel
+    , login : LoginModel
+    , token : Maybe Token
+    , currentUser : Maybe User
+    }
+
+
+type alias SignupModel =
+    { username : String
+    , email : String
+    , password : String
+    }
+
+
+type alias LoginModel =
+    { usernameOrEmail : String
+    , password : String
+    }
+
+
+type alias Token = String
+
+
+type alias User =
+    { username : String
+    , email : String
     }
 
 

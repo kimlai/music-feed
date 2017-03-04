@@ -7,6 +7,7 @@ import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Model exposing (Track, StreamingInfo(..), TrackId)
+import Radio.Model exposing (SignupModel, Token, User)
 import Task exposing (Task)
 
 
@@ -113,7 +114,7 @@ reportDeadTrack trackId =
         Http.defaultSettings
         { verb = "POST"
         , headers = [ ( "Content-Type", "application/json" ) ]
-        , url = "/report-dead-track"
+        , url = "/api/report-dead-track"
         , body = (reportDeadTrackBody trackId)
         }
         |> Http.fromJson (Json.Decode.succeed "ok")
@@ -125,3 +126,70 @@ reportDeadTrackBody trackId =
     |> Json.Encode.object
     |> Json.Encode.encode 0
     |> Http.string
+
+
+signup : SignupModel -> Task Http.Error String
+signup signupModel =
+    Http.send
+        Http.defaultSettings
+        { verb = "POST"
+        , headers = [ ( "Content-Type", "application/json" ) ]
+        , url = "/api/users"
+        , body = (signupBody signupModel)
+        }
+        |> Http.fromJson (Json.Decode.succeed "ok")
+
+
+signupBody : SignupModel -> Http.Body
+signupBody signupModel =
+    [ ( "username", Json.Encode.string signupModel.username )
+    , ( "email", Json.Encode.string signupModel.email )
+    , ( "password", Json.Encode.string signupModel.password )
+    ]
+    |> Json.Encode.object
+    |> Json.Encode.encode 0
+    |> Http.string
+
+
+login : String -> String -> Task Http.Error String
+login usernameOrEmail password =
+    Http.send
+        Http.defaultSettings
+        { verb = "POST"
+        , headers = [ ( "Content-Type", "application/json" ) ]
+        , url = "/api/login"
+        , body = (loginBody usernameOrEmail password)
+        }
+        |> Http.fromJson (Json.Decode.at ["token"] Json.Decode.string)
+
+
+loginBody : String -> String -> Http.Body
+loginBody usernameOrEmail password =
+    [ ( "usernameOrEmail", Json.Encode.string usernameOrEmail )
+    , ( "password", Json.Encode.string password )
+    ]
+    |> Json.Encode.object
+    |> Json.Encode.encode 0
+    |> Http.string
+
+
+me : String -> Task Http.Error User
+me token =
+    Http.send
+        Http.defaultSettings
+        { verb = "GET"
+        , headers =
+            [ ( "Content-Type", "application/json" )
+            , ( "Authorization", "Bearer " ++ token )
+            ]
+        , url = "/api/me"
+        , body = Http.empty
+        }
+        |> Http.fromJson decodeUser
+
+
+decodeUser : Json.Decode.Decoder User
+decodeUser =
+    Json.Decode.succeed User
+        |: ("username" := Json.Decode.string)
+        |: ("email" := Json.Decode.string)
