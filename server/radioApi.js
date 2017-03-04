@@ -20,7 +20,7 @@ router.get('/latest-tracks', latestTracks);
 router.post('/report-dead-track', reportDeadTrack);
 router.post('/users', signup);
 router.post('/login', login);
-router.get('/protected', jwt({ secret: process.env.JWT_SECRET }), protectedRoute);
+router.get('/me', jwt({ secret: process.env.JWT_SECRET }), me);
 
 app.use(router.routes());
 
@@ -104,9 +104,9 @@ function *login() {
     this.body = { token: token };
 }
 
-function *protectedRoute() {
+function *me() {
     this.status = 200;
-    this.body = "Protected";
+    this.body = this.state.user;
 }
 
 module.exports = app;
