@@ -1,11 +1,12 @@
 port module Feed.Main exposing (..)
 
 import Dict exposing (Dict)
-import Feed.Model as Model exposing (Model, PlaylistId(..))
+import Feed.Model exposing (Model, PlaylistId(..), Page(..))
 import Feed.Ports as Ports
 import Feed.Update as Update exposing (Msg(..))
 import Feed.View as View
 import Keyboard
+import Model
 import Navigation exposing (Location)
 import Player
 import PlayerEngine
@@ -29,10 +30,12 @@ init : String -> Location -> ( Model, Cmd Msg )
 init soundcloudClientId location =
     let
         page =
-            pages
-                |> List.filter ((==) location.pathname << .url)
-                |> List.head
-                |> Maybe.withDefault (Model.Page "/feed" (Just Feed))
+            case location.pathname of
+                "/feed" -> FeedPage
+                "/feed/saved-tracks" -> SavedTracksPage
+                "/feed/published-tracks" -> PublishedTracksPage
+                "/feed/publish-track" -> PublishNewTrackPage
+                _ -> PageNotFound
     in
         ( { tracks = Dict.empty
           , playlists = playlists
@@ -41,7 +44,6 @@ init soundcloudClientId location =
           , lastKeyPressed = Nothing
           , currentTime = Nothing
           , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist, CustomQueue ]
-          , pages = pages
           , navigation = navigation
           , soundcloudClientId = soundcloudClientId
           , youtubeTrackPublication = Nothing
@@ -69,28 +71,19 @@ subscriptions model =
         ]
 
 
-playlists : List Model.Playlist
+playlists : List Feed.Model.Playlist
 playlists =
-    [ Model.emptyPlaylist Feed "/feed/feed" "fake-url"
-    , Model.emptyPlaylist SavedTracks "/feed/saved_tracks" "/feed/save_track"
-    , Model.emptyPlaylist PublishedTracks "/feed/published_tracks" "/feed/publish_track"
-    , Model.emptyPlaylist Blacklist "/feed/blacklist" "/feed/blacklist"
+    [ Feed.Model.emptyPlaylist Feed "/feed/feed" "fake-url"
+    , Feed.Model.emptyPlaylist SavedTracks "/feed/saved_tracks" "/feed/save_track"
+    , Feed.Model.emptyPlaylist PublishedTracks "/feed/published_tracks" "/feed/publish_track"
+    , Feed.Model.emptyPlaylist Blacklist "/feed/blacklist" "/feed/blacklist"
     ]
 
 
-pages : List Model.Page
-pages =
-    [ Model.Page "/" (Just Feed)
-    , Model.Page "/feed/saved-tracks" (Just SavedTracks)
-    , Model.Page "/feed/published-tracks" (Just PublishedTracks)
-    , Model.Page "/feed/publish-track" Nothing
-    ]
-
-
-navigation : List Model.NavigationItem
+navigation : List (Model.NavigationItem Page PlaylistId)
 navigation =
-    [ Model.NavigationItem "Feed" "/feed"
-    , Model.NavigationItem "saved tracks" "/feed/saved-tracks"
-    , Model.NavigationItem "published tracks" "/feed/published-tracks"
-    , Model.NavigationItem "+" "/feed/publish-track"
+    [ Model.NavigationItem "Feed" "/feed" FeedPage (Just Feed)
+    , Model.NavigationItem "saved tracks" "/feed/saved-tracks" SavedTracksPage (Just SavedTracks)
+    , Model.NavigationItem "published tracks" "/feed/published-tracks" PublishedTracksPage (Just PublishedTracks)
+    , Model.NavigationItem "+" "/feed/publish-track" PublishNewTrackPage Nothing
     ]

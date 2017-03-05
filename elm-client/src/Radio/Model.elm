@@ -28,12 +28,6 @@ type alias Playlist =
     }
 
 
-type Page
-    = RadioPage
-    | LatestTracksPage
-    | PageNotFound
-
-
 emptyPlaylist : PlaylistId -> String -> String -> Playlist
 emptyPlaylist id fetchUrl addTrackUrl =
     { id = id
@@ -41,6 +35,12 @@ emptyPlaylist id fetchUrl addTrackUrl =
     , nextLink = fetchUrl
     , addTrackUrl = addTrackUrl
     }
+
+
+type Page
+    = RadioPage
+    | LatestTracksPage
+    | PageNotFound
 
 
 type PlaylistId

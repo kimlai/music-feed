@@ -5,7 +5,7 @@ import Api
 import Char
 import Date
 import Dict
-import Feed.Model as Model exposing (Model, PlaylistId(..), Page)
+import Feed.Model as Model exposing (Model, PlaylistId(..), Page(..))
 import Feed.Ports as Ports
 import Http
 import Keyboard
@@ -198,10 +198,12 @@ update message model =
         ChangePage url ->
             let
                 newPage =
-                    model.pages
-                        |> List.filter ((==) url << .url)
-                        |> List.head
-                        |> Maybe.withDefault (Page "/feed" (Just Feed))
+                    case url of
+                        "/feed" -> FeedPage
+                        "/feed/saved-tracks" -> SavedTracksPage
+                        "/feed/published-tracks" -> PublishedTracksPage
+                        "/feed/publish-track" -> PublishNewTrackPage
+                        _ -> PageNotFound
             in
                 ( { model | currentPage = newPage }
                 , Cmd.none
@@ -369,46 +371,42 @@ update message model =
                     update Rewind model
 
                 'L' ->
-                    case model.currentPage.playlist of
-                        Just playlistId ->
-                            case playlistId of
-                                Feed ->
-                                    update (ChangePage "/saved-tracks") model
+                    case model.currentPage of
+                        FeedPage ->
+                            update (ChangePage "/saved-tracks") model
 
-                                SavedTracks ->
-                                    update (ChangePage "/published-tracks") model
+                        SavedTracksPage ->
+                            update (ChangePage "/published-tracks") model
 
-                                PublishedTracks ->
-                                    update (ChangePage "/") model
+                        PublishedTracksPage ->
+                            update (ChangePage "/") model
 
-                                _ ->
-                                    ( model, Cmd.none )
-                        Nothing ->
-                            (model, Cmd.none)
+                        _ ->
+                            ( model, Cmd.none )
 
                 'H' ->
-                    case model.currentPage.playlist of
-                        Just playlistId ->
-                            case playlistId of
-                                Feed ->
-                                    update (ChangePage "/published-tracks") model
+                    case model.currentPage of
+                        FeedPage ->
+                            update (ChangePage "/published-tracks") model
 
-                                SavedTracks ->
-                                    update (ChangePage "/") model
+                        SavedTracksPage ->
+                            update (ChangePage "/") model
 
-                                PublishedTracks ->
-                                    update (ChangePage "/saved-tracks") model
+                        PublishedTracksPage ->
+                            update (ChangePage "/saved-tracks") model
 
-                                _ ->
-                                    ( model, Cmd.none )
-                        Nothing ->
-                            (model, Cmd.none)
+                        _ ->
+                            ( model, Cmd.none )
 
                 'm' ->
-                    case model.currentPage.playlist of
-                        Just id ->
-                            update (FetchMore id) model
-                        Nothing ->
+                    case model.currentPage of
+                        FeedPage ->
+                            update (FetchMore Feed) model
+                        SavedTracksPage ->
+                            update (FetchMore SavedTracks) model
+                        PublishedTracksPage ->
+                            update (FetchMore PublishedTracks) model
+                        _ ->
                             ( model, Cmd.none )
 
                 'b' ->

@@ -5,7 +5,7 @@ import Date exposing (Date)
 import Dict exposing (Dict)
 import Player exposing (Player)
 import Time exposing (Time)
-import Model exposing (Track, TrackId)
+import Model exposing (Track, TrackId, NavigationItem)
 
 
 type alias Model =
@@ -16,21 +16,9 @@ type alias Model =
     , lastKeyPressed : Maybe Char
     , currentTime : Maybe Time
     , player : Player PlaylistId TrackId
-    , pages : List Page
-    , navigation : List NavigationItem
+    , navigation : List (NavigationItem Page PlaylistId)
     , soundcloudClientId : String
     , youtubeTrackPublication : Maybe Track
-    }
-
-
-type alias NavigationItem =
-    { displayName : String
-    , href : String
-    }
-
-type alias Page =
-    { url : String
-    , playlist : Maybe PlaylistId
     }
 
 
@@ -49,6 +37,14 @@ emptyPlaylist id fetchUrl addTrackUrl =
     , nextLink = fetchUrl
     , addTrackUrl = addTrackUrl
     }
+
+
+type Page
+    = FeedPage
+    | SavedTracksPage
+    | PublishedTracksPage
+    | PublishNewTrackPage
+    | PageNotFound
 
 
 type PlaylistId

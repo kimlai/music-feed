@@ -36,8 +36,3 @@ type alias NavigationItem page playlist =
     , page : page
     , playlist : Maybe playlist
     }
-
-type alias Page a =
-    { url : String
-    , playlist : Maybe a
-    }

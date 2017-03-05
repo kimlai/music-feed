@@ -2,7 +2,7 @@ module Feed.View exposing (..)
 
 import Date exposing (Date)
 import Dict exposing (Dict)
-import Feed.Model as Model exposing (Model, Playlist, PlaylistId(..))
+import Feed.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..))
 import Feed.Update exposing (Msg(..))
 import Html exposing (Html, a, nav, li, ul, text, div, img, input, label, form, button)
 import Html.Attributes exposing (class, classList, href, src, style, value, id, type_)
@@ -17,39 +17,54 @@ import View
 
 view : Model -> Html Msg
 view model =
+    let
+        getPlaylist id =
+            List.filter ((==) id << .id) model.playlists
+                |> List.head
+    in
     div
         []
         [ View.viewGlobalPlayer TogglePlayback Next SeekTo (Model.currentTrack model) model.playing
         , View.viewNavigation
             ChangePage
             model.navigation
-            model.pages
             model.currentPage
             (Player.currentPlaylist model.player)
         , viewCustomQueue model.tracks (Player.playlistContent CustomQueue model.player)
         , div
             [ class "playlist-container" ]
-            [ case model.currentPage.playlist of
-                Just id ->
-                    let
-                        currentPagePlaylist =
-                            List.filter ((==) id << .id) model.playlists
-                                |> List.head
-                    in
-                        case currentPagePlaylist of
-                            Just playlist ->
-                                viewPlaylist
-                                    model.currentTime
-                                    model.tracks playlist
-                                    (Player.playlistContent id model.player)
-                            Nothing ->
-                                div [] [ text "Well, this is awkward..." ]
-                Nothing ->
-                    case model.currentPage.url of
-                        "/feed/publish-track" ->
-                            viewPublishTrack model.youtubeTrackPublication
-                        _ ->
-                            div [] [ text "404" ]
+            [ case model.currentPage of
+                FeedPage ->
+                    case getPlaylist Feed of
+                        Just playlist ->
+                            viewPlaylist
+                                model.currentTime
+                                model.tracks playlist
+                                (Player.playlistContent Feed model.player)
+                        Nothing ->
+                            div [] [ text "Well, this is awkward..." ]
+                SavedTracksPage ->
+                    case getPlaylist SavedTracks of
+                        Just playlist ->
+                            viewPlaylist
+                                model.currentTime
+                                model.tracks playlist
+                                (Player.playlistContent SavedTracks model.player)
+                        Nothing ->
+                            div [] [ text "Well, this is awkward..." ]
+                PublishedTracksPage ->
+                    case getPlaylist PublishedTracks of
+                        Just playlist ->
+                            viewPlaylist
+                                model.currentTime
+                                model.tracks playlist
+                                (Player.playlistContent PublishedTracks model.player)
+                        Nothing ->
+                            div [] [ text "Well, this is awkward..." ]
+                PublishNewTrackPage ->
+                    viewPublishTrack model.youtubeTrackPublication
+                PageNotFound ->
+                    div [] [ text "404" ]
 
             ]
         ]

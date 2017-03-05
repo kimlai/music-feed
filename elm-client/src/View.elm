@@ -6,7 +6,7 @@ import Html.Attributes exposing (class, src, classList, style, href)
 import Html.Events exposing (onClick, onWithOptions, on)
 import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
-import Model exposing (Track, Page, NavigationItem, Page)
+import Model exposing (Track, NavigationItem)
 
 
 viewGlobalPlayer : msg ->msg -> (Float -> msg) -> Maybe Track -> Bool -> Html msg
@@ -153,7 +153,7 @@ viewNavigationItem changePage currentPage currentPlaylist navigationItem =
         [ a
             ( classList
                 [ ( "active", navigationItem.page == currentPage )
-                , ( "playing", navigationItem.playlist == currentPlaylist )
+                , ( "playing", navigationItem.playlist /= Nothing && navigationItem.playlist == currentPlaylist )
                 ]
             :: [ href navigationItem.href ]
             )
