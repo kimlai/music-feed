@@ -5,19 +5,18 @@ import Date exposing (Date)
 import Dict exposing (Dict)
 import Player exposing (Player)
 import Time exposing (Time)
-import Model exposing (Track, TrackId, NavigationItem, Page)
+import Model exposing (Track, TrackId, NavigationItem)
 
 
 type alias Model =
     { tracks : Dict TrackId Track
     , playlists : List Playlist
     , playing : Bool
-    , currentPage : Page PlaylistId
+    , currentPage : Page
     , lastKeyPressed : Maybe Char
     , currentTime : Maybe Time
     , player : Player PlaylistId TrackId
-    , pages : List (Page PlaylistId)
-    , navigation : List NavigationItem
+    , navigation : List (NavigationItem Page PlaylistId)
     }
 
 
@@ -27,6 +26,12 @@ type alias Playlist =
     , nextLink : String
     , addTrackUrl : String
     }
+
+
+type Page
+    = RadioPage
+    | LatestTracksPage
+    | PageNotFound
 
 
 emptyPlaylist : PlaylistId -> String -> String -> Playlist

@@ -6,10 +6,10 @@ import Char
 import Dict
 import Http
 import Keyboard
-import Model exposing (Track, TrackId, StreamingInfo(..), Page)
+import Model exposing (Track, TrackId, StreamingInfo(..))
 import Player
 import PlayerEngine
-import Radio.Model as Model exposing (Model, PlaylistId(..))
+import Radio.Model as Model exposing (Model, PlaylistId(..), Page(..))
 import Radio.Ports as Ports
 import Task exposing (Task)
 import Time exposing (Time)
@@ -177,10 +177,10 @@ update message model =
         ChangePage url ->
             let
                 newPage =
-                    model.pages
-                        |> List.filter ((==) url << .url)
-                        |> List.head
-                        |> Maybe.withDefault (Page "/" (Just Radio))
+                    case url of
+                        "/" -> RadioPage
+                        "/latest" -> LatestTracksPage
+                        _ -> PageNotFound
             in
                 ( { model | currentPage = newPage }
                 , Cmd.none
@@ -214,13 +214,6 @@ update message model =
 
                 'h' ->
                     update Rewind model
-
-                'm' ->
-                    case model.currentPage.playlist of
-                        Just id ->
-                            update (FetchMore id) model
-                        Nothing ->
-                            ( model, Cmd.none )
 
                 'j' ->
                     ( model

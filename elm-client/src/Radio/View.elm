@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, classList, href, src, style, target)
 import Json.Decode
 import Html.Events exposing (onClick, onWithOptions)
 import Model exposing (Track, TrackId, StreamingInfo(..))
-import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..))
+import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..))
 import Regex
 import Player
 import Time exposing (Time)
@@ -24,37 +24,34 @@ view model =
         , View.viewNavigation
             ChangePage
             model.navigation
-            model.pages
             model.currentPage
             (Player.currentPlaylist model.player)
         , div
             []
-            [ case model.currentPage.playlist of
-                Just id ->
-                    case id of
-                        Radio ->
-                            let
-                                currentRadioTrack =
-                                    Player.currentTrackOfPlaylist Radio model.player
-                                        |> Maybe.andThen ((flip Dict.get) model.tracks)
-                            in
-                                viewRadioTrack currentRadioTrack (Player.currentPlaylist model.player)
-                        _ ->
-                            let
-                                currentPagePlaylist =
-                                    List.filter ((==) id << .id) model.playlists
-                                        |> List.head
-                            in
-                                case currentPagePlaylist of
-                                    Just playlist ->
-                                        viewLatestTracks
-                                            (Player.currentTrack model.player)
-                                            model.currentTime
-                                            model.tracks playlist
-                                            (Player.playlistContent id model.player)
-                                    Nothing ->
-                                        div [] [ text "Well, this is awkward..." ]
-                Nothing ->
+            [ case model.currentPage of
+                RadioPage ->
+                    let
+                        currentRadioTrack =
+                            Player.currentTrackOfPlaylist Radio model.player
+                                |> Maybe.andThen ((flip Dict.get) model.tracks)
+                    in
+                        viewRadioTrack currentRadioTrack (Player.currentPlaylist model.player)
+                LatestTracksPage ->
+                    let
+                        latestTracksPlaylist =
+                            List.filter ((==) LatestTracks << .id) model.playlists
+                                |> List.head
+                    in
+                        case latestTracksPlaylist of
+                            Just playlist ->
+                                viewLatestTracks
+                                    (Player.currentTrack model.player)
+                                    model.currentTime
+                                    model.tracks playlist
+                                    (Player.playlistContent LatestTracks model.player)
+                            Nothing ->
+                                div [] [ text "Well, this is awkward..." ]
+                PageNotFound ->
                     div [] [ text "404" ]
 
             ]

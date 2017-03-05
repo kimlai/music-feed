@@ -30,9 +30,11 @@ type StreamingInfo
 type alias StreamUrl = String
 
 
-type alias NavigationItem =
+type alias NavigationItem page playlist =
     { displayName : String
     , href : String
+    , page : page
+    , playlist : Maybe playlist
     }
 
 type alias Page a =

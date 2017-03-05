@@ -8,7 +8,7 @@ import Model exposing (Page)
 import Navigation exposing (Location)
 import Player
 import PlayerEngine
-import Radio.Model exposing (Model, PlaylistId(..))
+import Radio.Model exposing (Model, PlaylistId(..), Page(..))
 import Radio.Update as Update exposing (Msg(..))
 import Radio.View as View
 import Task
@@ -31,10 +31,10 @@ init : String -> Location -> ( Radio.Model.Model, Cmd Msg )
 init radioPlaylistJsonString location =
     let
         page =
-            pages
-                |> List.filter ((==) location.pathname << .url)
-                |> List.head
-                |> Maybe.withDefault (Page "/" (Just Radio))
+            case location.pathname of
+                "/" -> RadioPage
+                "/latest" -> LatestTracksPage
+                _ -> PageNotFound
         model =
             { tracks = Dict.empty
             , playlists = playlists
@@ -43,7 +43,6 @@ init radioPlaylistJsonString location =
             , lastKeyPressed = Nothing
             , currentTime = Nothing
             , player = Player.initialize [ Radio, LatestTracks, CustomQueue ]
-            , pages = pages
             , navigation = navigation
             }
         decodedRadioPayload =
@@ -52,7 +51,7 @@ init radioPlaylistJsonString location =
         ( model_, command ) =
             Update.update (FetchedMore Radio (Ok decodedRadioPayload)) model
         ( model__, command_ ) =
-            if page.playlist == Just Radio then
+            if page == RadioPage then
                 Update.update (PlayFromPlaylist Radio 0) model_
             else
                 ( model_, command )
@@ -87,15 +86,8 @@ playlists =
     ]
 
 
-pages : List (Page Radio.Model.PlaylistId)
-pages =
-    [ Model.Page "/" (Just Radio)
-    , Model.Page "/latest" (Just LatestTracks)
-    ]
-
-
-navigation : List Model.NavigationItem
+navigation : List (Model.NavigationItem Radio.Model.Page PlaylistId)
 navigation =
-    [ Model.NavigationItem "Radio" "/"
-    , Model.NavigationItem "Latest Tracks" "/latest"
+    [ Model.NavigationItem "Radio" "/" RadioPage (Just Radio)
+    , Model.NavigationItem "Latest Tracks" "/latest" LatestTracksPage (Just LatestTracks)
     ]

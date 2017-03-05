@@ -131,24 +131,17 @@ decodeElement =
         |: (field "offsetParent" (Json.Decode.nullable (Json.Decode.lazy (\_ -> decodeElement))))
 
 
-viewNavigation : (String -> msg) -> List NavigationItem -> List (Page a) -> Page a -> Maybe a -> Html msg
-viewNavigation changePage navigationItems pages currentPage currentPlaylist =
-    let
-        currentPlaylistPage =
-            pages
-                |> List.filter ((/=) Nothing << .playlist)
-                |> List.filter ((==) currentPlaylist << .playlist)
-                |> List.head
-    in
-        navigationItems
-            |> List.map (viewNavigationItem changePage currentPage currentPlaylistPage)
-            |> ul []
-            |> List.repeat 1
-            |> nav [ class "navigation" ]
+viewNavigation : (String -> msg) -> List (NavigationItem page playlist) -> page -> Maybe playlist -> Html msg
+viewNavigation changePage navigationItems currentPage currentPlaylist =
+    navigationItems
+        |> List.map (viewNavigationItem changePage currentPage currentPlaylist)
+        |> ul []
+        |> List.repeat 1
+        |> nav [ class "navigation" ]
 
 
-viewNavigationItem : (String -> msg) -> Page a -> Maybe (Page a) -> NavigationItem -> Html msg
-viewNavigationItem changePage currentPage currentPlaylistPage navigationItem =
+viewNavigationItem : (String -> msg) -> page -> Maybe playlist -> NavigationItem page playlist -> Html msg
+viewNavigationItem changePage currentPage currentPlaylist navigationItem =
     li
         [ onWithOptions
             "click"
@@ -159,8 +152,8 @@ viewNavigationItem changePage currentPage currentPlaylistPage navigationItem =
         ]
         [ a
             ( classList
-                [ ( "active", navigationItem.href == currentPage.url )
-                , ( "playing", Just navigationItem.href == Maybe.map .url currentPlaylistPage )
+                [ ( "active", navigationItem.page == currentPage )
+                , ( "playing", navigationItem.playlist == currentPlaylist )
                 ]
             :: [ href navigationItem.href ]
             )
