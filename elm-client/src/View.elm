@@ -132,23 +132,23 @@ decodeElement =
 
 
 viewNavigation : (String -> msg) -> List (NavigationItem page playlist) -> page -> Maybe playlist -> Html msg
-viewNavigation changePage navigationItems currentPage currentPlaylist =
+viewNavigation followLink navigationItems currentPage currentPlaylist =
     navigationItems
-        |> List.map (viewNavigationItem changePage currentPage currentPlaylist)
+        |> List.map (viewNavigationItem followLink currentPage currentPlaylist)
         |> ul []
         |> List.repeat 1
         |> nav [ class "navigation" ]
 
 
 viewNavigationItem : (String -> msg) -> page -> Maybe playlist -> NavigationItem page playlist -> Html msg
-viewNavigationItem changePage currentPage currentPlaylist navigationItem =
+viewNavigationItem followLink currentPage currentPlaylist navigationItem =
     li
         [ onWithOptions
             "click"
             { stopPropagation = False
             , preventDefault = True
             }
-            (Json.Decode.succeed (changePage navigationItem.href))
+            (Json.Decode.succeed (followLink navigationItem.href))
         ]
         [ a
             ( classList

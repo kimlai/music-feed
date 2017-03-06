@@ -17,7 +17,7 @@ import Time exposing (Time)
 main : Program String Model Msg
 main =
     Navigation.programWithFlags
-        (\location -> ChangePage location.pathname)
+        (\location -> NavigateTo (route location))
         { init = init
         , view = View.view
         , update = Update.update
@@ -25,35 +25,35 @@ main =
         }
 
 
+route : Location -> Page
+route location =
+    case location.pathname of
+        "/feed" -> FeedPage
+        "/feed/saved-tracks" -> SavedTracksPage
+        "/feed/published-tracks" -> PublishedTracksPage
+        "/feed/publish-track" -> PublishNewTrackPage
+        _ -> PageNotFound
+
 
 init : String -> Location -> ( Model, Cmd Msg )
 init soundcloudClientId location =
-    let
-        page =
-            case location.pathname of
-                "/feed" -> FeedPage
-                "/feed/saved-tracks" -> SavedTracksPage
-                "/feed/published-tracks" -> PublishedTracksPage
-                "/feed/publish-track" -> PublishNewTrackPage
-                _ -> PageNotFound
-    in
-        ( { tracks = Dict.empty
-          , playlists = playlists
-          , playing = False
-          , currentPage = page
-          , lastKeyPressed = Nothing
-          , currentTime = Nothing
-          , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist, CustomQueue ]
-          , navigation = navigation
-          , soundcloudClientId = soundcloudClientId
-          , youtubeTrackPublication = Nothing
-        }
-        , Cmd.batch
-            (List.append
-                (List.map Update.fetchMore playlists)
-                [Time.now |> Task.perform UpdateCurrentTime]
-            )
+    ( { tracks = Dict.empty
+      , playlists = playlists
+      , playing = False
+      , currentPage = route location
+      , lastKeyPressed = Nothing
+      , currentTime = Nothing
+      , player = Player.initialize [ Feed, SavedTracks, PublishedTracks, Blacklist, CustomQueue ]
+      , navigation = navigation
+      , soundcloudClientId = soundcloudClientId
+      , youtubeTrackPublication = Nothing
+    }
+    , Cmd.batch
+        (List.append
+            (List.map Update.fetchMore playlists)
+            [Time.now |> Task.perform UpdateCurrentTime]
         )
+    )
 
 
 

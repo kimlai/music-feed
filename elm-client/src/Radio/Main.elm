@@ -18,7 +18,7 @@ import Time exposing (Time)
 main : Program String Model Msg
 main =
     Navigation.programWithFlags
-        (\location -> ChangePage location.pathname)
+        (\location -> NavigateTo (route location))
         { init = init
         , view = View.view
         , update = Update.update
@@ -26,21 +26,23 @@ main =
         }
 
 
+route : Location -> Page
+route location =
+    case location.pathname of
+        "/" -> RadioPage
+        "/latest" -> LatestTracksPage
+        _ -> PageNotFound
+
 
 init : String -> Location -> ( Radio.Model.Model, Cmd Msg )
 init radioPlaylistJsonString location =
     let
-        page =
-            case location.pathname of
-                "/" -> RadioPage
-                "/latest" -> LatestTracksPage
-                _ -> PageNotFound
         model =
             { tracks = Dict.empty
             , radio = Radio.Model.emptyPlaylist Radio "/api/playlist" "fake-url"
             , latestTracks = Radio.Model.emptyPlaylist LatestTracks "/api/latest-tracks" "fake-url"
             , playing = False
-            , currentPage = page
+            , currentPage = route location
             , lastKeyPressed = Nothing
             , currentTime = Nothing
             , player = Player.initialize [ Radio, LatestTracks ]
@@ -52,7 +54,7 @@ init radioPlaylistJsonString location =
         ( model_, command ) =
             Update.update (FetchedMore Radio (Ok decodedRadioPayload)) model
         ( model__, command_ ) =
-            if page == RadioPage then
+            if route location == RadioPage then
                 Update.update (PlayFromPlaylist Radio 0) model_
             else
                 ( model_, command )

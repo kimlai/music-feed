@@ -33,7 +33,8 @@ type Msg
     | MoveToPlaylistFail Http.Error
     | MoveToPlaylistSuccess
     | BlacklistTrack TrackId
-    | ChangePage String
+    | NavigateTo Page
+    | FollowLink String
     | KeyPressed Keyboard.KeyCode
     | UpdateCurrentTime Time
     | UpdateCurrentTimeFail
@@ -195,19 +196,15 @@ update message model =
             , Cmd.none
             )
 
-        ChangePage url ->
-            let
-                newPage =
-                    case url of
-                        "/feed" -> FeedPage
-                        "/feed/saved-tracks" -> SavedTracksPage
-                        "/feed/published-tracks" -> PublishedTracksPage
-                        "/feed/publish-track" -> PublishNewTrackPage
-                        _ -> PageNotFound
-            in
-                ( { model | currentPage = newPage }
-                , Cmd.none
-                )
+        NavigateTo page ->
+            ( { model | currentPage = page }
+            , Cmd.none
+            )
+
+        FollowLink url ->
+            ( model
+            , Navigation.newUrl url
+            )
 
         SeekTo positionInPercentage ->
             ( model
@@ -280,7 +277,7 @@ update message model =
                 ( model__, command ) =
                     update (MoveToPlaylist PublishedTracks track.id) model_
                 ( model___, command_ ) =
-                    update (ChangePage "published-tracks") model__
+                    update (NavigateTo PublishedTracksPage) model__
             in
                 model___ ! [ command, command_ ]
 
@@ -352,7 +349,7 @@ update message model =
                 ( model__, command ) =
                     update (MoveToPlaylist PublishedTracks track.id) model_
                 ( model___, command_ ) =
-                    update (ChangePage "published-tracks") model__
+                    update (NavigateTo PublishedTracksPage) model__
             in
                 model___ ! [ command, command_ ]
 
@@ -373,13 +370,13 @@ update message model =
                 'L' ->
                     case model.currentPage of
                         FeedPage ->
-                            update (ChangePage "/saved-tracks") model
+                            update (NavigateTo SavedTracksPage) model
 
                         SavedTracksPage ->
-                            update (ChangePage "/published-tracks") model
+                            update (NavigateTo PublishedTracksPage) model
 
                         PublishedTracksPage ->
-                            update (ChangePage "/") model
+                            update (NavigateTo FeedPage) model
 
                         _ ->
                             ( model, Cmd.none )
@@ -387,13 +384,13 @@ update message model =
                 'H' ->
                     case model.currentPage of
                         FeedPage ->
-                            update (ChangePage "/published-tracks") model
+                            update (NavigateTo PublishedTracksPage) model
 
                         SavedTracksPage ->
-                            update (ChangePage "/") model
+                            update (NavigateTo FeedPage) model
 
                         PublishedTracksPage ->
-                            update (ChangePage "/saved-tracks") model
+                            update (NavigateTo SavedTracksPage) model
 
                         _ ->
                             ( model, Cmd.none )

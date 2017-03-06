@@ -26,7 +26,7 @@ view model =
         []
         [ View.viewGlobalPlayer TogglePlayback Next SeekTo (Model.currentTrack model) model.playing
         , View.viewNavigation
-            ChangePage
+            FollowLink
             model.navigation
             model.currentPage
             (Player.currentPlaylist model.player)

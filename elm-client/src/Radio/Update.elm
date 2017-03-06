@@ -7,6 +7,7 @@ import Dict
 import Http
 import Keyboard
 import Model exposing (Track, TrackId, StreamingInfo(..))
+import Navigation
 import Player
 import PlayerEngine
 import Radio.Model as Model exposing (Model, PlaylistId(..), Page(..))
@@ -24,7 +25,8 @@ type Msg
     | TrackError TrackId
     | FastForward
     | Rewind
-    | ChangePage String
+    | FollowLink String
+    | NavigateTo Page
     | KeyPressed Keyboard.KeyCode
     | UpdateCurrentTime Time
     | PlayFromPlaylist PlaylistId Int
@@ -157,17 +159,15 @@ update message model =
             , Cmd.none
             )
 
-        ChangePage url ->
-            let
-                newPage =
-                    case url of
-                        "/" -> RadioPage
-                        "/latest" -> LatestTracksPage
-                        _ -> PageNotFound
-            in
-                ( { model | currentPage = newPage }
-                , Cmd.none
-                )
+        NavigateTo page ->
+            ( { model | currentPage = page }
+            , Cmd.none
+            )
+
+        FollowLink url ->
+            ( model
+            , Navigation.newUrl url
+            )
 
         SeekTo positionInPercentage ->
             ( model
