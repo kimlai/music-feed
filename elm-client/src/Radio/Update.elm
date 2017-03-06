@@ -27,9 +27,7 @@ type Msg
     | ChangePage String
     | KeyPressed Keyboard.KeyCode
     | UpdateCurrentTime Time
-    | PlayFromCustomQueue Int Track
     | PlayFromPlaylist PlaylistId Int
-    | AddToCustomQueue TrackId
     | FetchMore PlaylistId
     | FetchedMore PlaylistId (Result Http.Error ( List Track, String ))
     | ReportedDeadTrack (Result Http.Error String)
@@ -43,28 +41,29 @@ update message model =
         FetchedMore playlistId (Ok ( tracks, nextLink )) ->
             let
                 updatePlaylist playlist =
-                    if playlist.id == playlistId then
-                        { playlist
-                        | nextLink = nextLink
-                        , loading = False
-                        }
-                    else
-                        playlist
-                updatedPlaylists =
-                    List.map updatePlaylist model.playlists
+                    { playlist | nextLink = nextLink
+                    , loading = False
+                    }
                 updatedTracks =
                     tracks
                         |> List.map (\track -> ( track.id, track ))
                         |> Dict.fromList
                         |> Dict.union model.tracks
+                updatedModel =
+                    { model
+                    | tracks = updatedTracks
+                    , player = Player.appendTracksToPlaylist playlistId (List.map .id tracks) model.player
+                    }
             in
-                ( { model
-                  | playlists = updatedPlaylists
-                  , tracks = updatedTracks
-                  , player = Player.appendTracksToPlaylist playlistId (List.map .id tracks) model.player
-                  }
-                , Cmd.none
-                )
+                case playlistId of
+                    Radio ->
+                        ( { updatedModel | radio = updatePlaylist model.radio }
+                        , Cmd.none
+                        )
+                    LatestTracks ->
+                        ( { updatedModel | latestTracks = updatePlaylist model.latestTracks }
+                        , Cmd.none
+                        )
 
         FetchedMore playlistId (Err error)->
             ( model, Cmd.none )
@@ -83,28 +82,20 @@ update message model =
                 msg
                 { model | player = player}
 
-        AddToCustomQueue trackId ->
-            ( { model | player = Player.appendTracksToPlaylist CustomQueue [ trackId ] model.player}
-            , Cmd.none
-            )
-
         FetchMore playlistId ->
             let
-                updatePlaylist playlist =
-                    if playlist.id == playlistId then
-                        { playlist | loading = True }
-                    else
-                        playlist
-                updatedPlaylists =
-                    List.map updatePlaylist model.playlists
-                fetchMoreHelp playlist =
-                    if playlist.id == playlistId then
-                        fetchMore playlist
-                    else
-                        Cmd.none
+                markAsLoading playlist =
+                    { playlist | loading = True }
             in
-                { model | playlists = updatedPlaylists }
-                ! List.map fetchMoreHelp model.playlists
+                case playlistId of
+                    Radio ->
+                        ( { model | radio = markAsLoading model.radio }
+                        , fetchMore model.radio
+                        )
+                    LatestTracks ->
+                        ( { model | latestTracks = markAsLoading model.latestTracks }
+                        , fetchMore model.latestTracks
+                        )
 
         UpdateCurrentTime newTime ->
             ( { model | currentTime = Just newTime }, Cmd.none )
@@ -154,14 +145,6 @@ update message model =
             update
                 Play
                 { model | player = Player.next model.player }
-
-        PlayFromCustomQueue position track ->
-            ( { model
-                | playing = True
-                , player = Player.select CustomQueue position model.player
-              }
-            , PlayerEngine.play track
-            )
 
         TrackProgress ( trackId, progress, currentTime ) ->
             ( { model

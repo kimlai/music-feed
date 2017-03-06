@@ -37,12 +37,13 @@ init radioPlaylistJsonString location =
                 _ -> PageNotFound
         model =
             { tracks = Dict.empty
-            , playlists = playlists
+            , radio = Radio.Model.emptyPlaylist Radio "/api/playlist" "fake-url"
+            , latestTracks = Radio.Model.emptyPlaylist LatestTracks "/api/latest-tracks" "fake-url"
             , playing = False
             , currentPage = page
             , lastKeyPressed = Nothing
             , currentTime = Nothing
-            , player = Player.initialize [ Radio, LatestTracks, CustomQueue ]
+            , player = Player.initialize [ Radio, LatestTracks ]
             , navigation = navigation
             }
         decodedRadioPayload =

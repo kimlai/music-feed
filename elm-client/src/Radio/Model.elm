@@ -10,7 +10,8 @@ import Model exposing (Track, TrackId, NavigationItem)
 
 type alias Model =
     { tracks : Dict TrackId Track
-    , playlists : List Playlist
+    , radio : Playlist
+    , latestTracks : Playlist
     , playing : Bool
     , currentPage : Page
     , lastKeyPressed : Maybe Char
@@ -46,13 +47,6 @@ type Page
 type PlaylistId
     = Radio
     | LatestTracks
-    | CustomQueue
-
-
-currentPlaylist : Model -> Maybe Playlist
-currentPlaylist model =
-    List.filter ((==) (Player.currentPlaylist model.player) << Just << .id) model.playlists
-        |> List.head
 
 
 currentTrack : Model -> Maybe Track

@@ -37,20 +37,12 @@ view model =
                     in
                         viewRadioTrack currentRadioTrack (Player.currentPlaylist model.player)
                 LatestTracksPage ->
-                    let
-                        latestTracksPlaylist =
-                            List.filter ((==) LatestTracks << .id) model.playlists
-                                |> List.head
-                    in
-                        case latestTracksPlaylist of
-                            Just playlist ->
-                                viewLatestTracks
-                                    (Player.currentTrack model.player)
-                                    model.currentTime
-                                    model.tracks playlist
-                                    (Player.playlistContent LatestTracks model.player)
-                            Nothing ->
-                                div [] [ text "Well, this is awkward..." ]
+                    viewLatestTracks
+                        (Player.currentTrack model.player)
+                        model.currentTime
+                        model.tracks
+                        model.latestTracks
+                        (Player.playlistContent LatestTracks model.player)
                 PageNotFound ->
                     div [] [ text "404" ]
 
@@ -98,29 +90,6 @@ viewRadioTrack track currentPlaylist =
                         ]
                     ]
                 ]
-
-
-viewCustomQueue : Dict TrackId Track -> List TrackId -> Html Msg
-viewCustomQueue tracks queue =
-    queue
-        |> List.filterMap (\trackId -> Dict.get trackId tracks)
-        |> List.indexedMap (viewCustomPlaylistItem)
-        |> div [ class "custom-queue" ]
-
-
-viewCustomPlaylistItem : Int -> Track -> Html Msg
-viewCustomPlaylistItem position track =
-    div
-        [ class "custom-queue-track"
-        , onClick (PlayFromCustomQueue position track)
-        ]
-        [ img [ src track.artwork_url ] []
-        , div
-            [ class "track-info" ]
-            [ div [] [ text track.artist ]
-            , div [] [ text track.title ]
-            ]
-        ]
 
 
 viewLatestTracks : Maybe TrackId -> Maybe Time -> Dict TrackId Track -> Playlist -> List TrackId -> Html Msg
