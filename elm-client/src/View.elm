@@ -13,30 +13,7 @@ viewGlobalPlayer : msg ->msg -> (Float -> msg) -> Maybe Track -> Bool -> Html ms
 viewGlobalPlayer tooglePlayback next seekTo track playing =
     case track of
         Nothing ->
-            div
-                [ class "global-player" ]
-                [ div
-                    [ class "controls" ]
-                    [ div
-                        [ class "playback-button" ]
-                        [ text "Play" ]
-                    , div
-                        [ class "next-button" ]
-                        [ text "Next" ]
-                    ]
-                , img [ src "images/placeholder.jpg" ] []
-                , div
-                    [ class "track-info" ]
-                    []
-                , div
-                    [ class "progress-bar" ]
-                    [ div [ class "outer" ] []
-                    ]
-                , div
-                    [ class "actions" ]
-                    []
-                ]
-
+            text ""
         Just track ->
             div
                 [ class "global-player" ]
