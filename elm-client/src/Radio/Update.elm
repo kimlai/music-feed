@@ -4,7 +4,8 @@ module Radio.Update exposing (..)
 import Api
 import Char
 import Dict
-import Http
+import Http exposing (Error(..))
+import Json.Decode
 import Keyboard
 import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
@@ -12,6 +13,7 @@ import Player
 import PlayerEngine
 import Radio.Model as Model exposing (Model, PlaylistId(..), Page(..))
 import Radio.Ports as Ports
+import Radio.SignupForm as SignupForm exposing (Field(..))
 import Task exposing (Task)
 import Time exposing (Time)
 
@@ -35,6 +37,13 @@ type Msg
     | ReportedDeadTrack (Result Http.Error String)
     | ResumeRadio
     | SeekTo Float
+    | SignupUpdateEmail String
+    | SignupBlurredField Field
+    | SignupEmailAvailability (Result Http.Error ( ( String, Bool ), ( String, Bool ) ))
+    | SignupUpdateUsername String
+    | SignupUpdatePassword String
+    | SignupSubmit
+    | SignupSubmitted (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -183,6 +192,88 @@ update message model =
             ( model
             , PlayerEngine.changeCurrentTime (Model.currentTrack model) -10
             )
+
+        SignupUpdateUsername newUsername ->
+            ( { model | signupForm = SignupForm.updateUsername newUsername model.signupForm }
+            , if SignupForm.shouldBeValid Username model.signupForm then
+                Http.send
+                    SignupEmailAvailability
+                    (Api.checkEmailAvailabilty model.signupForm.email newUsername)
+            else
+                Cmd.none
+            )
+
+        SignupUpdatePassword newPassword ->
+            ( { model | signupForm = SignupForm.updatePassword newPassword model.signupForm }
+            , Cmd.none
+            )
+
+        SignupUpdateEmail newEmail ->
+            ( { model | signupForm = SignupForm.updateEmail newEmail model.signupForm }
+            , if SignupForm.shouldBeValid Email model.signupForm then
+                Http.send
+                    SignupEmailAvailability
+                    (Api.checkEmailAvailabilty newEmail model.signupForm.username)
+            else
+                Cmd.none
+            )
+
+        SignupBlurredField field ->
+            ( { model | signupForm = SignupForm.startValidating field model.signupForm }
+            , case field of
+                Username ->
+                    Http.send
+                        SignupEmailAvailability
+                        (Api.checkEmailAvailabilty model.signupForm.email model.signupForm.username)
+                Email ->
+                    Http.send
+                        SignupEmailAvailability
+                        (Api.checkEmailAvailabilty model.signupForm.email model.signupForm.username)
+                Password ->
+                    Cmd.none
+            )
+
+        SignupEmailAvailability (Ok availability) ->
+            ( { model | signupForm = SignupForm.updateAvailabilities availability model.signupForm }
+            , Cmd.none
+            )
+
+        SignupEmailAvailability (Err _) ->
+            ( model , Cmd.none )
+
+        SignupSubmit ->
+            ( { model | signupForm =
+                model.signupForm
+                    |> SignupForm.startValidating Username
+                    |> SignupForm.startValidating Email
+                    |> SignupForm.startValidating Password
+              }
+            , Http.send SignupSubmitted (Api.signup model.signupForm)
+            )
+
+        SignupSubmitted (Ok _) ->
+            ( model
+            , Cmd.none
+            )
+
+        SignupSubmitted (Err error) ->
+            case error of
+                BadStatus response ->
+                    if response.status.code == 400 then
+                        let
+                            errors =
+                                Json.Decode.decodeString
+                                    Api.decodeSignupErrors
+                                    response.body
+                                    |> Result.withDefault []
+                        in
+                            ( { model | signupForm = SignupForm.setServerErrors errors model.signupForm }
+                            , Cmd.none
+                            )
+                    else
+                        ( model, Cmd.none )
+                _ ->
+                    ( model , Cmd.none )
 
         KeyPressed keyCode ->
             case (Char.fromCode keyCode) of

@@ -4,6 +4,7 @@ module Radio.Model exposing (..)
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Player exposing (Player)
+import Radio.SignupForm exposing (SignupForm)
 import Time exposing (Time)
 import Model exposing (Track, TrackId, NavigationItem)
 
@@ -18,6 +19,7 @@ type alias Model =
     , currentTime : Maybe Time
     , player : Player PlaylistId TrackId
     , navigation : List (NavigationItem Page PlaylistId)
+    , signupForm : SignupForm
     }
 
 
@@ -41,6 +43,7 @@ emptyPlaylist id fetchUrl addTrackUrl =
 type Page
     = RadioPage
     | LatestTracksPage
+    | Signup
     | PageNotFound
 
 
