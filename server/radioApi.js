@@ -19,6 +19,7 @@ router.get('/playlist', radioPlaylist);
 router.get('/latest-tracks', latestTracks);
 router.post('/report-dead-track', reportDeadTrack);
 router.post('/users', signup);
+router.post('/email-availability', checkEmailAvailabilty);
 router.post('/login', login);
 router.get('/me', jwt({ secret: process.env.JWT_SECRET }), me);
 router.post('/likes', jwt({ secret: process.env.JWT_SECRET }), addLike);
@@ -71,6 +72,28 @@ function *reportDeadTrack() {
 
 function *signup() {
     var submitted = this.request.body;
+
+    var userByEmail = yield knex('users')
+        .first('*')
+        .where('email', '=', submitted.email);
+
+    var userByUsername = yield knex('users')
+        .first('*')
+        .where('username', '=', submitted.username);
+
+    if (userByEmail || userByUsername) {
+        this.status = 400;
+        var errors = [];
+        if (userByEmail) {
+            errors = errors.concat({ field: 'email', error:  "Email is already taken" });
+        }
+        if (userByUsername) {
+            errors = errors.concat({ field: 'username', error : "Username is already taken" });
+        }
+        this.body = errors;
+        return;
+    }
+
     var salt = yield bcrypt.genSalt()
     var hash = yield bcrypt.hash(submitted.password, salt)
 
@@ -85,6 +108,24 @@ function *signup() {
     this.body = "OK";
 }
 
+function *checkEmailAvailabilty() {
+    var email = this.request.body.email;
+    var username = this.request.body.username;
+
+    var userByEmail = yield knex('users')
+        .first('*')
+        .where('email', '=', email);
+
+    var userByUsername = yield knex('users')
+        .first('*')
+        .where('username', '=', username);
+
+    this.status = 200;
+    this.body = {
+        email: !userByEmail,
+        username: !userByUsername,
+    };
+}
 
 function *login() {
     var submitted = this.request.body;

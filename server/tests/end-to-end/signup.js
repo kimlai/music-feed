@@ -26,6 +26,37 @@ describe('POST /users', function () {
                 assert.deepEqual({ email: 'me@example.org', username: 'foo' }, user);
             });
     });
+
+    describe('prevent account duplication', function () {
+        beforeEach(function () {
+            return knex.raw('TRUNCATE TABLE users CASCADE')
+                .then(function () {
+                    return request(app)
+                    .post('/users')
+                    .send({ username: 'foo', email: 'me@example.org', password: 'plain' });
+                });
+        });
+
+        it('returns a 400 response if the email is already taken', function () {
+            return request(app)
+                .post('/users')
+                .send({ username: 'bar', email: 'me@example.org', password: 'plain' })
+                .expect(400)
+                .then(function (res) {
+                    assert.deepEqual([{ field: 'email', error: 'Email is already taken' }], res.body);
+                });
+        });
+
+        it('returns a 400 response if the username is already taken', function () {
+            return request(app)
+                .post('/users')
+                .send({ username: 'foo', email: 'you@example.org', password: 'plain' })
+                .expect(400)
+                .then(function (res) {
+                    assert.deepEqual([{ field: 'username', error: 'Username is already taken' }], res.body);
+                });
+        });
+    });
 });
 
 describe('POST /login', function () {

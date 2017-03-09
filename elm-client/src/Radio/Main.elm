@@ -9,6 +9,7 @@ import Navigation exposing (Location)
 import Player
 import PlayerEngine
 import Radio.Model exposing (Model, PlaylistId(..), Page(..))
+import Radio.SignupForm as SignupForm
 import Radio.Update as Update exposing (Msg(..))
 import Radio.View as View
 import Task
@@ -31,6 +32,7 @@ route location =
     case location.pathname of
         "/" -> RadioPage
         "/latest" -> LatestTracksPage
+        "/sign-up" -> Signup
         _ -> PageNotFound
 
 
@@ -47,6 +49,7 @@ init radioPlaylistJsonString location =
             , currentTime = Nothing
             , player = Player.initialize [ Radio, LatestTracks ]
             , navigation = navigation
+            , signupForm = SignupForm.empty
             }
         decodedRadioPayload =
             Json.Decode.decodeString (Api.decodePlaylist Api.decodeTrack) radioPlaylistJsonString

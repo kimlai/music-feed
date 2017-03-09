@@ -6,6 +6,7 @@ import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Model exposing (Track, StreamingInfo(..), TrackId)
+import Radio.SignupForm exposing (Field(..))
 import Task exposing (Task)
 
 
@@ -109,3 +110,70 @@ reportDeadTrackBody trackId =
     [ ( "trackId", Json.Encode.string trackId ) ]
     |> Json.Encode.object
     |> Http.jsonBody
+
+
+checkEmailAvailabilty : String -> String -> Http.Request ( ( String, Bool ), ( String, Bool ) )
+checkEmailAvailabilty email username =
+    Http.post
+        "/api/email-availability"
+        (checkEmailAvailabiltyBody email username)
+        (decodeEmailAvailability email username)
+
+
+checkEmailAvailabiltyBody : String -> String -> Http.Body
+checkEmailAvailabiltyBody email username =
+    [ ( "email", Json.Encode.string email )
+    , ( "username", Json.Encode.string username )
+    ]
+    |> Json.Encode.object
+    |> Http.jsonBody
+
+
+decodeEmailAvailability : String -> String -> Json.Decode.Decoder ( ( String, Bool ), ( String, Bool ) )
+decodeEmailAvailability email username =
+    Json.Decode.map2 (,)
+        (field "email" Json.Decode.bool
+            |> Json.Decode.andThen (\availability -> Json.Decode.succeed ( email, availability ))
+        )
+        (field "username" Json.Decode.bool
+            |> Json.Decode.andThen (\availability -> Json.Decode.succeed ( username, availability ))
+        )
+
+
+signup : { a | email : String, username : String, password : String } -> Http.Request String
+signup params =
+    Http.post
+        "/api/users"
+        (signupBody params)
+        (Json.Decode.succeed "ok")
+
+
+signupBody : { a | email : String, username : String, password : String } -> Http.Body
+signupBody { email, username, password } =
+    [ ( "email", Json.Encode.string email )
+    , ( "username", Json.Encode.string username )
+    , ( "password", Json.Encode.string password )
+    ]
+    |> Json.Encode.object
+    |> Http.jsonBody
+
+
+decodeSignupErrors : Json.Decode.Decoder (List ( Field, String ))
+decodeSignupErrors =
+    Json.Decode.map2 (,)
+        (field "field" decodeSignupErrorField)
+        (field "error" Json.Decode.string)
+    |> Json.Decode.list
+
+
+
+decodeSignupErrorField : Json.Decode.Decoder Field
+decodeSignupErrorField =
+    Json.Decode.string
+    |> Json.Decode.andThen
+        (\value ->
+            case value of
+                "email" -> Json.Decode.succeed Email
+                "username" -> Json.Decode.succeed Username
+                _ -> Json.Decode.fail "Unkown field"
+        )
