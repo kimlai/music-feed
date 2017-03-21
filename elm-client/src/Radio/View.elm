@@ -3,7 +3,7 @@ module Radio.View exposing (..)
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, a, nav, li, ul, text, div, img, input, label, button, h1, span)
-import Html.Attributes exposing (class, classList, href, src, style, target, type_, for, placeholder, value, disabled)
+import Html.Attributes exposing (class, classList, href, src, style, target, type_, for, placeholder, value, disabled, name)
 import Json.Decode
 import Html.Events exposing (onClick, onWithOptions, onInput, onBlur, onSubmit)
 import Model exposing (Track, TrackId, StreamingInfo(..))
@@ -209,6 +209,7 @@ viewSignup form =
             [ input
                 [ type_ "text"
                 , placeholder "Username"
+                , name "name"
                 , value form.username
                 , onInput SignupUpdateUsername
                 , onBlur (SignupBlurredField Username)
@@ -222,6 +223,7 @@ viewSignup form =
             []
             [ input
                 [ type_ "text"
+                , name "email"
                 , placeholder "E-mail"
                 , value form.email
                 , onInput SignupUpdateEmail
