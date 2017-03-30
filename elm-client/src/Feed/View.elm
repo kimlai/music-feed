@@ -24,7 +24,13 @@ view model =
     in
     div
         []
-        [ View.viewGlobalPlayer TogglePlayback Next SeekTo (Model.currentTrack model) model.playing
+        [ View.viewGlobalPlayer
+            TogglePlayback
+            Next
+            SeekTo
+            (MoveToPlaylist SavedTracks)
+            (Model.currentTrack model)
+            model.playing
         , View.viewNavigation
             FollowLink
             model.navigation

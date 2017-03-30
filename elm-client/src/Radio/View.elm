@@ -22,7 +22,13 @@ view : Model -> Html Msg
 view model =
     div
         []
-        [ View.viewGlobalPlayer TogglePlayback Next SeekTo (Model.currentTrack model) model.playing
+        [ View.viewGlobalPlayer
+            TogglePlayback
+            Next
+            SeekTo
+            AddLike
+            (Model.currentTrack model)
+            model.playing
         , View.viewNavigation
             FollowLink
             model.navigation

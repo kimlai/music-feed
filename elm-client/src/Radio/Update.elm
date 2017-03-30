@@ -51,6 +51,8 @@ type Msg
     | LoginSubmit
     | LoginSubmitted (Result Http.Error String)
     | WhoAmI (Result Http.Error ConnectedUser)
+    | AddLike TrackId
+    | AddedLike (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -339,6 +341,18 @@ update message model =
             )
 
         WhoAmI (Err error) ->
+            ( model, Cmd.none )
+
+        AddLike trackId ->
+            case model.authToken of
+                Nothing ->
+                    update (NavigateTo Signup) model
+                Just token ->
+                    ( model
+                    , Http.send AddedLike (Api.addLike token trackId)
+                    )
+
+        AddedLike _ ->
             ( model, Cmd.none )
 
         KeyPressed keyCode ->

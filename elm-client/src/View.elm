@@ -2,15 +2,15 @@ module View exposing (..)
 
 
 import Html exposing (Html, div, text, img, ul, li, nav, a)
-import Html.Attributes exposing (class, src, classList, style, href)
+import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onWithOptions, on)
 import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
-import Model exposing (Track, NavigationItem)
+import Model exposing (Track, NavigationItem, TrackId)
 
 
-viewGlobalPlayer : msg ->msg -> (Float -> msg) -> Maybe Track -> Bool -> Html msg
-viewGlobalPlayer tooglePlayback next seekTo track playing =
+viewGlobalPlayer : msg -> msg -> (Float -> msg) -> (TrackId -> msg) -> Maybe Track -> Bool -> Html msg
+viewGlobalPlayer tooglePlayback next seekTo addLike track playing =
     case track of
         Nothing ->
             text ""
@@ -45,7 +45,14 @@ viewGlobalPlayer tooglePlayback next seekTo track playing =
                 , viewProgressBar seekTo track
                 , div
                     [ class "actions" ]
-                    []
+                    [ img
+                        [ src "https://icon.now.sh/heart"
+                        , class "like"
+                        , alt "Like"
+                        , onClick (addLike track.id)
+                        ]
+                        []
+                    ]
                 ]
 
 

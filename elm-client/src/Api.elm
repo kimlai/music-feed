@@ -237,3 +237,23 @@ decodeConnectedUser =
     Json.Decode.succeed ConnectedUser
         |: (field "username" Json.Decode.string)
         |: (field "email" Json.Decode.string)
+
+
+addLike : String -> TrackId -> Http.Request String
+addLike token trackId =
+    Http.request
+        { method = "POST"
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , url = "/api/likes"
+        , body = addLikeBody trackId
+        , expect = Http.expectJson (Json.Decode.succeed "OK")
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+addLikeBody : String -> Http.Body
+addLikeBody trackId =
+    [ ( "trackId", Json.Encode.string trackId ) ]
+    |> Json.Encode.object
+    |> Http.jsonBody

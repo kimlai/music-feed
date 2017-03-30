@@ -57,12 +57,13 @@ body {
     flex: 1;
     margin: auto; }
   .global-player .actions {
-    padding: 10px;
+    padding-left: 10px;
     cursor: pointer;
     margin: auto; }
-    .global-player .actions div {
-      float: left;
-      padding: 0 12px; }
+  .global-player img.like {
+    width: 16px;
+    height: 16px;
+    background: inherit; }
 
 .navigation {
   position: fixed;

@@ -70,13 +70,14 @@ body {
         margin: auto;
     }
     .actions {
-        padding: 10px;
+        padding-left: 10px;
         cursor: pointer;
         margin: auto;
-        div {
-            float: left;
-            padding: 0 12px;
-        }
+    }
+    img.like {
+        width: 16px;
+        height: 16px;
+        background: inherit;
     }
 }
 
