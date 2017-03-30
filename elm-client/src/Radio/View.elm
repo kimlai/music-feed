@@ -2,13 +2,14 @@ module Radio.View exposing (..)
 
 import Date exposing (Date)
 import Dict exposing (Dict)
-import Html exposing (Html, a, nav, li, ul, text, div, img, input, label, button, h1, span)
-import Html.Attributes exposing (class, classList, href, src, style, target, type_, for, placeholder, value, disabled, name)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Json.Decode
-import Html.Events exposing (onClick, onWithOptions, onInput, onBlur, onSubmit)
 import Model exposing (Track, TrackId, StreamingInfo(..))
 import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..))
-import Radio.SignupForm as SignupForm exposing (SignupForm, Field(..))
+import Radio.SignupView as SignupView
+import Radio.LoginView as LoginView
 import Regex
 import Player
 import Time exposing (Time)
@@ -45,7 +46,9 @@ view model =
                         model.latestTracks
                         (Player.playlistContent LatestTracks model.player)
                 Signup ->
-                    viewSignup model.signupForm
+                    SignupView.view model.signupForm
+                Login ->
+                    LoginView.view model.loginForm
                 PageNotFound ->
                     div [] [ text "404" ]
 
@@ -195,62 +198,3 @@ viewMoreButton playlistId =
         , onClick (FetchMore playlistId)
         ]
         [ text "More" ]
-
-
-viewSignup : SignupForm -> Html Msg
-viewSignup form =
-    Html.form
-        [ class "signup-form"
-        , onSubmit SignupSubmit
-        ]
-        [ h1 [] [ text "Create an account to save tracks" ]
-        , div
-            []
-            [ input
-                [ type_ "text"
-                , placeholder "Username"
-                , name "name"
-                , value form.username
-                , onInput SignupUpdateUsername
-                , onBlur (SignupBlurredField Username)
-                ]
-                []
-            , div
-                [ class "error" ]
-                [ text (SignupForm.error Username form |> Maybe.withDefault "") ]
-            ]
-        , div
-            []
-            [ input
-                [ type_ "text"
-                , name "email"
-                , placeholder "E-mail"
-                , value form.email
-                , onInput SignupUpdateEmail
-                , onBlur (SignupBlurredField Email)
-                ]
-                []
-            , div
-                [ class "error" ]
-                [ text (SignupForm.error Email form |> Maybe.withDefault "") ]
-            ]
-        , div
-            []
-            [ input
-                [ type_ "password"
-                , placeholder "Password"
-                , value form.password
-                , onInput SignupUpdatePassword
-                , onBlur (SignupBlurredField Password)
-                ]
-                []
-            , div
-                [ class "error" ]
-                [ text (SignupForm.error Password form |> Maybe.withDefault "") ]
-            ]
-        , button
-            [ type_ "submit"
-            , disabled (not (SignupForm.isValid form))
-            ]
-            [ text "Go!" ]
-        ]

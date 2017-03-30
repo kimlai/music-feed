@@ -4,6 +4,7 @@ module Radio.Model exposing (..)
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Player exposing (Player)
+import Radio.LoginForm exposing (LoginForm)
 import Radio.SignupForm exposing (SignupForm)
 import Time exposing (Time)
 import Model exposing (Track, TrackId, NavigationItem)
@@ -20,6 +21,7 @@ type alias Model =
     , player : Player PlaylistId TrackId
     , navigation : List (NavigationItem Page PlaylistId)
     , signupForm : SignupForm
+    , loginForm : LoginForm
     }
 
 
@@ -45,6 +47,7 @@ type Page
     | LatestTracksPage
     | Signup
     | PageNotFound
+    | Login
 
 
 type PlaylistId

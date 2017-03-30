@@ -7,6 +7,7 @@ import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Model exposing (Track, StreamingInfo(..), TrackId)
 import Radio.SignupForm exposing (Field(..))
+import Radio.LoginForm as LoginForm
 import Task exposing (Task)
 
 
@@ -175,5 +176,43 @@ decodeSignupErrorField =
             case value of
                 "email" -> Json.Decode.succeed Email
                 "username" -> Json.Decode.succeed Username
+                _ -> Json.Decode.fail "Unkown field"
+        )
+
+
+login : { a | emailOrUsername : String, password : String } -> Http.Request String
+login params =
+    Http.post
+        "/api/login"
+        (loginBody params)
+        (Json.Decode.succeed "ok")
+
+
+loginBody : { a | emailOrUsername : String, password : String } -> Http.Body
+loginBody { emailOrUsername, password } =
+    [ ( "usernameOrEmail", Json.Encode.string emailOrUsername )
+    , ( "password", Json.Encode.string password )
+    ]
+    |> Json.Encode.object
+    |> Http.jsonBody
+
+
+decodeLoginErrors : Json.Decode.Decoder (List ( LoginForm.Field, String ))
+decodeLoginErrors =
+    Json.Decode.map2 (,)
+        (field "field" decodeLoginErrorField)
+        (field "error" Json.Decode.string)
+    |> Json.Decode.list
+
+
+
+decodeLoginErrorField : Json.Decode.Decoder LoginForm.Field
+decodeLoginErrorField =
+    Json.Decode.string
+    |> Json.Decode.andThen
+        (\value ->
+            case value of
+                "emailOrUsername" -> Json.Decode.succeed LoginForm.EmailorUsername
+                "password" -> Json.Decode.succeed LoginForm.Password
                 _ -> Json.Decode.fail "Unkown field"
         )

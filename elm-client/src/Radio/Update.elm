@@ -14,6 +14,7 @@ import PlayerEngine
 import Radio.Model as Model exposing (Model, PlaylistId(..), Page(..))
 import Radio.Ports as Ports
 import Radio.SignupForm as SignupForm exposing (Field(..))
+import Radio.LoginForm as LoginForm
 import Task exposing (Task)
 import Time exposing (Time)
 
@@ -44,6 +45,11 @@ type Msg
     | SignupUpdatePassword String
     | SignupSubmit
     | SignupSubmitted (Result Http.Error String)
+    | LoginUpdateEmailOrUsername String
+    | LoginUpdatePassword String
+    | LoginBlurredField LoginForm.Field
+    | LoginSubmit
+    | LoginSubmitted (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -274,6 +280,55 @@ update message model =
                         ( model, Cmd.none )
                 _ ->
                     ( model , Cmd.none )
+
+        LoginUpdateEmailOrUsername newEmailOrUsername ->
+            ( { model | loginForm = LoginForm.updateEmailOrUsername newEmailOrUsername model.loginForm }
+            , Cmd.none
+            )
+
+        LoginUpdatePassword newPassword ->
+            ( { model | loginForm = LoginForm.updatePassword newPassword model.loginForm }
+            , Cmd.none
+            )
+
+        LoginBlurredField field ->
+            ( { model | loginForm = LoginForm.startValidating field model.loginForm }
+            , Cmd.none
+            )
+
+        LoginSubmit ->
+            ( { model | loginForm =
+                model.loginForm
+                    |> LoginForm.startValidating LoginForm.EmailorUsername
+                    |> LoginForm.startValidating LoginForm.Password
+              }
+            , Http.send LoginSubmitted (Api.login model.loginForm)
+            )
+
+        LoginSubmitted (Ok token) ->
+            ( model
+            , Cmd.none
+            )
+
+        LoginSubmitted (Err error) ->
+            case error of
+                BadStatus response ->
+                    if response.status.code == 400 then
+                        let
+                            errors =
+                                Json.Decode.decodeString
+                                    Api.decodeLoginErrors
+                                    response.body
+                                    |> Result.withDefault []
+                        in
+                            ( { model | loginForm = LoginForm.setServerErrors errors model.loginForm }
+                            , Cmd.none
+                            )
+                    else
+                        ( model, Cmd.none )
+                _ ->
+                    ( model , Cmd.none )
+
 
         KeyPressed keyCode ->
             case (Char.fromCode keyCode) of

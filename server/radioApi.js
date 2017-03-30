@@ -135,11 +135,19 @@ function *login() {
         .where('email', '=', submitted.usernameOrEmail)
         .orWhere('username', '=', submitted.usernameOrEmail)
 
-    this.assert(user, 400, 'non registered email');
+    if (!user) {
+        this.status = 400;
+        this.body = [{ field: 'emailOrUsername', error: 'Unkwown username or E-mail' }];
+        return;
+    }
 
     var match = yield bcrypt.compare(submitted.password, user.password);
 
-    this.assert(match, 400, 'invalid password');
+    if (!match) {
+        this.status = 400;
+        this.body = [{ field: 'password', error: 'Invalid password' }];
+        return;
+    }
 
     var token = jwt.sign({ username: user.username, email: user.email, uuid: user.uuid }, process.env.JWT_SECRET);
 
