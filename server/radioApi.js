@@ -105,7 +105,7 @@ function *signup() {
     }).into('users'),
 
     this.status = 201;
-    this.body = "OK";
+    this.body = {};
 }
 
 function *checkEmailAvailabilty() {

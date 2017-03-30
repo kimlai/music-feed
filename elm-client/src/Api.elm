@@ -181,16 +181,16 @@ decodeSignupErrorField =
         )
 
 
-login : { a | emailOrUsername : String, password : String } -> Http.Request String
-login params =
+login : String -> String -> Http.Request String
+login usernameOrEmail password =
     Http.post
         "/api/login"
-        (loginBody params)
+        (loginBody usernameOrEmail password)
         (Json.Decode.field "token" Json.Decode.string)
 
 
-loginBody : { a | emailOrUsername : String, password : String } -> Http.Body
-loginBody { emailOrUsername, password } =
+loginBody : String -> String -> Http.Body
+loginBody emailOrUsername password =
     [ ( "usernameOrEmail", Json.Encode.string emailOrUsername )
     , ( "password", Json.Encode.string password )
     ]

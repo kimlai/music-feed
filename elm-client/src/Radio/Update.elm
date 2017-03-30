@@ -259,12 +259,12 @@ update message model =
             )
 
         SignupSubmitted (Ok _) ->
-            ( model
-            , Cmd.none
+            ( { model | authToken = Just "coucou" }
+            , Http.send LoginSubmitted (Api.login model.signupForm.username model.signupForm.password)
             )
 
         SignupSubmitted (Err error) ->
-            case error of
+            case Debug.log "error" error of
                 BadStatus response ->
                     if response.status.code == 400 then
                         let
@@ -303,7 +303,7 @@ update message model =
                     |> LoginForm.startValidating LoginForm.EmailorUsername
                     |> LoginForm.startValidating LoginForm.Password
               }
-            , Http.send LoginSubmitted (Api.login model.loginForm)
+            , Http.send LoginSubmitted (Api.login model.loginForm.emailOrUsername model.loginForm.password)
             )
 
         LoginSubmitted (Ok token) ->
