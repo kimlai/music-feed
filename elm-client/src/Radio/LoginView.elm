@@ -13,6 +13,7 @@ view form =
     Html.form
         [ class "login-form"
         , onSubmit LoginSubmit
+        , action "login"
         ]
         [ h1 [] [ text "Sign in to Me Likey Radio" ]
         , div
@@ -21,6 +22,7 @@ view form =
                 [ type_ "text"
                 , placeholder "Username or E-mail"
                 , name "name"
+                , id "usernameOrEmail"
                 , onInput LoginUpdateEmailOrUsername
                 , onBlur (LoginBlurredField EmailorUsername)
                 ]
@@ -36,6 +38,7 @@ view form =
                 , placeholder "Password"
                 , onInput LoginUpdatePassword
                 , onBlur (LoginBlurredField Password)
+                , id "password"
                 ]
                 []
             , div
