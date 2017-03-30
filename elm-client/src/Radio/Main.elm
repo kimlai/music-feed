@@ -13,6 +13,7 @@ import Radio.Model exposing (Model, PlaylistId(..), Page(..))
 import Radio.LoginForm as LoginForm
 import Radio.SignupForm as SignupForm
 import Radio.Update as Update exposing (Msg(..))
+import Update exposing (andThen, addCmd)
 import Radio.View as View
 import Task
 import Time exposing (Time)
@@ -64,23 +65,28 @@ init initialPayloadJsonString location =
             , authToken = authToken
             , connectedUser = Nothing
             }
-        ( model_, command ) =
-            Update.update (FetchedMore Radio (Ok decodedRadioPayload)) model
-        ( model__, command_ ) =
+        initializeRadio =
+            Update.update (FetchedMore Radio (Ok decodedRadioPayload))
+        autoplayRadio =
             if route location == RadioPage then
-                Update.update (PlayFromPlaylist Radio 0) model_
+                Update.update (PlayFromPlaylist Radio 0)
             else
-                ( model_, command )
-        ( model___, command__ ) =
-            Update.update (FetchMore LatestTracks) model__
+                Update.identity
+        fetchLatestTracks =
+            Update.update (FetchMore LatestTracks)
+        attemptLogin =
+            authToken
+                |> Maybe.map (\token -> (Http.send WhoAmI (Api.whoAmI token)))
+                |> Maybe.withDefault Cmd.none
+        setCurrentTime =
+            Task.perform UpdateCurrentTime Time.now
     in
-        model___ !
-            [ command
-            , command_
-            , command__
-            , Time.now |> Task.perform UpdateCurrentTime
-            , authToken |> Maybe.map (\token -> (Http.send WhoAmI (Api.whoAmI token))) |> Maybe.withDefault Cmd.none
-            ]
+        model
+            |> initializeRadio
+            |> andThen autoplayRadio
+            |> andThen fetchLatestTracks
+            |> addCmd setCurrentTime
+            |> addCmd attemptLogin
 
 
 
