@@ -2,7 +2,8 @@ port module Radio.Main exposing (..)
 
 import Api
 import Dict exposing (Dict)
-import Json.Decode
+import Json.Decode exposing (field)
+import Http
 import Keyboard
 import Model
 import Navigation exposing (Location)
@@ -39,8 +40,15 @@ route location =
 
 
 init : String -> Location -> ( Radio.Model.Model, Cmd Msg )
-init radioPlaylistJsonString location =
+init initialPayloadJsonString location =
     let
+        initialPayloadDecoder =
+            Json.Decode.map2 (,)
+                (field "authToken" (Json.Decode.nullable Json.Decode.string))
+                (field "playlist" (Api.decodePlaylist Api.decodeTrack))
+        ( authToken, decodedRadioPayload ) =
+            Json.Decode.decodeString initialPayloadDecoder initialPayloadJsonString
+                 |> Result.withDefault ( Nothing, ( [], "/playlist" ))
         model =
             { tracks = Dict.empty
             , radio = Radio.Model.emptyPlaylist Radio "/api/playlist" "fake-url"
@@ -53,12 +61,9 @@ init radioPlaylistJsonString location =
             , navigation = navigation
             , signupForm = SignupForm.empty
             , loginForm = LoginForm.empty
-            , authToken = Nothing
+            , authToken = authToken
             , connectedUser = Nothing
             }
-        decodedRadioPayload =
-            Json.Decode.decodeString (Api.decodePlaylist Api.decodeTrack) radioPlaylistJsonString
-                |> Result.withDefault ( [], "/playlist" )
         ( model_, command ) =
             Update.update (FetchedMore Radio (Ok decodedRadioPayload)) model
         ( model__, command_ ) =
@@ -74,6 +79,7 @@ init radioPlaylistJsonString location =
             , command_
             , command__
             , Time.now |> Task.perform UpdateCurrentTime
+            , authToken |> Maybe.map (\token -> (Http.send WhoAmI (Api.whoAmI token))) |> Maybe.withDefault Cmd.none
             ]
 
 

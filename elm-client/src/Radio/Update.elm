@@ -308,7 +308,10 @@ update message model =
 
         LoginSubmitted (Ok token) ->
             ( { model | authToken = Just token }
-            , Http.send WhoAmI (Api.whoAmI token)
+            , Cmd.batch
+                [ Http.send WhoAmI (Api.whoAmI token)
+                , Ports.storeAuthToken token
+                ]
             )
 
         LoginSubmitted (Err error) ->

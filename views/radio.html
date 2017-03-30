@@ -16,6 +16,7 @@
             <div id="player"></div>
         </div>
         <script>
+            var authToken = window.localStorage.getItem('authToken');
             var tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
             var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -24,12 +25,19 @@
             function onYouTubeIframeAPIReady() {
                 var soundcloudClientId = '<%=client_id%>';
                 var playlist = <%=playlist%>;
-                var app = Elm.Radio.Main.fullscreen(JSON.stringify(playlist));
+                var app = Elm.Radio.Main.fullscreen(JSON.stringify({
+                    playlist: playlist,
+                    authToken: authToken
+                }));
 
                 app = initializePlayer(soundcloudClientId, app);
 
                 app.ports.scroll.subscribe(function(offset) {
                     window.scrollBy(0, offset);
+                });
+
+                app.ports.storeAuthToken.subscribe(function(token) {
+                    window.localStorage.setItem('authToken', token);
                 });
             }
         </script>
