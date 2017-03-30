@@ -346,7 +346,9 @@ update message model =
         AddLike trackId ->
             case model.authToken of
                 Nothing ->
-                    update (NavigateTo Signup) model
+                    ( model
+                    , Navigation.newUrl "/sign-up"
+                    )
                 Just token ->
                     ( model
                     , Http.send AddedLike (Api.addLike token trackId)

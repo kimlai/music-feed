@@ -4,6 +4,7 @@ module Radio.LoginView exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Html.Extra exposing (link)
 import Radio.LoginForm as LoginForm exposing (LoginForm, Field(..))
 import Radio.Update exposing (Msg(..))
 
@@ -50,4 +51,13 @@ view form =
             , disabled (not (LoginForm.isValid form))
             ]
             [ text "Go!" ]
+        , div
+            []
+            [ span [] [ text "or " ]
+            , link
+                FollowLink
+                "/sign-up"
+                []
+                [ text "sign up" ]
+            ]
         ]
