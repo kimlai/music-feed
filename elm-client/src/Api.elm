@@ -6,6 +6,7 @@ import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
 import Model exposing (Track, StreamingInfo(..), TrackId)
+import Radio.Model exposing (ConnectedUser)
 import Radio.SignupForm exposing (Field(..))
 import Radio.LoginForm as LoginForm
 import Task exposing (Task)
@@ -185,7 +186,7 @@ login params =
     Http.post
         "/api/login"
         (loginBody params)
-        (Json.Decode.succeed "ok")
+        (Json.Decode.field "token" Json.Decode.string)
 
 
 loginBody : { a | emailOrUsername : String, password : String } -> Http.Body
@@ -216,3 +217,23 @@ decodeLoginErrorField =
                 "password" -> Json.Decode.succeed LoginForm.Password
                 _ -> Json.Decode.fail "Unkown field"
         )
+
+
+whoAmI : String -> Http.Request ConnectedUser
+whoAmI token =
+    Http.request
+        { method = "GET"
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , url = "/api/me"
+        , body = Http.emptyBody
+        , expect = Http.expectJson decodeConnectedUser
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+decodeConnectedUser : Json.Decode.Decoder ConnectedUser
+decodeConnectedUser =
+    Json.Decode.succeed ConnectedUser
+        |: (field "username" Json.Decode.string)
+        |: (field "email" Json.Decode.string)

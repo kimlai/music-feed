@@ -7,7 +7,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode
 import Model exposing (Track, TrackId, StreamingInfo(..))
-import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..))
+import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..), ConnectedUser)
 import Radio.SignupView as SignupView
 import Radio.LoginView as LoginView
 import Regex
@@ -28,6 +28,7 @@ view model =
             model.navigation
             model.currentPage
             (Player.currentPlaylist model.player)
+        , viewConnectedUser model.connectedUser
         , div
             [ class "main" ]
             [ case model.currentPage of
@@ -198,3 +199,14 @@ viewMoreButton playlistId =
         , onClick (FetchMore playlistId)
         ]
         [ text "More" ]
+
+
+viewConnectedUser : Maybe ConnectedUser -> Html Msg
+viewConnectedUser user =
+    case user of
+        Nothing ->
+            text ""
+        Just user ->
+            div
+                [ class "connected-user" ]
+                [ text user.username ]

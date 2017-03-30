@@ -22,6 +22,14 @@ type alias Model =
     , navigation : List (NavigationItem Page PlaylistId)
     , signupForm : SignupForm
     , loginForm : LoginForm
+    , authToken : Maybe String
+    , connectedUser : Maybe ConnectedUser
+    }
+
+
+type alias ConnectedUser =
+    { username : String
+    , email : String
     }
 
 

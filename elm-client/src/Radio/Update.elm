@@ -11,7 +11,7 @@ import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
 import PlayerEngine
-import Radio.Model as Model exposing (Model, PlaylistId(..), Page(..))
+import Radio.Model as Model exposing (Model, PlaylistId(..), Page(..), ConnectedUser)
 import Radio.Ports as Ports
 import Radio.SignupForm as SignupForm exposing (Field(..))
 import Radio.LoginForm as LoginForm
@@ -50,6 +50,7 @@ type Msg
     | LoginBlurredField LoginForm.Field
     | LoginSubmit
     | LoginSubmitted (Result Http.Error String)
+    | WhoAmI (Result Http.Error ConnectedUser)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -306,8 +307,8 @@ update message model =
             )
 
         LoginSubmitted (Ok token) ->
-            ( model
-            , Cmd.none
+            ( { model | authToken = Just token }
+            , Http.send WhoAmI (Api.whoAmI token)
             )
 
         LoginSubmitted (Err error) ->
@@ -329,6 +330,13 @@ update message model =
                 _ ->
                     ( model , Cmd.none )
 
+        WhoAmI (Ok user) ->
+            ( { model | connectedUser = Just user }
+            , Cmd.none
+            )
+
+        WhoAmI (Err error) ->
+            ( model, Cmd.none )
 
         KeyPressed keyCode ->
             case (Char.fromCode keyCode) of

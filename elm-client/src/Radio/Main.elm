@@ -53,6 +53,8 @@ init radioPlaylistJsonString location =
             , navigation = navigation
             , signupForm = SignupForm.empty
             , loginForm = LoginForm.empty
+            , authToken = Nothing
+            , connectedUser = Nothing
             }
         decodedRadioPayload =
             Json.Decode.decodeString (Api.decodePlaylist Api.decodeTrack) radioPlaylistJsonString
