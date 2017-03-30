@@ -339,48 +339,54 @@ update message model =
             ( model, Cmd.none )
 
         KeyPressed keyCode ->
-            case (Char.fromCode keyCode) of
-                'n' ->
-                    update Next model
-
-                'p' ->
-                    update TogglePlayback model
-
-                'l' ->
-                    update FastForward model
-
-                'h' ->
-                    update Rewind model
-
-                'j' ->
-                    ( model
-                    , Ports.scroll 120
-                    )
-
-                'k' ->
-                    ( model
-                    , Ports.scroll -120
-                    )
-
-                'g' ->
-                    if model.lastKeyPressed == Just 'g' then
-                        ( { model | lastKeyPressed = Nothing }
-                        , Ports.scroll -9999999
-                        )
-                    else
-                        ( { model | lastKeyPressed = Just 'g' }
-                        , Cmd.none
-                        )
-
-                'G' ->
-                    ( model
-                    , Ports.scroll 99999999
-                    )
-
+            case model.currentPage of
+                Signup ->
+                    ( model, Cmd.none )
+                Login ->
+                    ( model, Cmd.none )
                 _ ->
-                    ( model
-                    , Cmd.none
-                    )
+                    case (Char.fromCode keyCode) of
+                        'n' ->
+                            update Next model
+
+                        'p' ->
+                            update TogglePlayback model
+
+                        'l' ->
+                            update FastForward model
+
+                        'h' ->
+                            update Rewind model
+
+                        'j' ->
+                            ( model
+                            , Ports.scroll 120
+                            )
+
+                        'k' ->
+                            ( model
+                            , Ports.scroll -120
+                            )
+
+                        'g' ->
+                            if model.lastKeyPressed == Just 'g' then
+                                ( { model | lastKeyPressed = Nothing }
+                                , Ports.scroll -9999999
+                                )
+                            else
+                                ( { model | lastKeyPressed = Just 'g' }
+                                , Cmd.none
+                                )
+
+                        'G' ->
+                            ( model
+                            , Ports.scroll 99999999
+                            )
+
+                        _ ->
+                            ( model
+                            , Cmd.none
+                            )
 
 
 
