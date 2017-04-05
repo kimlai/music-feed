@@ -7,7 +7,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode
 import Model exposing (Track, TrackId, StreamingInfo(..))
-import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..), ConnectedUser)
+import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..), ConnectedUser, PlaylistStatus(..))
 import Radio.SignupView as SignupView
 import Radio.LoginView as LoginView
 import Radio.LikesView as LikesView
@@ -121,13 +121,13 @@ viewLatestTracks currentTrackId currentTime tracks playlist playlistContent=
                 |> List.filterMap (\trackId -> Dict.get trackId tracks)
 
         placeholders =
-            if playlist.loading == True then
+            if playlist.status == Fetching then
                 List.repeat 10 viewTrackPlaceHolder
             else
                 []
 
         moreButton =
-            if playlist.loading == False then
+            if playlist.status == Fetched then
                 viewMoreButton playlist.id
             else
                 text ""

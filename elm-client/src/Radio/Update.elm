@@ -11,7 +11,7 @@ import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
 import PlayerEngine
-import Radio.Model as Model exposing (Model, PlaylistId(..), Page(..), ConnectedUser)
+import Radio.Model as Model exposing (Model, PlaylistId(..), Page(..), ConnectedUser, PlaylistStatus(..))
 import Radio.Ports as Ports
 import Radio.SignupForm as SignupForm exposing (Field(..))
 import Radio.LoginForm as LoginForm
@@ -63,7 +63,7 @@ update message model =
             let
                 updatePlaylist playlist =
                     { playlist | nextLink = nextLink
-                    , loading = False
+                    , status = Fetched
                     }
                 updatedTracks =
                     tracks
@@ -109,23 +109,23 @@ update message model =
 
         FetchMore playlistId ->
             let
-                markAsLoading playlist =
-                    { playlist | loading = True }
+                markAsFetching playlist =
+                    { playlist | status = Fetching }
             in
                 case playlistId of
                     Radio ->
-                        ( { model | radio = markAsLoading model.radio }
+                        ( { model | radio = markAsFetching model.radio }
                         , fetchMore model.radio
                         )
                     LatestTracks ->
-                        ( { model | latestTracks = markAsLoading model.latestTracks }
+                        ( { model | latestTracks = markAsFetching model.latestTracks }
                         , fetchMore model.latestTracks
                         )
                     Likes ->
                         redirectToSignupIfNoAuthToken
                             model
                             (\model token ->
-                                ( { model | likes = markAsLoading model.likes }
+                                ( { model | likes = markAsFetching model.likes }
                                 , Http.send (FetchedMore Likes) (Api.fetchLikes token)
                                 )
                             )
@@ -200,7 +200,9 @@ update message model =
                 if page == LikesPage then
                     redirectToSignupIfNoAuthToken
                         model
-                        (\model token -> updatedModel |> Update.andThen (update (FetchMore Likes)))
+                        (\model token ->
+                            updatedModel
+                                |> Update.when ((==) NotRequested << .status << .likes) (update (FetchMore Likes)))
                 else
                     updatedModel
 
