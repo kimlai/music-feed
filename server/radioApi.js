@@ -10,6 +10,7 @@ var _ = require('lodash');
 var bcrypt = require('co-bcrypt');
 var uuid = require('node-uuid').v4;
 var jwt = require('koa-jwt');
+var R = require('ramda');
 
 var app = koa();
 
@@ -176,24 +177,36 @@ function *addLike() {
 
 function *likes() {
     var userUuid = this.state.user.uuid;
+    var before = this.request.query.before;
 
-    var likedTracks = yield knex.select('published_tracks.*', 'likes.created_at')
+    var query = knex.select('published_tracks.*', 'likes.created_at')
         .from('likes')
         .innerJoin('published_tracks', 'likes.track_id', 'published_tracks.soundcloudTrackId')
         .orderBy('likes.created_at', 'desc')
-        .then(function (rows) {
-            return _.map(rows, function (row) {
-                console.log(row);
-                var track = row.track;
-                track.created_at = row.created_at;
-                track.id = row.soundcloudTrackId;
-                return track;
-            });
+        .limit(10);
+
+    if (before) {
+        query.where('created_at', '<', before);
+    }
+
+    var likedTracks = yield query.then(function (rows) {
+        return _.map(rows, function (row) {
+            var track = row.track;
+            track.created_at = row.created_at;
+            track.id = row.soundcloudTrackId;
+            return track;
         });
+    });
+
+    var lastTrackTimestamp = R.pipe(
+        R.last,
+        R.prop('created_at'),
+        date => date.toISOString()
+    )(likedTracks);
 
     this.body = {
         tracks: likedTracks,
-        next_href: ''
+        next_href: '/api/likes?before=' + lastTrackTimestamp
     };
 }
 

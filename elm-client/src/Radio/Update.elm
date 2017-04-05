@@ -126,7 +126,7 @@ update message model =
                             model
                             (\model token ->
                                 ( { model | likes = markAsFetching model.likes }
-                                , Http.send (FetchedMore Likes) (Api.fetchLikes token)
+                                , Http.send (FetchedMore Likes) (Api.fetchLikes token model.likes.nextLink)
                                 )
                             )
 

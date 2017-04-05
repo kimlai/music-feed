@@ -1,4 +1,4 @@
-FROM node:0.12
+FROM node:6.10.1
 
 MAINTAINER Kim Laï Trinh <kimlai@lrqdo.fr>
 
