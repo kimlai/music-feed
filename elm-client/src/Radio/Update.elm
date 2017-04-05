@@ -17,6 +17,7 @@ import Radio.SignupForm as SignupForm exposing (Field(..))
 import Radio.LoginForm as LoginForm
 import Task exposing (Task)
 import Time exposing (Time)
+import Update
 
 
 type Msg
@@ -84,6 +85,10 @@ update message model =
                         ( { updatedModel | latestTracks = updatePlaylist model.latestTracks }
                         , Cmd.none
                         )
+                    Likes ->
+                        ( { updatedModel | likes = updatePlaylist model.likes }
+                        , Cmd.none
+                        )
 
         FetchedMore playlistId (Err error)->
             ( model, Cmd.none )
@@ -116,6 +121,14 @@ update message model =
                         ( { model | latestTracks = markAsLoading model.latestTracks }
                         , fetchMore model.latestTracks
                         )
+                    Likes ->
+                        redirectToSignupIfNoAuthToken
+                            model
+                            (\model token ->
+                                ( { model | likes = markAsLoading model.likes }
+                                , Http.send (FetchedMore Likes) (Api.fetchLikes token)
+                                )
+                            )
 
         UpdateCurrentTime newTime ->
             ( { model | currentTime = Just newTime }, Cmd.none )
@@ -178,9 +191,18 @@ update message model =
             )
 
         NavigateTo page ->
-            ( { model | currentPage = page }
-            , Cmd.none
-            )
+            let
+                updatedModel =
+                    ( { model | currentPage = page }
+                    , Cmd.none
+                    )
+            in
+                if page == LikesPage then
+                    redirectToSignupIfNoAuthToken
+                        model
+                        (\model token -> updatedModel |> Update.andThen (update (FetchMore Likes)))
+                else
+                    updatedModel
 
         FollowLink url ->
             ( model
@@ -344,18 +366,19 @@ update message model =
             ( model, Cmd.none )
 
         AddLike trackId ->
-            case model.authToken of
-                Nothing ->
-                    ( model
-                    , Navigation.newUrl "/sign-up"
-                    )
-                Just token ->
+            redirectToSignupIfNoAuthToken
+                model
+                (\model token ->
                     ( model
                     , Http.send AddedLike (Api.addLike token trackId)
                     )
+                )
 
-        AddedLike _ ->
+        AddedLike (Ok _) ->
             ( model, Cmd.none )
+
+        AddedLike (Err error) ->
+            redirectToSignupIf401 error model
 
         KeyPressed keyCode ->
             case model.currentPage of
@@ -420,3 +443,29 @@ fetchMore playlist =
 reportDeadTrack : TrackId -> Cmd Msg
 reportDeadTrack trackId =
     Http.send ReportedDeadTrack (Api.reportDeadTrack trackId)
+
+
+redirectToSignup : Model -> ( Model, Cmd Msg )
+redirectToSignup =
+    update (FollowLink "/sign-up")
+
+
+redirectToSignupIfNoAuthToken : Model -> (Model -> String -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg )
+redirectToSignupIfNoAuthToken model ifAuthenticated =
+    case model.authToken of
+        Nothing ->
+            redirectToSignup model
+        Just token ->
+            ifAuthenticated model token
+
+
+redirectToSignupIf401 : Http.Error -> Model -> ( Model, Cmd Msg )
+redirectToSignupIf401 error =
+    case error of
+        Http.BadStatus response ->
+            if response.status.code == 401 then
+                redirectToSignup
+            else
+                Update.identity
+        _ ->
+            Update.identity

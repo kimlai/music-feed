@@ -14,6 +14,7 @@ type alias Model =
     { tracks : Dict TrackId Track
     , radio : Playlist
     , latestTracks : Playlist
+    , likes : Playlist
     , playing : Bool
     , currentPage : Page
     , lastKeyPressed : Maybe Char
@@ -37,22 +38,21 @@ type alias Playlist =
     { id: PlaylistId
     , loading : Bool
     , nextLink : String
-    , addTrackUrl : String
     }
 
 
-emptyPlaylist : PlaylistId -> String -> String -> Playlist
-emptyPlaylist id fetchUrl addTrackUrl =
+emptyPlaylist : PlaylistId -> String -> Playlist
+emptyPlaylist id fetchUrl =
     { id = id
     , loading = True
     , nextLink = fetchUrl
-    , addTrackUrl = addTrackUrl
     }
 
 
 type Page
     = RadioPage
     | LatestTracksPage
+    | LikesPage
     | Signup
     | PageNotFound
     | Login
@@ -61,6 +61,7 @@ type Page
 type PlaylistId
     = Radio
     | LatestTracks
+    | Likes
 
 
 currentTrack : Model -> Maybe Track

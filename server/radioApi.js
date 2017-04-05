@@ -180,7 +180,7 @@ function *likes() {
     var likedTracks = yield knex.select('published_tracks.*', 'likes.created_at')
         .from('likes')
         .innerJoin('published_tracks', 'likes.track_id', 'published_tracks.soundcloudTrackId')
-        .orderBy('likes.created_at', 'asc')
+        .orderBy('likes.created_at', 'desc')
         .then(function (rows) {
             return _.map(rows, function (row) {
                 console.log(row);

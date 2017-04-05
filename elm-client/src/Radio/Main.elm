@@ -35,6 +35,7 @@ route location =
     case location.pathname of
         "/" -> RadioPage
         "/latest" -> LatestTracksPage
+        "/likes" -> LikesPage
         "/sign-up" -> Signup
         "/login" -> Login
         _ -> PageNotFound
@@ -52,19 +53,22 @@ init initialPayloadJsonString location =
                  |> Result.withDefault ( Nothing, ( [], "/playlist" ))
         model =
             { tracks = Dict.empty
-            , radio = Radio.Model.emptyPlaylist Radio "/api/playlist" "fake-url"
-            , latestTracks = Radio.Model.emptyPlaylist LatestTracks "/api/latest-tracks" "fake-url"
+            , radio = Radio.Model.emptyPlaylist Radio "/api/playlist"
+            , latestTracks = Radio.Model.emptyPlaylist LatestTracks "/api/latest-tracks"
+            , likes = Radio.Model.emptyPlaylist Likes "/api/likes"
             , playing = False
             , currentPage = route location
             , lastKeyPressed = Nothing
             , currentTime = Nothing
-            , player = Player.initialize [ Radio, LatestTracks ]
+            , player = Player.initialize [ Radio, LatestTracks, Likes ]
             , navigation = navigation
             , signupForm = SignupForm.empty
             , loginForm = LoginForm.empty
             , authToken = authToken
             , connectedUser = Nothing
             }
+        navigateToLocation =
+            Update.update (NavigateTo (route location))
         initializeRadio =
             Update.update (FetchedMore Radio (Ok decodedRadioPayload))
         autoplayRadio =
@@ -82,7 +86,8 @@ init initialPayloadJsonString location =
             Task.perform UpdateCurrentTime Time.now
     in
         model
-            |> initializeRadio
+            |> navigateToLocation
+            |> andThen initializeRadio
             |> andThen autoplayRadio
             |> andThen fetchLatestTracks
             |> addCmd setCurrentTime
@@ -102,15 +107,9 @@ subscriptions model =
         ]
 
 
-playlists : List Radio.Model.Playlist
-playlists =
-    [ Radio.Model.emptyPlaylist Radio "/api/playlist" "fake-url"
-    , Radio.Model.emptyPlaylist LatestTracks "/api/latest-tracks" "fake-url"
-    ]
-
-
 navigation : List (Model.NavigationItem Radio.Model.Page PlaylistId)
 navigation =
     [ Model.NavigationItem "Radio" "/" RadioPage (Just Radio)
     , Model.NavigationItem "Latest Tracks" "/latest" LatestTracksPage (Just LatestTracks)
+    , Model.NavigationItem "Your Likes" "/likes" LikesPage (Just Likes)
     ]

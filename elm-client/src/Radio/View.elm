@@ -10,6 +10,7 @@ import Model exposing (Track, TrackId, StreamingInfo(..))
 import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..), ConnectedUser)
 import Radio.SignupView as SignupView
 import Radio.LoginView as LoginView
+import Radio.LikesView as LikesView
 import Regex
 import Player
 import Time exposing (Time)
@@ -52,6 +53,13 @@ view model =
                         model.tracks
                         model.latestTracks
                         (Player.playlistContent LatestTracks model.player)
+                LikesPage ->
+                    viewLatestTracks
+                        (Player.currentTrack model.player)
+                        model.currentTime
+                        model.tracks
+                        model.likes
+                        (Player.playlistContent Likes model.player)
                 Signup ->
                     SignupView.view model.signupForm
                 Login ->

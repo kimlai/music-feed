@@ -257,3 +257,16 @@ addLikeBody trackId =
     [ ( "trackId", Json.Encode.string trackId ) ]
     |> Json.Encode.object
     |> Http.jsonBody
+
+
+fetchLikes : String -> Http.Request ( List Track, String )
+fetchLikes token =
+    Http.request
+        { method = "GET"
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , url = "/api/likes"
+        , body = Http.emptyBody
+        , expect = Http.expectJson (decodePlaylist decodeTrack)
+        , timeout = Nothing
+        , withCredentials = False
+        }
