@@ -35,7 +35,7 @@ type Msg
     | UpdateCurrentTime Time
     | PlayFromPlaylist PlaylistId Int
     | FetchMore PlaylistId
-    | FetchedMore PlaylistId (Result Http.Error ( List Track, String ))
+    | FetchedMore PlaylistId (Result Http.Error ( List Track, Maybe String ))
     | ReportedDeadTrack (Result Http.Error String)
     | ResumeRadio
     | SeekTo Float
@@ -111,24 +111,22 @@ update message model =
             let
                 markAsFetching playlist =
                     { playlist | status = Fetching }
+                ( playlist, updateModel ) =
+                    case playlistId of
+                        Radio ->
+                            ( model.radio, (\model fn -> { model | radio = fn model.radio }) )
+                        LatestTracks ->
+                            ( model.latestTracks, (\model fn -> { model | latestTracks = fn model.latestTracks }) )
+                        Likes ->
+                            ( model.likes, (\model fn -> { model | likes = fn model.likes }) )
             in
-                case playlistId of
-                    Radio ->
-                        ( { model | radio = markAsFetching model.radio }
-                        , fetchMore model.radio
+                case playlist.nextLink of
+                    Nothing ->
+                        ( model, Cmd.none )
+                    Just url ->
+                        ( updateModel model markAsFetching
+                        , Http.send (FetchedMore playlistId) (Api.fetchPlaylist model.authToken url Api.decodeTrack)
                         )
-                    LatestTracks ->
-                        ( { model | latestTracks = markAsFetching model.latestTracks }
-                        , fetchMore model.latestTracks
-                        )
-                    Likes ->
-                        redirectToSignupIfNoAuthToken
-                            model
-                            (\model token ->
-                                ( { model | likes = markAsFetching model.likes }
-                                , Http.send (FetchedMore Likes) (Api.fetchLikes token model.likes.nextLink)
-                                )
-                            )
 
         UpdateCurrentTime newTime ->
             ( { model | currentTime = Just newTime }, Cmd.none )
@@ -435,11 +433,6 @@ update message model =
 
 
 -- HTTP
-
-
-fetchMore : Model.Playlist -> Cmd Msg
-fetchMore playlist =
-    Http.send (FetchedMore playlist.id) (Api.fetchPlaylist playlist.nextLink Api.decodeTrack)
 
 
 reportDeadTrack : TrackId -> Cmd Msg

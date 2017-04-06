@@ -11,6 +11,7 @@ var bcrypt = require('co-bcrypt');
 var uuid = require('node-uuid').v4;
 var jwt = require('koa-jwt');
 var R = require('ramda');
+var Maybe = require('data.maybe');
 
 var app = koa();
 
@@ -28,6 +29,16 @@ router.get('/likes', jwt({ secret: process.env.JWT_SECRET }), likes);
 
 app.use(router.routes());
 
+const nextHref = (baseUrl, tracks) =>
+    R.pipe(
+        R.nth(19),
+        Maybe.fromNullable,
+        R.map(R.prop('created_at')),
+        R.map(date => date.toISOString()),
+        R.map(timestamp => `${baseUrl}?before=${timestamp}`),
+        url => url.getOrElse(null)
+    )(tracks);
+
 function *radioPlaylist() {
     var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
     this.body = yield fetchRadioPlaylist(soundcloudUserId);
@@ -35,11 +46,11 @@ function *radioPlaylist() {
 
 function *latestTracks() {
     var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
-    var offset = parseInt(this.request.query.offset, 0) || 0;
-    var tracks = yield fetchPublishedTracks(soundcloudUserId, this.request.query.offset);
+    var before = this.request.query.before;
+    var tracks = yield fetchPublishedTracks(soundcloudUserId, before);
     this.body = {
         tracks: tracks,
-        next_href: '/api/latest-tracks?offset=' + (offset + 20),
+        next_href: nextHref('/api/latest-tracks', tracks),
     };
 }
 
@@ -183,7 +194,7 @@ function *likes() {
         .from('likes')
         .innerJoin('published_tracks', 'likes.track_id', 'published_tracks.soundcloudTrackId')
         .orderBy('likes.created_at', 'desc')
-        .limit(10);
+        .limit(20);
 
     if (before) {
         query.where('created_at', '<', before);
@@ -198,15 +209,9 @@ function *likes() {
         });
     });
 
-    var lastTrackTimestamp = R.pipe(
-        R.last,
-        R.prop('created_at'),
-        date => date.toISOString()
-    )(likedTracks);
-
     this.body = {
         tracks: likedTracks,
-        next_href: '/api/likes?before=' + lastTrackTimestamp
+        next_href: nextHref('/api/likes', likedTracks),
     };
 }
 

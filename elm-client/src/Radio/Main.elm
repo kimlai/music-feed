@@ -50,7 +50,7 @@ init initialPayloadJsonString location =
                 (field "playlist" (Api.decodePlaylist Api.decodeTrack))
         ( authToken, decodedRadioPayload ) =
             Json.Decode.decodeString initialPayloadDecoder initialPayloadJsonString
-                 |> Result.withDefault ( Nothing, ( [], "/playlist" ))
+                 |> Result.withDefault ( Nothing, ( [], Just "/playlist" ))
         model =
             { tracks = Dict.empty
             , radio = Radio.Model.emptyPlaylist Radio "/api/playlist"

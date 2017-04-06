@@ -9,6 +9,8 @@ var koa = require('koa');
 var request = require('co-request');
 var router = require('koa-router')();
 var soundcloud = require('../soundcloud/api-client');
+var R = require('ramda');
+var Maybe = require('data.maybe');
 
 var app = koa();
 
@@ -69,14 +71,24 @@ function *savedTracks() {
     this.body = yield fetchSavedTracks(soundcloudUserId, this.request.query.offset);
 }
 
+const nextHref = (baseUrl, tracks) =>
+    R.pipe(
+        R.nth(19),
+        Maybe.fromNullable,
+        R.map(R.prop('created_at')),
+        R.map(date => date.toISOString()),
+        R.map(timestamp => `${baseUrl}?before=${timestamp}`),
+        url => url.getOrElse(null)
+    )(tracks);
+
 function *publishedTracks() {
     var token = this.state.token;
     var soundcloudUserId = this.state.user.id;
-    var offset = parseInt(this.request.query.offset, 0) || 0;
-    var tracks = yield fetchPublishedTracks(soundcloudUserId, offset);
+    var before = this.request.query.before;
+    var tracks = yield fetchPublishedTracks(soundcloudUserId, before);
     this.body = {
         tracks: tracks,
-        next_href: '/feed/published_tracks?offset=' + (offset + 20),
+        next_href: nextHref('/feed/published_tracks', tracks),
     };
 }
 

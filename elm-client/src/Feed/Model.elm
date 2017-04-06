@@ -25,7 +25,7 @@ type alias Model =
 type alias Playlist =
     { id: PlaylistId
     , loading : Bool
-    , nextLink : String
+    , nextLink : Maybe String
     , addTrackUrl : String
     }
 
@@ -34,7 +34,7 @@ emptyPlaylist : PlaylistId -> String -> String -> Playlist
 emptyPlaylist id fetchUrl addTrackUrl =
     { id = id
     , loading = True
-    , nextLink = fetchUrl
+    , nextLink = Just fetchUrl
     , addTrackUrl = addTrackUrl
     }
 

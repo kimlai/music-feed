@@ -12,16 +12,35 @@ import Radio.LoginForm as LoginForm
 import Task exposing (Task)
 
 
-fetchPlaylist : String -> Json.Decode.Decoder Track -> Http.Request ( List Track, String )
-fetchPlaylist url trackDecoder =
-    Http.get url (decodePlaylist trackDecoder)
+fetchPlaylist : Maybe String -> String -> Json.Decode.Decoder Track -> Http.Request ( List Track, Maybe String )
+fetchPlaylist authToken url trackDecoder =
+    let
+        headers =
+            authToken
+                |> Maybe.map (\authToken -> [ Http.header "Authorization" ("Bearer " ++ authToken) ])
+                |> Maybe.withDefault []
+    in
+        Http.request
+            { method = "GET"
+            , headers = headers
+            , url = url
+            , body = Http.emptyBody
+            , expect = Http.expectJson (decodePlaylist trackDecoder)
+            , timeout = Nothing
+            , withCredentials = False
+            }
 
 
-decodePlaylist : Json.Decode.Decoder Track -> Json.Decode.Decoder ( List Track, String )
+fetchFeedPlaylist : String -> Json.Decode.Decoder Track -> Http.Request ( List Track, Maybe String )
+fetchFeedPlaylist url trackDecoder =
+        Http.get url (decodePlaylist trackDecoder)
+
+
+decodePlaylist : Json.Decode.Decoder Track -> Json.Decode.Decoder ( List Track, Maybe String )
 decodePlaylist trackDecoder =
     Json.Decode.map2 (,)
         (field "tracks" (Json.Decode.list trackDecoder))
-        (field "next_href" Json.Decode.string)
+        (field "next_href" (Json.Decode.nullable Json.Decode.string))
 
 
 decodeTrack : Json.Decode.Decoder Track
@@ -257,16 +276,3 @@ addLikeBody trackId =
     [ ( "trackId", Json.Encode.string trackId ) ]
     |> Json.Encode.object
     |> Http.jsonBody
-
-
-fetchLikes : String -> String-> Http.Request ( List Track, String )
-fetchLikes token url =
-    Http.request
-        { method = "GET"
-        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
-        , url = url
-        , body = Http.emptyBody
-        , expect = Http.expectJson (decodePlaylist decodeTrack)
-        , timeout = Nothing
-        , withCredentials = False
-        }

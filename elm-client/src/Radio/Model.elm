@@ -37,7 +37,7 @@ type alias ConnectedUser =
 type alias Playlist =
     { id: PlaylistId
     , status : PlaylistStatus
-    , nextLink : String
+    , nextLink : Maybe String
     }
 
 
@@ -51,7 +51,7 @@ emptyPlaylist : PlaylistId -> String -> Playlist
 emptyPlaylist id fetchUrl =
     { id = id
     , status = NotRequested
-    , nextLink = fetchUrl
+    , nextLink = Just fetchUrl
     }
 
 

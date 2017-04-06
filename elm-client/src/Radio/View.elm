@@ -127,10 +127,11 @@ viewLatestTracks currentTrackId currentTime tracks playlist playlistContent=
                 []
 
         moreButton =
-            if playlist.status == Fetched then
-                viewMoreButton playlist.id
-            else
-                text ""
+            case playlist.nextLink of
+                Just url ->
+                    viewMoreButton playlist.id
+                Nothing ->
+                    text ""
 
         tracksView =
             List.indexedMap (viewTrack currentTrackId currentTime playlist.id) playlistTracks

@@ -42,7 +42,7 @@ type Msg
     | PlayFromPlaylist PlaylistId Int Track
     | AddToCustomQueue TrackId
     | FetchMore PlaylistId
-    | FetchedMore PlaylistId (Result Http.Error ( List Track, String ))
+    | FetchedMore PlaylistId (Result Http.Error ( List Track, Maybe String ))
     | AddedTrack (Result Http.Error String)
     | PublishFromSoundcloudUrl String
     | PublishedFromSoundcloudUrl (Result Http.Error Track)
@@ -481,7 +481,11 @@ fetchMore playlist =
                 _ ->
                     Soundcloud.decodeTrack
     in
-        Http.send (FetchedMore playlist.id) (Api.fetchPlaylist playlist.nextLink trackDecoder)
+        case playlist.nextLink of
+            Nothing ->
+                Cmd.none
+            Just url ->
+                Http.send (FetchedMore playlist.id) (Api.fetchFeedPlaylist url trackDecoder)
 
 
 addTrack : String -> TrackId -> Cmd Msg
