@@ -21,6 +21,22 @@ initialize playlistIds =
         }
 
 
+prependTrackToPlaylist : a -> b -> Player a b -> Player a b
+prependTrackToPlaylist playlistId track (Player { playlists, currentPlaylist, currentTrack }) =
+    let
+        updatePlaylist ( id, playlist ) =
+            if id == playlistId then
+                ( id, Playlist.prepend track playlist )
+            else
+                ( id, playlist )
+    in
+        Player
+            { playlists = List.map updatePlaylist playlists
+            , currentPlaylist = currentPlaylist
+            , currentTrack = currentTrack
+            }
+
+
 appendTracksToPlaylist : a -> List b -> Player a b -> Player a b
 appendTracksToPlaylist playlistId tracks (Player { playlists, currentPlaylist, currentTrack }) =
     let

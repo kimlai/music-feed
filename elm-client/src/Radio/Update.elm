@@ -369,7 +369,7 @@ update message model =
             redirectToSignupIfNoAuthToken
                 model
                 (\model token ->
-                    ( model
+                    ( { model | player = Player.prependTrackToPlaylist Likes trackId model.player }
                     , Http.send AddedLike (Api.addLike token trackId)
                     )
                 )
