@@ -25,6 +25,7 @@ type alias Model =
     , loginForm : LoginForm
     , authToken : Maybe String
     , connectedUser : Maybe ConnectedUser
+    , redirectToAfterLogin : Page
     }
 
 

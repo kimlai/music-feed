@@ -11,6 +11,7 @@ import Player
 import PlayerEngine
 import Radio.Model exposing (Model, PlaylistId(..), Page(..))
 import Radio.LoginForm as LoginForm
+import Radio.Router
 import Radio.SignupForm as SignupForm
 import Radio.Update as Update exposing (Msg(..))
 import Update exposing (andThen, addCmd)
@@ -32,13 +33,7 @@ main =
 
 route : Location -> Page
 route location =
-    case location.pathname of
-        "/" -> RadioPage
-        "/latest" -> LatestTracksPage
-        "/likes" -> LikesPage
-        "/sign-up" -> Signup
-        "/login" -> Login
-        _ -> PageNotFound
+    Radio.Router.urlToPage location.pathname
 
 
 init : String -> Location -> ( Radio.Model.Model, Cmd Msg )
@@ -64,6 +59,7 @@ init initialPayloadJsonString location =
             , loginForm = LoginForm.empty
             , authToken = authToken
             , connectedUser = Nothing
+            , redirectToAfterLogin = RadioPage
             }
         navigateToLocation =
             Update.update (NavigateTo (route location))

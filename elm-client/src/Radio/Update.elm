@@ -13,6 +13,7 @@ import Player
 import PlayerEngine
 import Radio.Model as Model exposing (Model, PlaylistId(..), Page(..), ConnectedUser, PlaylistStatus(..))
 import Radio.Ports as Ports
+import Radio.Router
 import Radio.SignupForm as SignupForm exposing (Field(..))
 import Radio.LoginForm as LoginForm
 import Task exposing (Task)
@@ -222,6 +223,7 @@ update message model =
                 if page == LikesPage then
                     redirectToSignupIfNoAuthToken
                         model
+                        (Just LikesPage)
                         (\model token ->
                             updatedModel
                                 |> Update.when ((==) NotRequested << .status << .likes) (update (FetchMore Likes)))
@@ -361,6 +363,7 @@ update message model =
                 , Ports.storeAuthToken token
                 ]
             )
+                |> Update.andThen (update (FollowLink (Radio.Router.pageToUrl model.redirectToAfterLogin)))
 
         LoginSubmitted (Err error) ->
             case error of
@@ -401,6 +404,7 @@ update message model =
             in
                 redirectToSignupIfNoAuthToken
                     updatedModel
+                    Nothing
                     (\model token ->
                         ( model
                         , Http.send AddedLike (Api.addLike token trackId)
@@ -411,7 +415,7 @@ update message model =
             ( model, Cmd.none )
 
         AddedLike (Err error) ->
-            redirectToSignupIf401 error model
+            redirectToSignupIf401 error Nothing model
 
         KeyPressed keyCode ->
             case model.currentPage of
@@ -473,26 +477,28 @@ reportDeadTrack trackId =
     Http.send ReportedDeadTrack (Api.reportDeadTrack trackId)
 
 
-redirectToSignup : Model -> ( Model, Cmd Msg )
-redirectToSignup =
-    update (FollowLink "/sign-up")
+redirectToSignup : Maybe Page -> Model -> ( Model, Cmd Msg )
+redirectToSignup page model =
+    ( { model | redirectToAfterLogin = Maybe.withDefault model.currentPage page }
+    , Navigation.modifyUrl "/sign-up"
+    )
 
 
-redirectToSignupIfNoAuthToken : Model -> (Model -> String -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg )
-redirectToSignupIfNoAuthToken model ifAuthenticated =
+redirectToSignupIfNoAuthToken : Model -> Maybe Page -> (Model -> String -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg )
+redirectToSignupIfNoAuthToken model page ifAuthenticated =
     case model.authToken of
         Nothing ->
-            redirectToSignup model
+            redirectToSignup page model
         Just token ->
             ifAuthenticated model token
 
 
-redirectToSignupIf401 : Http.Error -> Model -> ( Model, Cmd Msg )
-redirectToSignupIf401 error =
+redirectToSignupIf401 : Http.Error -> Maybe Page -> Model -> ( Model, Cmd Msg )
+redirectToSignupIf401 error page =
     case error of
         Http.BadStatus response ->
             if response.status.code == 401 then
-                redirectToSignup
+                redirectToSignup page
             else
                 Update.identity
         _ ->
