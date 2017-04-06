@@ -28,6 +28,7 @@ decodeTrack =
             |> Json.Decode.andThen (\url -> Json.Decode.succeed (Soundcloud url)))
         |: (field "permalink_url" Json.Decode.string)
         |: (field "created_at" Json.Decode.Extra.date)
+        |: Json.Decode.succeed False
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed False

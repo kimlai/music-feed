@@ -297,6 +297,7 @@ update message model =
                                 , progress = 0
                                 , currentTime = 0
                                 , error = False
+                                , liked = False
                                 }
                             )
             in

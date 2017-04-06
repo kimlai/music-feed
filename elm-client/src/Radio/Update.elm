@@ -36,6 +36,7 @@ type Msg
     | PlayFromPlaylist PlaylistId Int
     | FetchMore PlaylistId
     | FetchedMore PlaylistId (Result Http.Error ( List Track, Maybe String ))
+    | FetchedRadio (Result Http.Error ( List Track, Maybe String ))
     | ReportedDeadTrack (Result Http.Error String)
     | ResumeRadio
     | SeekTo Float
@@ -59,6 +60,29 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
+        FetchedRadio (Ok ( tracks, nextLink )) ->
+            let
+                updatePlaylist playlist =
+                    { playlist | nextLink = nextLink
+                    , status = Fetched
+                    }
+                updatedTracks =
+                    tracks
+                        |> List.map (\track -> ( track.id, track ))
+                        |> Dict.fromList
+                        |> Dict.union model.tracks
+                updatedModel =
+                    { model
+                    | tracks = updatedTracks
+                    , player = Player.appendTracksToPlaylist Radio (List.map .id tracks) model.player
+                    }
+            in
+                ( { updatedModel | radio = updatePlaylist model.radio } , Cmd.none)
+                    |> Update.when ((==) RadioPage << .currentPage) (update (PlayFromPlaylist Radio 0))
+
+        FetchedRadio (Err error)->
+            ( model, Cmd.none )
+
         FetchedMore playlistId (Ok ( tracks, nextLink )) ->
             let
                 updatePlaylist playlist =
@@ -366,13 +390,22 @@ update message model =
             ( model, Cmd.none )
 
         AddLike trackId ->
-            redirectToSignupIfNoAuthToken
-                model
-                (\model token ->
-                    ( { model | player = Player.prependTrackToPlaylist Likes trackId model.player }
-                    , Http.send AddedLike (Api.addLike token trackId)
+            let
+                updateTrack track =
+                    { track | liked = True }
+                updatedModel =
+                    { model
+                    | player = Player.prependTrackToPlaylist Likes trackId model.player
+                    , tracks = Dict.update trackId (Maybe.map updateTrack) model.tracks
+                    }
+            in
+                redirectToSignupIfNoAuthToken
+                    updatedModel
+                    (\model token ->
+                        ( model
+                        , Http.send AddedLike (Api.addLike token trackId)
+                        )
                     )
-                )
 
         AddedLike (Ok _) ->
             ( model, Cmd.none )

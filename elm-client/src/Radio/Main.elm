@@ -45,12 +45,10 @@ init : String -> Location -> ( Radio.Model.Model, Cmd Msg )
 init initialPayloadJsonString location =
     let
         initialPayloadDecoder =
-            Json.Decode.map2 (,)
-                (field "authToken" (Json.Decode.nullable Json.Decode.string))
-                (field "playlist" (Api.decodePlaylist Api.decodeTrack))
-        ( authToken, decodedRadioPayload ) =
+            (field "authToken" (Json.Decode.nullable Json.Decode.string))
+        authToken =
             Json.Decode.decodeString initialPayloadDecoder initialPayloadJsonString
-                 |> Result.withDefault ( Nothing, ( [], Just "/playlist" ))
+                 |> Result.withDefault Nothing
         model =
             { tracks = Dict.empty
             , radio = Radio.Model.emptyPlaylist Radio "/api/playlist"
@@ -70,12 +68,7 @@ init initialPayloadJsonString location =
         navigateToLocation =
             Update.update (NavigateTo (route location))
         initializeRadio =
-            Update.update (FetchedMore Radio (Ok decodedRadioPayload))
-        autoplayRadio =
-            if route location == RadioPage then
-                Update.update (PlayFromPlaylist Radio 0)
-            else
-                Update.identity
+            Http.send (FetchedRadio) (Api.fetchPlaylist authToken "/api/playlist" Api.decodeTrack)
         fetchLatestTracks =
             Update.update (FetchMore LatestTracks)
         attemptLogin =
@@ -87,9 +80,8 @@ init initialPayloadJsonString location =
     in
         model
             |> navigateToLocation
-            |> andThen initializeRadio
-            |> andThen autoplayRadio
             |> andThen fetchLatestTracks
+            |> addCmd initializeRadio
             |> addCmd setCurrentTime
             |> addCmd attemptLogin
 

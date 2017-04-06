@@ -17,6 +17,7 @@ module.exports = function fetchSavedTracks(soundcloudUserId, offset) {
             return _.map(rows, function (row) {
                 var track = row.track;
                 track.saved_at = row.savedAt;
+                track.likes = false;
                 return track;
             });
         })

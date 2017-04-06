@@ -16,6 +16,7 @@ type alias Track =
     , streamingInfo: StreamingInfo
     , sourceUrl : String
     , createdAt : Date
+    , liked : Bool
     , progress : Float
     , currentTime : Float
     , error : Bool

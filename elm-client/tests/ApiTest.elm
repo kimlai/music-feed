@@ -28,6 +28,7 @@ all =
                         }
                     , "saved_at":"2016-09-11T14:31:20.465Z"
                     , "id":"280751017"
+                    , "liked": false
                     }
                     """
                     |> Result.toMaybe
@@ -39,6 +40,7 @@ all =
                         , streamingInfo = Soundcloud "https://api.soundcloud.com/tracks/280751017/stream"
                         , sourceUrl = "http://soundcloud.com/lemellotron/zerolex-family-tree"
                         , createdAt = Date.fromTime 1472655571000
+                        , liked = False
                         , progress = 0
                         , currentTime = 0
                         , error = False
@@ -54,6 +56,7 @@ all =
                     , "artist":"LeMellotron"
                     , "source":"http://soundcloud.com/lemellotron/zerolex-family-tree"
                     , "created_at":"2016/08/31 14:59:31 +0000"
+                    , "liked": false
                     , "youtube":
                         { "id":"fakeYoutubeId" }
                     , "saved_at":"2016-09-11T14:31:20.465Z"
@@ -69,6 +72,7 @@ all =
                         , streamingInfo = Youtube "fakeYoutubeId"
                         , sourceUrl = "http://soundcloud.com/lemellotron/zerolex-family-tree"
                         , createdAt = Date.fromTime 1472655571000
+                        , liked = False
                         , progress = 0
                         , currentTime = 0
                         , error = False

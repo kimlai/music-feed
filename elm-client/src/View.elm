@@ -45,15 +45,27 @@ viewGlobalPlayer tooglePlayback next seekTo addLike track playing =
                 , viewProgressBar seekTo track
                 , div
                     [ class "actions" ]
-                    [ img
-                        [ src "https://icon.now.sh/heart"
-                        , class "like"
-                        , alt "Like"
-                        , onClick (addLike track.id)
-                        ]
-                        []
-                    ]
+                    [ viewLikeButton addLike track ]
                 ]
+
+
+viewLikeButton : (TrackId -> msg ) -> Track -> Html msg
+viewLikeButton addLike track =
+    if track.liked then
+        img
+            [ src "https://icon.now.sh/heart/02779E"
+            , class "like"
+            , alt "Unlike"
+            ]
+            []
+    else
+        img
+            [ src "https://icon.now.sh/heart"
+            , class "like"
+            , alt "Like"
+            , onClick (addLike track.id)
+            ]
+            []
 
 
 viewProgressBar : (Float -> msg) -> Track -> Html msg

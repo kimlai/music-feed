@@ -17,8 +17,8 @@ var app = koa();
 
 app.use(bodyParser());
 
-router.get('/playlist', radioPlaylist);
-router.get('/latest-tracks', latestTracks);
+router.get('/playlist', jwt({ secret: process.env.JWT_SECRET, passthrough: true }), radioPlaylist);
+router.get('/latest-tracks', jwt({ secret: process.env.JWT_SECRET, passthrough: true }), latestTracks);
 router.post('/report-dead-track', reportDeadTrack);
 router.post('/users', signup);
 router.post('/email-availability', checkEmailAvailabilty);
@@ -41,13 +41,15 @@ const nextHref = (baseUrl, tracks) =>
 
 function *radioPlaylist() {
     var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
-    this.body = yield fetchRadioPlaylist(soundcloudUserId);
+    const userUuid = R.path(['user', 'uuid'], this.state)
+    this.body = yield fetchRadioPlaylist(soundcloudUserId, userUuid);
 }
 
 function *latestTracks() {
+    const userUuid = R.path(['user', 'uuid'], this.state)
     var soundcloudUserId = process.env.ADMIN_SOUNDCLOUD_ID;
     var before = this.request.query.before;
-    var tracks = yield fetchPublishedTracks(soundcloudUserId, before);
+    var tracks = yield fetchPublishedTracks(soundcloudUserId, before, userUuid);
     this.body = {
         tracks: tracks,
         next_href: nextHref('/api/latest-tracks', tracks),
@@ -205,6 +207,7 @@ function *likes() {
             var track = row.track;
             track.created_at = row.created_at;
             track.id = row.soundcloudTrackId;
+            track.liked = true;
             return track;
         });
     });

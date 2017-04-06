@@ -24,9 +24,7 @@
 
             function onYouTubeIframeAPIReady() {
                 var soundcloudClientId = '<%=client_id%>';
-                var playlist = <%=playlist%>;
                 var app = Elm.Radio.Main.fullscreen(JSON.stringify({
-                    playlist: playlist,
                     authToken: authToken
                 }));
 

@@ -53,6 +53,7 @@ decodeTrack =
         |: decodeStreamingInfo
         |: (field "source" Json.Decode.string)
         |: (field "created_at" Json.Decode.Extra.date)
+        |: (field "liked" (Json.Decode.Extra.withDefault False Json.Decode.bool))
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed 0
         |: Json.Decode.succeed False
