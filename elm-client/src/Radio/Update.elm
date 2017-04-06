@@ -56,6 +56,8 @@ type Msg
     | WhoAmI (Result Http.Error ConnectedUser)
     | AddLike TrackId
     | AddedLike (Result Http.Error String)
+    | RemoveLike TrackId
+    | RemovedLike (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -415,6 +417,31 @@ update message model =
             ( model, Cmd.none )
 
         AddedLike (Err error) ->
+            redirectToSignupIf401 error Nothing model
+
+        RemoveLike trackId ->
+            let
+                updateTrack track =
+                    { track | liked = False }
+                updateModel model =
+                    { model
+                    | player = Player.removeTrackFromPlaylist Likes trackId model.player
+                    , tracks = Dict.update trackId (Maybe.map updateTrack) model.tracks
+                    }
+            in
+                redirectToSignupIfNoAuthToken
+                    model
+                    Nothing
+                    (\model token ->
+                        ( updateModel model
+                        , Http.send RemovedLike (Api.removeLike token trackId)
+                        )
+                    )
+
+        RemovedLike (Ok _) ->
+            ( model, Cmd.none )
+
+        RemovedLike (Err error) ->
             redirectToSignupIf401 error Nothing model
 
         KeyPressed keyCode ->

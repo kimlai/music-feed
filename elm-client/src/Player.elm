@@ -37,6 +37,22 @@ prependTrackToPlaylist playlistId track (Player { playlists, currentPlaylist, cu
             }
 
 
+removeTrackFromPlaylist : a -> b -> Player a b -> Player a b
+removeTrackFromPlaylist playlistId track (Player { playlists, currentPlaylist, currentTrack }) =
+    let
+        updatePlaylist ( id, playlist ) =
+            if id == playlistId then
+                ( id, Playlist.remove track playlist )
+            else
+                ( id, playlist )
+    in
+        Player
+            { playlists = List.map updatePlaylist playlists
+            , currentPlaylist = currentPlaylist
+            , currentTrack = currentTrack
+            }
+
+
 appendTracksToPlaylist : a -> List b -> Player a b -> Player a b
 appendTracksToPlaylist playlistId tracks (Player { playlists, currentPlaylist, currentTrack }) =
     let

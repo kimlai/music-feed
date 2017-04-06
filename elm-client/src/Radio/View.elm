@@ -28,6 +28,7 @@ view model =
             Next
             SeekTo
             AddLike
+            RemoveLike
             (Model.currentTrack model)
             model.playing
         , View.viewNavigation

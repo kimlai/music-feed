@@ -29,6 +29,7 @@ view model =
             Next
             SeekTo
             (MoveToPlaylist SavedTracks)
+            (MoveToPlaylist Blacklist)
             (Model.currentTrack model)
             model.playing
         , View.viewNavigation

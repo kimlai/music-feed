@@ -9,8 +9,15 @@ import Json.Decode.Extra exposing ((|:))
 import Model exposing (Track, NavigationItem, TrackId)
 
 
-viewGlobalPlayer : msg -> msg -> (Float -> msg) -> (TrackId -> msg) -> Maybe Track -> Bool -> Html msg
-viewGlobalPlayer tooglePlayback next seekTo addLike track playing =
+viewGlobalPlayer : msg
+                -> msg
+                -> (Float -> msg)
+                -> (TrackId -> msg)
+                -> (TrackId -> msg)
+                -> Maybe Track
+                -> Bool
+                -> Html msg
+viewGlobalPlayer tooglePlayback next seekTo addLike removeLike track playing =
     case track of
         Nothing ->
             text ""
@@ -45,17 +52,18 @@ viewGlobalPlayer tooglePlayback next seekTo addLike track playing =
                 , viewProgressBar seekTo track
                 , div
                     [ class "actions" ]
-                    [ viewLikeButton addLike track ]
+                    [ viewLikeButton addLike removeLike track ]
                 ]
 
 
-viewLikeButton : (TrackId -> msg ) -> Track -> Html msg
-viewLikeButton addLike track =
+viewLikeButton : (TrackId -> msg ) -> (TrackId -> msg) -> Track -> Html msg
+viewLikeButton addLike removeLike track =
     if track.liked then
         img
             [ src "https://icon.now.sh/heart/02779E"
             , class "like"
             , alt "Unlike"
+            , onClick (removeLike track.id)
             ]
             []
     else

@@ -25,6 +25,7 @@ router.post('/email-availability', checkEmailAvailabilty);
 router.post('/login', login);
 router.get('/me', jwt({ secret: process.env.JWT_SECRET }), me);
 router.post('/likes', jwt({ secret: process.env.JWT_SECRET }), addLike);
+router.delete('/likes', jwt({ secret: process.env.JWT_SECRET }), removeLike);
 router.get('/likes', jwt({ secret: process.env.JWT_SECRET }), likes);
 
 app.use(router.routes());
@@ -183,6 +184,20 @@ function *addLike() {
         track_id: submitted.trackId,
         created_at: new Date(),
     }).into('likes'),
+
+    this.status = 201;
+    this.body = {};
+}
+
+function *removeLike() {
+    var submitted = this.request.body;
+    var userUuid = this.state.user.uuid;
+
+    yield knex('likes')
+        .where({
+            user_uuid: userUuid,
+            track_id: submitted.trackId,
+        }).delete();
 
     this.status = 201;
     this.body = {};

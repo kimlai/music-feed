@@ -277,3 +277,23 @@ addLikeBody trackId =
     [ ( "trackId", Json.Encode.string trackId ) ]
     |> Json.Encode.object
     |> Http.jsonBody
+
+
+removeLike : String -> TrackId -> Http.Request String
+removeLike token trackId =
+    Http.request
+        { method = "DELETE"
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , url = "/api/likes"
+        , body = removeLikeBody trackId
+        , expect = Http.expectJson (Json.Decode.succeed "OK")
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+removeLikeBody : String -> Http.Body
+removeLikeBody trackId =
+    [ ( "trackId", Json.Encode.string trackId ) ]
+    |> Json.Encode.object
+    |> Http.jsonBody
