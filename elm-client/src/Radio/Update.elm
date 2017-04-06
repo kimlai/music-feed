@@ -215,7 +215,7 @@ update message model =
 
         NavigateTo page ->
             let
-                updatedModel =
+                updateModel model =
                     ( { model | currentPage = page }
                     , Cmd.none
                     )
@@ -225,10 +225,10 @@ update message model =
                         model
                         (Just LikesPage)
                         (\model token ->
-                            updatedModel
+                            updateModel model
                                 |> Update.when ((==) NotRequested << .status << .likes) (update (FetchMore Likes)))
                 else
-                    updatedModel
+                    updateModel model
 
         FollowLink url ->
             ( model
@@ -396,17 +396,17 @@ update message model =
             let
                 updateTrack track =
                     { track | liked = True }
-                updatedModel =
+                updateModel model =
                     { model
                     | player = Player.prependTrackToPlaylist Likes trackId model.player
                     , tracks = Dict.update trackId (Maybe.map updateTrack) model.tracks
                     }
             in
                 redirectToSignupIfNoAuthToken
-                    updatedModel
+                    model
                     Nothing
                     (\model token ->
-                        ( model
+                        ( updateModel model
                         , Http.send AddedLike (Api.addLike token trackId)
                         )
                     )
