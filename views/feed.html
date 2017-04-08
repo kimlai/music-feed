@@ -39,7 +39,7 @@
                     ospry.up({
                         form: form,
                         imageReady: function(err, metadata) {
-                            app.ports.imageUploaded.send(metadata.url);
+                            app.ports.imageUploaded.send(metadata.httpsURL);
                         }
                     });
                 });
