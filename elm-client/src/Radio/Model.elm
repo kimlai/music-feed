@@ -2,16 +2,17 @@ module Radio.Model exposing (..)
 
 
 import Date exposing (Date)
-import Dict exposing (Dict)
 import Player exposing (Player)
 import Radio.LoginForm exposing (LoginForm)
 import Radio.SignupForm exposing (SignupForm)
 import Time exposing (Time)
-import Model exposing (Track, TrackId, NavigationItem)
+import Model exposing (NavigationItem)
+import Track exposing (Track, TrackId)
+import Tracklist exposing (Tracklist)
 
 
 type alias Model =
-    { tracks : Dict TrackId Track
+    { tracks : Tracklist
     , radio : Playlist
     , latestTracks : Playlist
     , likes : Playlist
@@ -74,4 +75,4 @@ type PlaylistId
 currentTrack : Model -> Maybe Track
 currentTrack model =
     Player.currentTrack model.player
-        |> Maybe.andThen ((flip Dict.get) model.tracks)
+        |> Maybe.andThen ((flip Tracklist.get) model.tracks)

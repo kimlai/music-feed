@@ -5,11 +5,11 @@ import Http
 import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
 import Json.Encode
-import Model exposing (Track, StreamingInfo(..), TrackId)
 import Radio.Model exposing (ConnectedUser)
 import Radio.SignupForm exposing (Field(..))
 import Radio.LoginForm as LoginForm
 import Task exposing (Task)
+import Track exposing (Track, TrackId, StreamingInfo(..))
 
 
 fetchPlaylist : Maybe String -> String -> Json.Decode.Decoder Track -> Http.Request ( List Track, Maybe String )

@@ -4,7 +4,7 @@ port module PlayerEngine exposing
     )
 
 
-import Model exposing (Track, TrackId, StreamingInfo(..))
+import Track exposing (Track, TrackId, StreamingInfo(..))
 import Youtube exposing (YoutubeId)
 
 

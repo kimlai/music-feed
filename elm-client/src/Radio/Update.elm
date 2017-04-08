@@ -3,11 +3,9 @@ module Radio.Update exposing (..)
 
 import Api
 import Char
-import Dict
 import Http exposing (Error(..))
 import Json.Decode
 import Keyboard
-import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
 import PlayerEngine
@@ -18,6 +16,8 @@ import Radio.SignupForm as SignupForm exposing (Field(..))
 import Radio.LoginForm as LoginForm
 import Task exposing (Task)
 import Time exposing (Time)
+import Track exposing (Track, TrackId, StreamingInfo(..))
+import Tracklist
 import Update
 
 
@@ -69,14 +69,9 @@ update message model =
                     { playlist | nextLink = nextLink
                     , status = Fetched
                     }
-                updatedTracks =
-                    tracks
-                        |> List.map (\track -> ( track.id, track ))
-                        |> Dict.fromList
-                        |> Dict.union model.tracks
                 updatedModel =
                     { model
-                    | tracks = updatedTracks
+                    | tracks = Tracklist.add tracks model.tracks
                     , player = Player.appendTracksToPlaylist Radio (List.map .id tracks) model.player
                     }
             in
@@ -92,14 +87,9 @@ update message model =
                     { playlist | nextLink = nextLink
                     , status = Fetched
                     }
-                updatedTracks =
-                    tracks
-                        |> List.map (\track -> ( track.id, track ))
-                        |> Dict.fromList
-                        |> Dict.union model.tracks
                 updatedModel =
                     { model
-                    | tracks = updatedTracks
+                    | tracks = Tracklist.add tracks model.tracks
                     , player = Player.appendTracksToPlaylist playlistId (List.map .id tracks) model.player
                     }
             in
@@ -178,12 +168,7 @@ update message model =
         TrackError trackId ->
             let
                 newModel =
-                    { model | tracks =
-                        Dict.update
-                            trackId
-                            (Maybe.map (\track -> { track | error = True }))
-                            model.tracks
-                    }
+                    { model | tracks = Tracklist.update trackId Track.markAsErrored model.tracks }
 
                 ( newModelWithNext, command ) =
                     update Next newModel
@@ -206,11 +191,7 @@ update message model =
 
         TrackProgress ( trackId, progress, currentTime ) ->
             ( { model
-                | tracks =
-                    Dict.update
-                        trackId
-                        (Maybe.map (\track -> { track | progress = progress, currentTime = currentTime }))
-                        model.tracks
+                | tracks = Tracklist.update trackId (Track.recordProgress progress currentTime) model.tracks
               }
             , Cmd.none
             )
@@ -396,12 +377,10 @@ update message model =
 
         AddLike trackId ->
             let
-                updateTrack track =
-                    { track | liked = True }
                 updateModel model =
                     { model
                     | player = Player.prependTrackToPlaylist Likes trackId model.player
-                    , tracks = Dict.update trackId (Maybe.map updateTrack) model.tracks
+                    , tracks = Tracklist.update trackId Track.like model.tracks
                     }
             in
                 redirectToSignupIfNoAuthToken
@@ -421,12 +400,10 @@ update message model =
 
         RemoveLike trackId ->
             let
-                updateTrack track =
-                    { track | liked = False }
                 updateModel model =
                     { model
                     | player = Player.removeTrackFromPlaylist Likes trackId model.player
-                    , tracks = Dict.update trackId (Maybe.map updateTrack) model.tracks
+                    , tracks = Tracklist.update trackId Track.unlike model.tracks
                     }
             in
                 redirectToSignupIfNoAuthToken

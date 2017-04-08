@@ -12,6 +12,7 @@ import Player
 import PlayerEngine
 import Task
 import Time exposing (Time)
+import Tracklist
 
 
 main : Program String Model Msg
@@ -37,7 +38,7 @@ route location =
 
 init : String -> Location -> ( Model, Cmd Msg )
 init soundcloudClientId location =
-    ( { tracks = Dict.empty
+    ( { tracks = Tracklist.empty
       , playlists = playlists
       , playing = False
       , currentPage = route location

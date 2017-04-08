@@ -1,12 +1,10 @@
 module Radio.View exposing (..)
 
 import Date exposing (Date)
-import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode
-import Model exposing (Track, TrackId, StreamingInfo(..))
 import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..), ConnectedUser, PlaylistStatus(..))
 import Radio.SignupView as SignupView
 import Radio.LoginView as LoginView
@@ -16,6 +14,8 @@ import Player
 import Time exposing (Time)
 import TimeAgo exposing (timeAgo)
 import Radio.Update exposing (Msg(..))
+import Track exposing (Track, TrackId, StreamingInfo(..))
+import Tracklist exposing (Tracklist)
 import View
 
 
@@ -44,7 +44,7 @@ view model =
                     let
                         currentRadioTrack =
                             Player.currentTrackOfPlaylist Radio model.player
-                                |> Maybe.andThen ((flip Dict.get) model.tracks)
+                                |> Maybe.andThen ((flip Tracklist.get) model.tracks)
                     in
                         viewRadioTrack currentRadioTrack (Player.currentPlaylist model.player)
                 LatestTracksPage ->
@@ -114,12 +114,11 @@ viewRadioTrack track currentPlaylist =
                 ]
 
 
-viewLatestTracks : Maybe TrackId -> Maybe Time -> Dict TrackId Track -> Playlist -> List TrackId -> Html Msg
+viewLatestTracks : Maybe TrackId -> Maybe Time -> Tracklist -> Playlist -> List TrackId -> Html Msg
 viewLatestTracks currentTrackId currentTime tracks playlist playlistContent=
     let
         playlistTracks =
-            playlistContent
-                |> List.filterMap (\trackId -> Dict.get trackId tracks)
+            Tracklist.getTracks playlistContent tracks
 
         placeholders =
             if playlist.status == Fetching then

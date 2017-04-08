@@ -1,7 +1,6 @@
 port module Radio.Main exposing (..)
 
 import Api
-import Dict exposing (Dict)
 import Json.Decode exposing (field)
 import Http
 import Keyboard
@@ -18,6 +17,7 @@ import Update exposing (andThen, addCmd)
 import Radio.View as View
 import Task
 import Time exposing (Time)
+import Tracklist
 
 
 main : Program String Model Msg
@@ -45,7 +45,7 @@ init initialPayloadJsonString location =
             Json.Decode.decodeString initialPayloadDecoder initialPayloadJsonString
                  |> Result.withDefault Nothing
         model =
-            { tracks = Dict.empty
+            { tracks = Tracklist.empty
             , radio = Radio.Model.emptyPlaylist Radio "/api/playlist"
             , latestTracks = Radio.Model.emptyPlaylist LatestTracks "/api/latest-tracks"
             , likes = Radio.Model.emptyPlaylist Likes "/api/likes"

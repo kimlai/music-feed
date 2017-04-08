@@ -6,7 +6,7 @@ import Http
 import Json.Decode
 import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
-import Model exposing (Track, StreamingInfo(..))
+import Track exposing (Track, StreamingInfo(..))
 import Task exposing (Task)
 
 

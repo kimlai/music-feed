@@ -8,10 +8,11 @@ import Html exposing (Html, a, nav, li, ul, text, div, img, input, label, form, 
 import Html.Attributes exposing (class, classList, href, src, style, value, id, type_)
 import Html.Events exposing (onClick, onWithOptions, onInput)
 import Json.Decode
-import Model exposing (Track, TrackId)
 import Player
 import Time exposing (Time)
 import TimeAgo exposing (timeAgo)
+import Track exposing (Track, TrackId)
+import Tracklist exposing (Tracklist)
 import View
 
 
@@ -77,10 +78,10 @@ view model =
         ]
 
 
-viewCustomQueue : Dict TrackId Track -> List TrackId -> Html Msg
+viewCustomQueue : Tracklist -> List TrackId -> Html Msg
 viewCustomQueue tracks queue =
-    queue
-        |> List.filterMap (\trackId -> Dict.get trackId tracks)
+    tracks
+        |> Tracklist.getTracks queue
         |> List.indexedMap (viewCustomPlaylistItem)
         |> div [ class "custom-queue" ]
 
@@ -100,12 +101,11 @@ viewCustomPlaylistItem position track =
         ]
 
 
-viewPlaylist : Maybe Time -> Dict TrackId Track -> Playlist -> List TrackId -> Html Msg
+viewPlaylist : Maybe Time -> Tracklist -> Playlist -> List TrackId -> Html Msg
 viewPlaylist currentTime tracks playlist playlistContent=
     let
         playlistTracks =
-            playlistContent
-                |> List.filterMap (\trackId -> Dict.get trackId tracks)
+            Tracklist.getTracks playlistContent tracks
 
         tracksView =
             List.indexedMap (viewTrack currentTime playlist.id) playlistTracks

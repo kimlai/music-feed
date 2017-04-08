@@ -6,7 +6,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onWithOptions, on)
 import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
-import Model exposing (Track, NavigationItem, TrackId)
+import Model exposing (NavigationItem)
+import Track exposing (Track, TrackId)
 
 
 viewGlobalPlayer : msg

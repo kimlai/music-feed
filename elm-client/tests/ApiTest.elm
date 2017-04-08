@@ -4,7 +4,7 @@ import Api
 import Date
 import Expect
 import Json.Decode
-import Model exposing (StreamingInfo(..))
+import Track exposing (StreamingInfo(..))
 import String
 import Test exposing (..)
 

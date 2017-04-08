@@ -9,7 +9,6 @@ import Feed.Model as Model exposing (Model, PlaylistId(..), Page(..))
 import Feed.Ports as Ports
 import Http
 import Keyboard
-import Model exposing (Track, TrackId, StreamingInfo(..))
 import Navigation
 import Player
 import PlayerEngine
@@ -17,6 +16,8 @@ import Regex
 import Soundcloud
 import Task exposing (Task)
 import Time exposing (Time)
+import Track exposing (Track, TrackId, StreamingInfo(..))
+import Tracklist
 import Youtube
 
 
@@ -71,15 +72,10 @@ update message model =
                         playlist
                 updatedPlaylists =
                     List.map updatePlaylist model.playlists
-                updatedTracks =
-                    tracks
-                        |> List.map (\track -> ( track.id, track ))
-                        |> Dict.fromList
-                        |> Dict.union model.tracks
             in
                 ( { model
                   | playlists = updatedPlaylists
-                  , tracks = updatedTracks
+                  , tracks = Tracklist.add tracks model.tracks
                   , player = Player.appendTracksToPlaylist playlistId (List.map .id tracks) model.player
                   }
                 , Cmd.none
@@ -154,11 +150,7 @@ update message model =
             let
                 newModel =
                     { model
-                        | tracks =
-                            Dict.update
-                                trackId
-                                (Maybe.map (\track -> { track | error = True }))
-                                model.tracks
+                    | tracks = Tracklist.update trackId Track.markAsErrored model.tracks
                     }
 
                 ( newModel_, command ) =
@@ -187,11 +179,7 @@ update message model =
 
         TrackProgress ( trackId, progress, currentTime ) ->
             ( { model
-                | tracks =
-                    Dict.update
-                        trackId
-                        (Maybe.map (\track -> { track | progress = progress, currentTime = currentTime }))
-                        model.tracks
+                | tracks = Tracklist.update trackId (Track.recordProgress progress currentTime) model.tracks
               }
             , Cmd.none
             )
@@ -273,7 +261,7 @@ update message model =
         PublishedFromSoundcloudUrl (Ok track) ->
             let
                 model_ =
-                    { model | tracks = Dict.insert track.id track model.tracks }
+                    { model | tracks = Tracklist.add [track] model.tracks }
                 ( model__, command ) =
                     update (MoveToPlaylist PublishedTracks track.id) model_
                 ( model___, command_ ) =
@@ -346,7 +334,7 @@ update message model =
         PublishedYoutubeTrack (Ok track) ->
             let
                 model_ =
-                    { model | tracks = Dict.insert track.id track model.tracks }
+                    { model | tracks = Tracklist.add [track] model.tracks }
                 ( model__, command ) =
                     update (MoveToPlaylist PublishedTracks track.id) model_
                 ( model___, command_ ) =
