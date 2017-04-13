@@ -8,6 +8,7 @@ import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
 import Model exposing (NavigationItem)
 import Track exposing (Track, TrackId)
+import Icons
 
 
 viewGlobalPlayer : msg
@@ -23,6 +24,15 @@ viewGlobalPlayer tooglePlayback next seekTo addLike removeLike track playing =
         Nothing ->
             text ""
         Just track ->
+            let
+                icon =
+                    if track.error then
+                        Icons.error
+                    else if playing then
+                        Icons.pause
+                    else
+                        Icons.play
+            in
             div
                 [ class "global-player" ]
                 [ div
@@ -35,12 +45,12 @@ viewGlobalPlayer tooglePlayback next seekTo addLike removeLike track playing =
                             ]
                         , onClick (tooglePlayback)
                         ]
-                        [ text "Play" ]
+                        [ icon ]
                     , div
                         [ class "next-button"
                         , onClick next
                         ]
-                        [ text "Next" ]
+                        [ Icons.next ]
                     ]
                 , img
                     [ src track.artwork_url ]
@@ -60,21 +70,19 @@ viewGlobalPlayer tooglePlayback next seekTo addLike removeLike track playing =
 viewLikeButton : (TrackId -> msg ) -> (TrackId -> msg) -> Track -> Html msg
 viewLikeButton addLike removeLike track =
     if track.liked then
-        img
-            [ src "https://icon.now.sh/heart/02779E"
-            , class "like"
+        div
+            [ class "unlike"
             , alt "Unlike"
             , onClick (removeLike track.id)
             ]
-            []
+            [ Icons.heart ]
     else
-        img
-            [ src "https://icon.now.sh/heart"
-            , class "like"
+        div
+            [ class "like"
             , alt "Like"
             , onClick (addLike track.id)
             ]
-            []
+            [ Icons.heart ]
 
 
 viewProgressBar : (Float -> msg) -> Track -> Html msg

@@ -29,20 +29,15 @@ body {
     float: left;
     margin: 0 6px; }
   .global-player .controls {
-    margin: auto; }
+    display: flex;
+    align-items: center; }
     .global-player .controls div {
       cursor: pointer;
       color: transparent;
-      float: left; }
+      text-align: center; }
     .global-player .controls .playback-button {
-      background: url("/images/play.svg") no-repeat 55% center;
       width: 46px; }
-      .global-player .controls .playback-button.playing {
-        background: url("/images/pause.svg") no-repeat 55% center; }
-      .global-player .controls .playback-button.error {
-        background: url("/images/error.svg") no-repeat 55% center; }
     .global-player .controls .next-button {
-      background: url("/images/next.svg") no-repeat 55% center;
       width: 33px; }
   .global-player .track-info {
     margin: auto;
@@ -57,13 +52,12 @@ body {
     flex: 1;
     margin: auto; }
   .global-player .actions {
-    padding-left: 10px;
+    padding-left: 18px;
+    padding-right: 6px;
     cursor: pointer;
     margin: auto; }
-  .global-player img.like {
-    width: 16px;
-    height: 16px;
-    background: inherit; }
+  .global-player .unlike svg {
+    fill: #02779E; }
 
 .navigation {
   position: fixed;

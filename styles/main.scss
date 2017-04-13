@@ -33,24 +33,17 @@ body {
         margin: 0 6px;
     }
     .controls {
-        margin: auto;
+        display: flex;
+        align-items: center;
         div {
             cursor: pointer;
             color: transparent;
-            float: left;
+            text-align: center;
         }
         .playback-button {
-            background: url('/images/play.svg') no-repeat 55% center;
             width: 46px;
-            &.playing {
-                background: url('/images/pause.svg') no-repeat 55% center;
-            }
-            &.error {
-                background: url('/images/error.svg') no-repeat 55% center;
-            }
         }
         .next-button {
-            background: url('/images/next.svg') no-repeat 55% center;
             width: 33px;
         }
     }
@@ -70,14 +63,13 @@ body {
         margin: auto;
     }
     .actions {
-        padding-left: 10px;
+        padding-left: 18px;
+        padding-right: 6px;
         cursor: pointer;
         margin: auto;
     }
-    img.like {
-        width: 16px;
-        height: 16px;
-        background: inherit;
+    .unlike svg {
+        fill: #02779E;
     }
 }
 
