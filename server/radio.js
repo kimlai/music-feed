@@ -34,7 +34,7 @@ module.exports = function fetchRadioPlaylist(soundcloudUserId, userUuid) {
         .then(function (tracks) {
             return {
                 tracks: tracks,
-                next_href: "/radio_playlist"
+                next_href: "/api/playlist"
             };
         });
 };

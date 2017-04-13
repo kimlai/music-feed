@@ -211,7 +211,7 @@ viewMoreButton : PlaylistId -> Html Msg
 viewMoreButton playlistId =
     div
         [ class "view-more"
-        , onClick (FetchMore playlistId)
+        , onClick (FetchMore playlistId False)
         ]
         [ text "More" ]
 

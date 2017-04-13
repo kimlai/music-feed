@@ -35,9 +35,8 @@ type Msg
     | KeyPressed Keyboard.KeyCode
     | UpdateCurrentTime Time
     | PlayFromPlaylist PlaylistId Int
-    | FetchMore PlaylistId
-    | FetchedMore PlaylistId (Result Http.Error ( List Track, Maybe String ))
-    | FetchedRadio (Result Http.Error ( List Track, Maybe String ))
+    | FetchMore PlaylistId Bool
+    | FetchedMore PlaylistId Bool (Result Http.Error ( List Track, Maybe String ))
     | ReportedDeadTrack (Result Http.Error String)
     | ResumeRadio
     | SeekTo Float
@@ -63,26 +62,12 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
-        FetchedRadio (Ok ( tracks, nextLink )) ->
+        FetchedMore playlistId autoplay (Ok ( tracks, nextLink )) ->
             let
-                updatePlaylist playlist =
-                    { playlist | nextLink = nextLink
-                    , status = Fetched
-                    }
-                updatedModel =
-                    { model
-                    | tracks = Tracklist.add tracks model.tracks
-                    , player = Player.appendTracksToPlaylist Radio (List.map .id tracks) model.player
-                    }
-            in
-                ( { updatedModel | radio = updatePlaylist model.radio } , Cmd.none)
-                    |> Update.when ((==) RadioPage << .currentPage) (update (PlayFromPlaylist Radio 0))
-
-        FetchedRadio (Err error)->
-            ( model, Cmd.none )
-
-        FetchedMore playlistId (Ok ( tracks, nextLink )) ->
-            let
+                nextTrackIndex =
+                    model.player
+                        |> Player.playlistContent playlistId
+                        |> List.length
                 updatePlaylist playlist =
                     { playlist | nextLink = nextLink
                     , status = Fetched
@@ -92,22 +77,25 @@ update message model =
                     | tracks = Tracklist.add tracks model.tracks
                     , player = Player.appendTracksToPlaylist playlistId (List.map .id tracks) model.player
                     }
+                newModel =
+                    case playlistId of
+                        Radio ->
+                            ( { updatedModel | radio = updatePlaylist model.radio }
+                            , Cmd.none
+                            )
+                        LatestTracks ->
+                            ( { updatedModel | latestTracks = updatePlaylist model.latestTracks }
+                            , Cmd.none
+                            )
+                        Likes ->
+                            ( { updatedModel | likes = updatePlaylist model.likes }
+                            , Cmd.none
+                            )
             in
-                case playlistId of
-                    Radio ->
-                        ( { updatedModel | radio = updatePlaylist model.radio }
-                        , Cmd.none
-                        )
-                    LatestTracks ->
-                        ( { updatedModel | latestTracks = updatePlaylist model.latestTracks }
-                        , Cmd.none
-                        )
-                    Likes ->
-                        ( { updatedModel | likes = updatePlaylist model.likes }
-                        , Cmd.none
-                        )
+                newModel
+                    |> Update.when (always autoplay) (update (PlayFromPlaylist playlistId nextTrackIndex))
 
-        FetchedMore playlistId (Err error)->
+        FetchedMore playlistId autoplay (Err error)->
             ( model, Cmd.none )
 
         PlayFromPlaylist playlistId position ->
@@ -124,7 +112,7 @@ update message model =
                 msg
                 { model | player = player}
 
-        FetchMore playlistId ->
+        FetchMore playlistId autoplay ->
             let
                 markAsFetching playlist =
                     { playlist | status = Fetching }
@@ -142,7 +130,7 @@ update message model =
                         ( model, Cmd.none )
                     Just url ->
                         ( updateModel model markAsFetching
-                        , Http.send (FetchedMore playlistId) (Api.fetchPlaylist model.authToken url Api.decodeTrack)
+                        , Http.send (FetchedMore playlistId autoplay) (Api.fetchPlaylist model.authToken url Api.decodeTrack)
                         )
 
         UpdateCurrentTime newTime ->
@@ -151,7 +139,9 @@ update message model =
         Play ->
             case Model.currentTrack model of
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( model
+                    , PlayerEngine.pause Nothing
+                    )
                 Just track ->
                     ( { model | playing = True }
                     , PlayerEngine.play track
@@ -185,9 +175,21 @@ update message model =
                 update Play model
 
         Next ->
-            update
-                Play
-                { model | player = Player.next model.player }
+            let
+                currentPlaylist =
+                    Player.currentPlaylist model.player
+                nextTrack =
+                    (Player.currentTrack << Player.next) model.player
+            in
+                case nextTrack of
+                    Just track ->
+                        update Play { model | player = Player.next model.player }
+                    Nothing ->
+                        case currentPlaylist of
+                            Nothing ->
+                                ( model, Cmd.none )
+                            Just playlistId ->
+                                update (FetchMore playlistId True) model
 
         TrackProgress ( trackId, progress, currentTime ) ->
             ( { model
@@ -209,7 +211,7 @@ update message model =
                         (Just LikesPage)
                         (\model token ->
                             updateModel model
-                                |> Update.when ((==) NotRequested << .status << .likes) (update (FetchMore Likes)))
+                                |> Update.when ((==) NotRequested << .status << .likes) (update (FetchMore Likes False)))
                 else
                     updateModel model
 

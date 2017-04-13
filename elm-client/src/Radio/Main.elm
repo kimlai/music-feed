@@ -64,9 +64,9 @@ init initialPayloadJsonString location =
         navigateToLocation =
             Update.update (NavigateTo (route location))
         initializeRadio =
-            Http.send (FetchedRadio) (Api.fetchPlaylist authToken "/api/playlist" Api.decodeTrack)
+            Http.send (FetchedMore Radio (RadioPage == route location)) (Api.fetchPlaylist authToken "/api/playlist" Api.decodeTrack)
         fetchLatestTracks =
-            Update.update (FetchMore LatestTracks)
+            Update.update (FetchMore LatestTracks False)
         attemptLogin =
             authToken
                 |> Maybe.map (\token -> (Http.send WhoAmI (Api.whoAmI token)))
