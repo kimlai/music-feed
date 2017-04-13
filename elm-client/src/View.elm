@@ -13,13 +13,14 @@ import Icons
 
 viewGlobalPlayer : msg
                 -> msg
+                -> msg
                 -> (Float -> msg)
                 -> (TrackId -> msg)
                 -> (TrackId -> msg)
                 -> Maybe Track
                 -> Bool
                 -> Html msg
-viewGlobalPlayer tooglePlayback next seekTo addLike removeLike track playing =
+viewGlobalPlayer tooglePlayback toggleRadioPlaylist next seekTo addLike removeLike track playing =
     case track of
         Nothing ->
             text ""
@@ -37,7 +38,8 @@ viewGlobalPlayer tooglePlayback next seekTo addLike removeLike track playing =
                 [ class "global-player" ]
                 [ div
                     [ class "controls" ]
-                    [ div
+                    [ viewShowRadioPlaylistToggle toggleRadioPlaylist
+                    , div
                         [ classList
                             [ ( "playback-button", True )
                             , ( "playing", playing && not track.error )
@@ -65,6 +67,15 @@ viewGlobalPlayer tooglePlayback next seekTo addLike removeLike track playing =
                     [ class "actions" ]
                     [ viewLikeButton addLike removeLike track ]
                 ]
+
+
+viewShowRadioPlaylistToggle : msg -> Html msg
+viewShowRadioPlaylistToggle toggleRadioPlaylist =
+    div
+        [ class "show-radio-playlist"
+        , onClick toggleRadioPlaylist
+        ]
+        [ Icons.playlist ]
 
 
 viewLikeButton : (TrackId -> msg ) -> (TrackId -> msg) -> Track -> Html msg

@@ -28,6 +28,7 @@ view model =
         [ View.viewGlobalPlayer
             TogglePlayback
             Next
+            Next
             SeekTo
             (MoveToPlaylist SavedTracks)
             (MoveToPlaylist Blacklist)

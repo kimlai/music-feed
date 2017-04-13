@@ -46,6 +46,12 @@ body {
         .next-button {
             width: 33px;
         }
+        .show-radio-playlist {
+            width: 46px;
+            svg {
+                fill: #333333;
+            }
+        }
     }
     .track-info {
         margin: auto;
@@ -191,6 +197,60 @@ body {
     border: 1px solid #f0f0f0;
     &:hover {
         background: #f0f0f0;
+    }
+}
+
+.radio-playlist {
+    z-index: 999;
+    background: #fcfcfc;
+    position: fixed;
+    top: 0;
+    bottom: 75px;
+    width: 250px;
+    overflow-y: auto;
+    padding-left: 12px;
+    left: -260px;
+    &.visible {
+        left: 0;
+    }
+    transition: left 0.15s;
+    .track-info-container {
+        cursor: pointer;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 6px;
+        &:last-child {
+            margin-bottom: 0;
+        }
+        &:hover,
+        &.selected {
+            background: #f0f0f0;
+        }
+        img {
+            width: 50px;
+            height: 50px;
+            background: #f0f0f0;
+            float: left;
+            margin: 0 6px 0 0;
+        }
+        .track-info {
+            width: 160px;
+            margin-left: 6px;
+            div {
+                font-size: 14px;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+            .title {
+                margin-bottom: 3px;
+            }
+            .artist {
+                font-size: 12px;
+                color: #777777;
+            }
+        }
     }
 }
 

@@ -57,6 +57,7 @@ type Msg
     | AddedLike (Result Http.Error String)
     | RemoveLike TrackId
     | RemovedLike (Result Http.Error String)
+    | ToggleRadioPlaylist
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -242,6 +243,11 @@ update message model =
         Rewind ->
             ( model
             , PlayerEngine.changeCurrentTime (Model.currentTrack model) -10
+            )
+
+        ToggleRadioPlaylist ->
+            ( { model | showRadioPlaylist = not model.showRadioPlaylist }
+            , Cmd.none
             )
 
         SignupUpdateUsername newUsername ->

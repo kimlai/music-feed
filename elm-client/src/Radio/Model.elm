@@ -14,6 +14,7 @@ import Tracklist exposing (Tracklist)
 type alias Model =
     { tracks : Tracklist
     , radio : Playlist
+    , showRadioPlaylist : Bool
     , latestTracks : Playlist
     , likes : Playlist
     , playing : Bool

@@ -47,6 +47,7 @@ init initialPayloadJsonString location =
         model =
             { tracks = Tracklist.empty
             , radio = Radio.Model.emptyPlaylist Radio "/api/playlist"
+            , showRadioPlaylist = False
             , latestTracks = Radio.Model.emptyPlaylist LatestTracks "/api/latest-tracks"
             , likes = Radio.Model.emptyPlaylist Likes "/api/likes"
             , playing = False

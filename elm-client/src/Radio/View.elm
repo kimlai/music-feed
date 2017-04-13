@@ -4,6 +4,7 @@ import Date exposing (Date)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Icons
 import Json.Decode
 import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..), ConnectedUser, PlaylistStatus(..))
 import Radio.SignupView as SignupView
@@ -25,6 +26,7 @@ view model =
         []
         [ View.viewGlobalPlayer
             TogglePlayback
+            ToggleRadioPlaylist
             Next
             SeekTo
             AddLike
@@ -37,6 +39,11 @@ view model =
             model.currentPage
             (Player.currentPlaylist model.player)
         , viewConnectedUser model.connectedUser
+        , viewRadioPlaylist
+                model.showRadioPlaylist
+                (Player.currentTrack model.player)
+                model.tracks
+                (Player.playlistContent Radio model.player)
         , div
             [ class "main" ]
             [ case model.currentPage of
@@ -46,7 +53,7 @@ view model =
                             Player.currentTrackOfPlaylist Radio model.player
                                 |> Maybe.andThen ((flip Tracklist.get) model.tracks)
                     in
-                        viewRadioTrack currentRadioTrack (Player.currentPlaylist model.player)
+                        div [] [ viewRadioTrack currentRadioTrack (Player.currentPlaylist model.player) ]
                 LatestTracksPage ->
                     viewLatestTracks
                         (Player.currentTrack model.player)
@@ -112,6 +119,45 @@ viewRadioTrack track currentPlaylist =
                         ]
                     ]
                 ]
+
+
+viewRadioPlaylist : Bool -> Maybe TrackId -> Tracklist -> List TrackId -> Html Msg
+viewRadioPlaylist showRadioPlaylist currentTrackId tracks playlistContent =
+    Tracklist.getTracks playlistContent tracks
+        |> List.indexedMap (viewRadioPlaylistTrack currentTrackId)
+        |> div
+            [ classList
+                [ ( "radio-playlist", True )
+                , ( "visible", showRadioPlaylist )
+                ]
+            ]
+
+
+viewRadioPlaylistTrack : Maybe TrackId -> Int -> Track -> Html Msg
+viewRadioPlaylistTrack currentTrackId position track =
+    div
+        [ onClick (PlayFromPlaylist Radio position)
+        , classList
+            [ ("track-info-container", True)
+            , ("error", track.error)
+            , ("selected", currentTrackId == Just track.id)
+            ]
+        ]
+        [ div
+            [ class "cover" ]
+            [ img
+                [ src (Regex.replace Regex.All (Regex.regex "large") (\_ -> "t200x200") track.artwork_url) ]
+                []
+            ]
+        , div
+            []
+            [ div
+                [ class "track-info" ]
+                [ div [ class "title" ] [ text track.title ]
+                , div [ class "artist" ] [ text ("by " ++ track.artist) ]
+                ]
+            ]
+        ]
 
 
 viewLatestTracks : Maybe TrackId -> Maybe Time -> Tracklist -> Playlist -> List TrackId -> Html Msg

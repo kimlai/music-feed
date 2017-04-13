@@ -40,6 +40,19 @@ pause =
         ]
 
 
+playlist : Svg msg
+playlist =
+    svg [ attribute "height" "18", viewBox "0 0 12 12", attribute "width" "18" ]
+        [ g
+            []
+            [ path
+                [ d "M7.5,4.5 L0,8.5 L0,0.5 L7.5,4.5 L7.5,4.5 Z M3,11 L3,10 L12,10 L12,11 L3,11 L3,11 Z M12,7 L12,8 L5,8 L5,7 L12,7 L12,7 Z M8.00000487,3.99835018 L12,3.99835018 L12,4.99835018 L8,4.99835018 L8,3.99835018 L8.00000487,3.99835018 L8.00000487,3.99835018 Z"
+                ]
+                []
+            ]
+        ]
+
+
 error : Svg msg
 error =
     svg [ attribute "height" "20px", id "svg3017", viewBox "0 0 17 20", attribute "width" "17px", attribute "xmlns" "http://www.w3.org/2000/svg" ]
