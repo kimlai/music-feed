@@ -143,9 +143,18 @@ update message model =
                     , PlayerEngine.pause Nothing
                     )
                 Just track ->
-                    ( { model | playing = True }
-                    , PlayerEngine.play track
-                    )
+                    let
+                        resetTrack track =
+                            if track.progress > 99.9 then
+                                { track | currentTime = 0, progress = 0 }
+                            else
+                                track
+                        updatedModel =
+                            { model | tracks = Tracklist.update track.id resetTrack model.tracks }
+                    in
+                        ( { updatedModel | playing = True }
+                        , PlayerEngine.play (resetTrack track)
+                        )
 
         Pause ->
             ( { model | playing = False }
