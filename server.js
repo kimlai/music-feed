@@ -4,9 +4,11 @@ var radio = require('./server/radioApp');
 var feed = require('./server/feedApp');
 var serve = require('koa-static');
 var views = require('koa-views');
+var compress = require('koa-compress');
 
 var app = koa();
 
+app.use(compress());
 app.use(serve('./public'));
 
 app.use(views('views', {
@@ -17,5 +19,6 @@ app.use(views('views', {
 
 app.use(mount('/', radio));
 app.use(mount('/feed', feed));
+
 
 app.listen(process.env.PORT || 3000);
