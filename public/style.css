@@ -162,6 +162,19 @@ body {
   .more-button:hover {
     background: #f0f0f0; }
 
+.radio-playlist-overlay {
+  background: black;
+  opacity: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  transition: opacity 0.15s; }
+  .radio-playlist-overlay.visible {
+    opacity: 0.2;
+    right: 0;
+    bottom: 0; }
+
 .radio-playlist {
   z-index: 999;
   background: #fcfcfc;

@@ -39,6 +39,14 @@ view model =
             model.currentPage
             (Player.currentPlaylist model.player)
         , viewConnectedUser model.connectedUser
+        , div
+            [ classList
+                [ ("radio-playlist-overlay", True )
+                , ( "visible", model.showRadioPlaylist )
+                ]
+            , onClick ToggleRadioPlaylist
+            ]
+            [ text "" ]
         , viewRadioPlaylist
                 model.showRadioPlaylist
                 (Player.currentTrack model.player)
