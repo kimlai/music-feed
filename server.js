@@ -5,9 +5,13 @@ var feed = require('./server/feedApp');
 var serve = require('koa-static');
 var views = require('koa-views');
 var compress = require('koa-compress');
+var forceSSL = require('./server/forceSSL');
 
 var app = koa();
 
+if (process.env.NODE_ENV === 'production') {
+    app.use(forceSSL);
+}
 app.use(compress());
 app.use(serve('./public'));
 
