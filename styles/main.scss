@@ -333,6 +333,17 @@ body {
         line-height: 1;
         padding-bottom: 24px;
     }
+    .source {
+        opacity: 0.5;
+        line-height: 1;
+        padding-bottom: 24px;
+        a {
+            text-decoration: none;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
     .resume-radio {
         cursor: pointer;
         &:before {

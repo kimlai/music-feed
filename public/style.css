@@ -271,6 +271,14 @@ body {
     font-size: 48px;
     line-height: 1;
     padding-bottom: 24px; }
+  .radio-track .source {
+    opacity: 0.5;
+    line-height: 1;
+    padding-bottom: 24px; }
+    .radio-track .source a {
+      text-decoration: none; }
+      .radio-track .source a:hover {
+        text-decoration: underline; }
   .radio-track .resume-radio {
     cursor: pointer; }
     .radio-track .resume-radio:before {

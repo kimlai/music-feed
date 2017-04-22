@@ -94,6 +94,14 @@ viewRadioTrack track currentPlaylist =
             div [] [ text "" ]
 
         Just track ->
+            let
+                source =
+                    case track.streamingInfo of
+                        Soundcloud url ->
+                            "Soundcloud"
+                        Youtube id ->
+                            "Youtube"
+            in
             div
                 [ class "radio-track" ]
                 [ div
@@ -110,12 +118,15 @@ viewRadioTrack track currentPlaylist =
                         [ class "track-info" ]
                         [ div [ class "title" ] [ text track.title ]
                         , div [ class "artist" ] [ text ("by " ++ track.artist) ]
-                        , a
-                            [ class "source"
-                            , href track.sourceUrl
-                            , target "_blank"
+                        , div
+                            [ class "source" ]
+                            [ span [] [ text "on " ]
+                            , a
+                                [ href track.sourceUrl
+                                , target "_blank"
+                                ]
+                                [ text source ]
                             ]
-                            [ text "Source" ]
                         , if currentPlaylist /= Just Radio then
                             div
                                 [ class "resume-radio"
