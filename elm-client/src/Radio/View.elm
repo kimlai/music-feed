@@ -91,7 +91,7 @@ viewRadioTrack : Maybe Track -> Maybe PlaylistId -> Html Msg
 viewRadioTrack track currentPlaylist =
     case track of
         Nothing ->
-            div [] [ text "..." ]
+            div [] [ text "" ]
 
         Just track ->
             div
@@ -109,7 +109,7 @@ viewRadioTrack track currentPlaylist =
                     [ div
                         [ class "track-info" ]
                         [ div [ class "title" ] [ text track.title ]
-                        , div [ class "artist" ] [ text track.artist ]
+                        , div [ class "artist" ] [ text ("by " ++ track.artist) ]
                         , a
                             [ class "source"
                             , href track.sourceUrl

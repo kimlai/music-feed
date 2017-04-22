@@ -59,8 +59,8 @@ viewGlobalPlayer tooglePlayback toggleRadioPlaylist next seekTo addLike removeLi
                     []
                 , div
                     [ class "track-info" ]
-                    [ div [ class "artist" ] [ text track.artist ]
-                    , div [ class "title" ] [ text track.title ]
+                    [ div [ class "title" ] [ text track.title ]
+                    , div [ class "artist" ] [ text ("by " ++ track.artist) ]
                     ]
                 , viewProgressBar seekTo track
                 , div

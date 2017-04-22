@@ -52,6 +52,9 @@ body {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden; }
+    .global-player .track-info .artist {
+      font-size: 12px;
+      color: #777777; }
   .global-player .progress-bar {
     flex: 1;
     margin: auto; }
