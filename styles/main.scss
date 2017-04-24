@@ -344,6 +344,28 @@ body {
             }
         }
     }
+    .like-button {
+        line-height: 1;
+        cursor: pointer;
+        svg {
+            fill: white;
+            stroke-width: 3px;
+            stroke: #333;
+            opacity: 0.5;
+            width: 20px;
+            height: 18px;
+            &:hover {
+                opacity: 1;
+            }
+        }
+        &.liked {
+            svg {
+                fill: #02779E;
+                stroke: #02779E;
+                opacity: 1;
+            }
+        }
+    }
     .resume-radio {
         cursor: pointer;
         &:before {

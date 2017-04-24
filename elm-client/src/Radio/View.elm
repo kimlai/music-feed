@@ -101,6 +101,11 @@ viewRadioTrack track currentPlaylist =
                             "Soundcloud"
                         Youtube id ->
                             "Youtube"
+                onLikeButtonClicked =
+                    if track.liked then
+                        RemoveLike track.id
+                    else
+                        AddLike track.id
             in
             div
                 [ class "radio-track" ]
@@ -127,6 +132,14 @@ viewRadioTrack track currentPlaylist =
                                 ]
                                 [ text source ]
                             ]
+                        , div
+                            [ classList
+                                [ ( "like-button", True )
+                                , ( "liked", track.liked )
+                                ]
+                            , onClick onLikeButtonClicked
+                            ]
+                            [ Icons.heart ]
                         , if currentPlaylist /= Just Radio then
                             div
                                 [ class "resume-radio"

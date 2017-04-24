@@ -279,6 +279,22 @@ body {
       text-decoration: none; }
       .radio-track .source a:hover {
         text-decoration: underline; }
+  .radio-track .like-button {
+    line-height: 1;
+    cursor: pointer; }
+    .radio-track .like-button svg {
+      fill: white;
+      stroke-width: 3px;
+      stroke: #333;
+      opacity: 0.5;
+      width: 20px;
+      height: 18px; }
+      .radio-track .like-button svg:hover {
+        opacity: 1; }
+    .radio-track .like-button.liked svg {
+      fill: #02779E;
+      stroke: #02779E;
+      opacity: 1; }
   .radio-track .resume-radio {
     cursor: pointer; }
     .radio-track .resume-radio:before {
