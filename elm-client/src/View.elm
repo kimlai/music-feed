@@ -4,6 +4,7 @@ module View exposing (..)
 import Html exposing (Html, div, text, img, ul, li, nav, a)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onWithOptions, on)
+import Html.Extra exposing (link)
 import Json.Decode exposing (field)
 import Json.Decode.Extra exposing ((|:))
 import Model exposing (NavigationItem)
@@ -11,7 +12,7 @@ import Track exposing (Track, TrackId)
 import Icons
 
 
-viewGlobalPlayer : msg
+viewGlobalPlayer : (String -> msg)
                 -> msg
                 -> msg
                 -> (Float -> msg)
@@ -20,7 +21,7 @@ viewGlobalPlayer : msg
                 -> Maybe Track
                 -> Bool
                 -> Html msg
-viewGlobalPlayer tooglePlayback toggleRadioPlaylist next seekTo addLike removeLike track playing =
+viewGlobalPlayer followLink tooglePlayback next seekTo addLike removeLike track playing =
     case track of
         Nothing ->
             text ""
@@ -38,7 +39,7 @@ viewGlobalPlayer tooglePlayback toggleRadioPlaylist next seekTo addLike removeLi
                 [ class "global-player" ]
                 [ div
                     [ class "controls" ]
-                    [ viewShowRadioPlaylistToggle toggleRadioPlaylist
+                    [ viewShowRadioPlaylistToggle followLink
                     , div
                         [ classList
                             [ ( "playback-button", True )
@@ -69,12 +70,12 @@ viewGlobalPlayer tooglePlayback toggleRadioPlaylist next seekTo addLike removeLi
                 ]
 
 
-viewShowRadioPlaylistToggle : msg -> Html msg
-viewShowRadioPlaylistToggle toggleRadioPlaylist =
-    div
-        [ class "show-radio-playlist"
-        , onClick toggleRadioPlaylist
-        ]
+viewShowRadioPlaylistToggle : (String -> msg) -> Html msg
+viewShowRadioPlaylistToggle followLink =
+    link
+        followLink
+        "/queue/next"
+        [ class "show-radio-playlist" ]
         [ Icons.playlist ]
 
 

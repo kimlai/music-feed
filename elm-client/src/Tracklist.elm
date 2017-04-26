@@ -38,3 +38,8 @@ get trackId (Tracklist tracklist) =
 getTracks : List TrackId -> Tracklist -> List Track
 getTracks ids (Tracklist tracklist) =
     List.filterMap (\trackId -> Dict.get trackId tracklist) ids
+
+
+getTracksWithPosition : List ( Int, TrackId ) -> Tracklist -> List ( Int, Track )
+getTracksWithPosition ids (Tracklist tracklist) =
+    List.filterMap (\( position, trackId ) -> Dict.get trackId tracklist |> Maybe.map (\track -> ( position, track ))) ids

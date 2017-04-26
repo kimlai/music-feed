@@ -17,6 +17,7 @@ type alias Model =
     , showRadioPlaylist : Bool
     , latestTracks : Playlist
     , likes : Playlist
+    , played : List TrackId
     , playing : Bool
     , currentPage : Page
     , lastKeyPressed : Maybe Char
@@ -60,6 +61,8 @@ emptyPlaylist id fetchUrl =
 
 type Page
     = RadioPage
+    | UpNextPage
+    | PlayedPage
     | LatestTracksPage
     | LikesPage
     | Signup

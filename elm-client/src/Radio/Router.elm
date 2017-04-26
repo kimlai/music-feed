@@ -25,6 +25,8 @@ pageToUrl page =
 routes : List ( String, Page )
 routes =
     [ ( "/",  RadioPage )
+    , ( "/queue/played", PlayedPage )
+    , ( "/queue/next", UpNextPage )
     , ( "/latest",  LatestTracksPage )
     , ( "/likes",  LikesPage )
     , ( "/sign-up",  Signup )

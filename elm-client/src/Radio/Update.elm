@@ -35,6 +35,7 @@ type Msg
     | KeyPressed Keyboard.KeyCode
     | UpdateCurrentTime Time
     | PlayFromPlaylist PlaylistId Int
+    | PlayOutsidePlaylist TrackId
     | FetchMore PlaylistId Bool
     | FetchedMore PlaylistId Bool (Result Http.Error ( List Track, Maybe String ))
     | ReportedDeadTrack (Result Http.Error String)
@@ -113,6 +114,20 @@ update message model =
                 msg
                 { model | player = player}
 
+        PlayOutsidePlaylist trackId ->
+            let
+                player =
+                    Player.selectOutsidePlaylist trackId model.player
+                msg =
+                    if Player.currentTrack player == Player.currentTrack model.player then
+                        TogglePlayback
+                    else
+                        Play
+            in
+            update
+                msg
+                { model | player = player}
+
         FetchMore playlistId autoplay ->
             let
                 markAsFetching playlist =
@@ -150,8 +165,16 @@ update message model =
                                 { track | currentTime = 0, progress = 0 }
                             else
                                 track
+                        updatePlayedTracks tracks =
+                            if List.head tracks /= Just track.id && track.progress == 0 then
+                                track.id :: tracks
+                            else
+                                tracks
                         updatedModel =
-                            { model | tracks = Tracklist.update track.id resetTrack model.tracks }
+                            { model
+                            | tracks = Tracklist.update track.id resetTrack model.tracks
+                            , played = updatePlayedTracks model.played
+                            }
                     in
                         ( { updatedModel | playing = True }
                         , PlayerEngine.play (resetTrack track)

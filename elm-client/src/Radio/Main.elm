@@ -50,6 +50,7 @@ init initialPayloadJsonString location =
             , showRadioPlaylist = False
             , latestTracks = Radio.Model.emptyPlaylist LatestTracks "/api/latest-tracks"
             , likes = Radio.Model.emptyPlaylist Likes "/api/likes"
+            , played = []
             , playing = False
             , currentPage = route location
             , lastKeyPressed = Nothing
@@ -99,6 +100,6 @@ subscriptions model =
 navigation : List (Model.NavigationItem Radio.Model.Page PlaylistId)
 navigation =
     [ Model.NavigationItem "Radio" "/" RadioPage (Just Radio)
-    , Model.NavigationItem "Latest Tracks" "/latest" LatestTracksPage (Just LatestTracks)
+    , Model.NavigationItem "New" "/latest" LatestTracksPage (Just LatestTracks)
     , Model.NavigationItem "Your Likes" "/likes" LikesPage (Just Likes)
     ]

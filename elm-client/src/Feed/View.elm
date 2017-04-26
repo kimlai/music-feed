@@ -26,8 +26,8 @@ view model =
     div
         []
         [ View.viewGlobalPlayer
+            FollowLink
             TogglePlayback
-            Next
             Next
             SeekTo
             (MoveToPlaylist SavedTracks)

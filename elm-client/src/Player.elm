@@ -93,6 +93,15 @@ select playlistId position (Player { playlists, currentPlaylist, currentTrack })
             }
 
 
+selectOutsidePlaylist : b -> Player a b -> Player a b
+selectOutsidePlaylist track (Player { playlists, currentPlaylist, currentTrack }) =
+    Player
+        { playlists = playlists
+        , currentPlaylist = currentPlaylist
+        , currentTrack = Just track
+        }
+
+
 selectPlaylist : a -> Player a b -> Player a b
 selectPlaylist playlistId (Player { playlists, currentPlaylist, currentTrack }) =
     let
@@ -180,3 +189,13 @@ playlistContent playlistId (Player { playlists }) =
         |> Maybe.withDefault ( playlistId, Playlist.empty )
         |> Tuple.second
         |> Playlist.items
+
+
+upcoming : a -> Player a b -> List ( Int, b )
+upcoming playlistId (Player { playlists }) =
+    playlists
+        |> List.filter ((==) playlistId << Tuple.first)
+        |> List.head
+        |> Maybe.withDefault ( playlistId, Playlist.empty )
+        |> Tuple.second
+        |> Playlist.upcoming

@@ -2,7 +2,7 @@ module Playlist exposing
     ( Playlist
     , empty
     , append, prepend, remove
-    , currentItem, next, select, items
+    , currentItem, next, select, items, upcoming
     )
 
 import Array exposing (Array)
@@ -79,3 +79,10 @@ select newPosition (Playlist { items, position }) =
 items : Playlist a -> List a
 items (Playlist { items }) =
     Array.toList items
+
+
+upcoming : Playlist a -> List ( Int, a )
+upcoming (Playlist { items, position }) =
+    Array.toList items
+        |> List.indexedMap (\index item -> ( index, item ))
+        |> List.drop (position + 1)

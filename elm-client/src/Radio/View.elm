@@ -4,6 +4,7 @@ import Date exposing (Date)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Html.Extra exposing (link)
 import Icons
 import Json.Decode
 import Radio.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..), ConnectedUser, PlaylistStatus(..))
@@ -25,8 +26,8 @@ view model =
     div
         []
         [ View.viewGlobalPlayer
+            FollowLink
             TogglePlayback
-            ToggleRadioPlaylist
             Next
             SeekTo
             AddLike
@@ -62,6 +63,22 @@ view model =
                                 |> Maybe.andThen ((flip Tracklist.get) model.tracks)
                     in
                         div [] [ viewRadioTrack currentRadioTrack (Player.currentPlaylist model.player) ]
+                PlayedPage ->
+                    viewPlayedTracks model.currentPage model.tracks (List.drop 1 model.played)
+                UpNextPage ->
+                    let
+                        playlist =
+                            Player.currentPlaylist model.player
+                                |> Maybe.withDefault Radio
+                    in
+                        viewUpcomingTracks
+                            model.currentPage
+                            model.tracks
+                            playlist
+                            (Player.upcoming
+                                playlist
+                                model.player
+                            )
                 LatestTracksPage ->
                     viewLatestTracks
                         (Player.currentTrack model.player)
@@ -152,6 +169,160 @@ viewRadioTrack track currentPlaylist =
                     ]
                 ]
 
+
+viewPlayedTracks : Page -> Tracklist -> List TrackId -> Html Msg
+viewPlayedTracks currentPage tracks playedTracks =
+    div
+        [ class "queues" ]
+        [ ul
+            [ class "nav" ]
+            [ li
+                [ classList [ ( "active", currentPage == UpNextPage ) ] ]
+                [ link FollowLink "/queue/next" [] [ text "Up Next" ] ]
+            , li
+                [ classList [ ( "active", currentPage == PlayedPage ) ] ]
+                [ link FollowLink "/queue/played" [] [ text "Played" ] ]
+            ]
+        , if List.isEmpty playedTracks then
+            div
+                [ class "empty-played-tracks" ]
+                [ h2 [] [ text "Empty" ]
+                , p [] [ text "No tracks have been played yet" ]
+                ]
+        else
+            table
+                [ class "played-tracks" ]
+                [ thead
+                    []
+                    [ th [] []
+                    , th [] []
+                    , th [] []
+                    , th [] [ text "Title" ]
+                    , th [] [ text "Artist" ]
+                    ]
+                , tbody
+                    []
+                    (Tracklist.getTracks playedTracks tracks |> List.map viewPlayedTrack)
+                ]
+        ]
+
+
+viewPlayedTrack : Track -> Html Msg
+viewPlayedTrack track =
+    let
+        onLikeButtonClicked =
+            if track.liked then
+                RemoveLike track.id
+            else
+                AddLike track.id
+    in
+    tr
+        []
+        [ td
+            []
+            [ div
+                [ class "play"
+                , onClick (PlayOutsidePlaylist track.id)
+                ]
+                [ Icons.play ]
+            ]
+        , td
+            []
+            [ div
+                [ classList
+                    [ ( "like-button", True )
+                    , ( "liked", track.liked )
+                    ]
+                , onClick onLikeButtonClicked
+                ]
+                [ Icons.heart ]
+            ]
+        , td
+            []
+            [ div
+                [ class "cover" ]
+                [ img
+                    [ src (Regex.replace Regex.All (Regex.regex "large") (\_ -> "t200x200") track.artwork_url) ]
+                    []
+                ]
+            ]
+        , td [] [ div [ class "title" ] [ text track.title ] ]
+        , td [] [ div [ class "artist" ] [ text track.artist ] ]
+        ]
+
+
+viewUpcomingTracks : Page -> Tracklist -> PlaylistId -> List ( Int, TrackId ) -> Html Msg
+viewUpcomingTracks currentPage tracks playlistId upcomingTracks =
+    div
+        [ class "queues" ]
+        [ ul
+            [ class "nav" ]
+            [ li
+                [ classList [ ( "active", currentPage == UpNextPage ) ] ]
+                [ link FollowLink "/queue/next" [] [ text "Up Next" ] ]
+            , li
+                [ classList [ ( "active", currentPage == PlayedPage ) ] ]
+                [ link FollowLink "/queue/played" [] [ text "Played" ] ]
+            ]
+        , table
+            [ class "played-tracks" ]
+            [ thead
+                []
+                [ th [] []
+                , th [] []
+                , th [] []
+                , th [] [ text "Title" ]
+                , th [] [ text "Artist" ]
+                ]
+            , tbody
+                []
+                (Tracklist.getTracksWithPosition upcomingTracks tracks |> List.map (viewUpcomingTrack playlistId))
+            ]
+        ]
+
+
+viewUpcomingTrack : PlaylistId -> ( Int, Track ) -> Html Msg
+viewUpcomingTrack playlistId ( position, track ) =
+    let
+        onLikeButtonClicked =
+            if track.liked then
+                RemoveLike track.id
+            else
+                AddLike track.id
+    in
+    tr
+        []
+        [ td
+            []
+            [ div
+                [ class "play"
+                , onClick (PlayFromPlaylist playlistId position)
+                ]
+                [ Icons.play ]
+            ]
+        , td
+            []
+            [ div
+                [ classList
+                    [ ( "like-button", True )
+                    , ( "liked", track.liked )
+                    ]
+                , onClick onLikeButtonClicked
+                ]
+                [ Icons.heart ]
+            ]
+        , td
+            []
+            [ div
+                [ class "cover" ]
+                [ img
+                    [ src (Regex.replace Regex.All (Regex.regex "large") (\_ -> "t200x200") track.artwork_url) ]
+                    []
+                ]
+            ]
+        , td [] [ div [ class "title" ] [ text track.title ] ]
+        , td [] [ div [ class "artist" ] [ text track.artist ] ]
+        ]
 
 viewRadioPlaylist : Bool -> Maybe TrackId -> Tracklist -> List TrackId -> Html Msg
 viewRadioPlaylist showRadioPlaylist currentTrackId tracks playlistContent =
