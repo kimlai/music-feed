@@ -98,3 +98,21 @@ heart =
             ]
             []
         ]
+
+
+brokenHeart : Svg msg
+brokenHeart =
+    svg [ fill "currentColor"
+        , attribute "height" "16"
+        , viewBox "0 0 32 32"
+        , attribute "width" "16"
+        , attribute "xmlns" "http://www.w3.org/2000/svg"
+        ]
+        [ path
+            [ d "M0 10 C0 6, 3 2, 8 2 C12 2, 15 5, 16 6 C17 5, 20 2, 24 2 C30 2, 32 6, 32 10 C32 18, 18 29, 16 30 C14 29, 0 18, 0 10"
+            ]
+            []
+        , path
+            [ d "M 15.668394,0.33160622 0.38687402,14.093263", attribute "style" "stroke-width:1.4;stroke-linecap:butt;stroke-linejoin:miter", attribute "transform" "scale(2,2)" ]
+            []
+        ]

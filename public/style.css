@@ -364,9 +364,28 @@ body {
       text-decoration: none; }
       .radio-track .source a:hover {
         text-decoration: underline; }
+  .radio-track .like-dislike-buttons {
+    display: flex; }
+  .radio-track .dislike-button {
+    line-height: 1;
+    cursor: pointer;
+    margin-right: 16px; }
+    .radio-track .dislike-button svg {
+      fill: white;
+      stroke-width: 3px;
+      stroke: #333;
+      opacity: 0.5;
+      width: 20px;
+      height: 18px; }
+      .radio-track .dislike-button svg:hover {
+        opacity: 1; }
+    .radio-track .dislike-button.disliked svg {
+      stroke: #02779E;
+      opacity: 1; }
   .radio-track .like-button {
     line-height: 1;
-    cursor: pointer; }
+    cursor: pointer;
+    margin-right: 12px; }
     .radio-track .like-button svg {
       fill: white;
       stroke-width: 3px;

@@ -150,13 +150,24 @@ viewRadioTrack track currentPlaylist =
                                 [ text source ]
                             ]
                         , div
-                            [ classList
-                                [ ( "like-button", True )
-                                , ( "liked", track.liked )
+                            [ class "like-dislike-buttons" ]
+                            [ div
+                                [ classList
+                                    [ ( "dislike-button", True )
+                                    , ( "disliked", False )
+                                    ]
+                                , onClick Next
                                 ]
-                            , onClick onLikeButtonClicked
+                                [ Icons.brokenHeart ]
+                            , div
+                                [ classList
+                                    [ ( "like-button", True )
+                                    , ( "liked", track.liked )
+                                    ]
+                                , onClick onLikeButtonClicked
+                                ]
+                                [ Icons.heart ]
                             ]
-                            [ Icons.heart ]
                         , if currentPlaylist /= Just Radio then
                             div
                                 [ class "resume-radio"

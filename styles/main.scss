@@ -453,9 +453,35 @@ body {
             }
         }
     }
+    .like-dislike-buttons {
+        display: flex;
+    }
+    .dislike-button {
+        line-height: 1;
+        cursor: pointer;
+        margin-right: 16px;
+        svg {
+            fill: white;
+            stroke-width: 3px;
+            stroke: #333;
+            opacity: 0.5;
+            width: 20px;
+            height: 18px;
+            &:hover {
+                opacity: 1;
+            }
+        }
+        &.disliked {
+            svg {
+                stroke: #02779E;
+                opacity: 1;
+            }
+        }
+    }
     .like-button {
         line-height: 1;
         cursor: pointer;
+        margin-right: 12px;
         svg {
             fill: white;
             stroke-width: 3px;
