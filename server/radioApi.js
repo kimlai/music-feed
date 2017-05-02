@@ -209,6 +209,7 @@ function *likes() {
 
     var query = knex.select('published_tracks.*', 'likes.created_at')
         .from('likes')
+        .where('likes.user_uuid', '=', userUuid)
         .innerJoin('published_tracks', 'likes.track_id', 'published_tracks.soundcloudTrackId')
         .orderBy('likes.created_at', 'desc')
         .limit(20);
