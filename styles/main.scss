@@ -171,6 +171,25 @@ body {
     }
 }
 
+.publish-track-form {
+    line-height: 2;
+    label {
+        display: inline-block;
+        width: 140px;
+        text-align: right;
+        margin-right: 24px;
+    }
+    input {
+        width: 460px;
+    }
+    .upload-cover-button {
+        margin-left: 164px;
+    }
+    .submit-button {
+        margin-left: 164px;
+    }
+}
+
 .progress-bar {
     position: relative;
     .outer {

@@ -6,7 +6,7 @@ import Feed.Model as Model exposing (Model, Playlist, PlaylistId(..), Page(..))
 import Feed.Update exposing (Msg(..))
 import Html exposing (Html, a, nav, li, ul, text, div, img, input, label, form, button)
 import Html.Attributes exposing (class, classList, href, src, style, value, id, type_)
-import Html.Events exposing (onClick, onWithOptions, onInput)
+import Html.Events exposing (onClick, onWithOptions, onInput, onSubmit)
 import Json.Decode
 import Player
 import Time exposing (Time)
@@ -197,7 +197,7 @@ viewMoreButton playlistId =
 viewPublishTrack : Maybe Track -> Html Msg
 viewPublishTrack newTrack =
     div
-        []
+        [ class "publish-track-form"]
         [ div
             []
             [ label [] [ text "Soundcloud" ]
@@ -218,8 +218,10 @@ viewNewTrackForm newTrack =
         Nothing ->
             text ""
         Just track ->
-            div
-                [ class "new-track-form" ]
+            form
+                [ class "new-track-form"
+                , onSubmit (PublishYoutubeTrack track)
+                ]
                 [ div
                     []
                     [ label [] [ text "Artist" ]
@@ -239,13 +241,20 @@ viewNewTrackForm newTrack =
                         []
                     ]
                 , form
-                    [ id "cover-upload" ]
-                    [ input [ type_ "file" ] []
-                    , div
-                        [ onClick UploadImage ]
+                    [ id "cover-upload"
+                    , onSubmit UploadImage
+                    ]
+                    [ div
+                        []
+                        [ label [] [ text "Cover" ]
+                        , input [ type_ "file" ] []
+                        ]
+                    , button
+                        [ type_ "submit", class "upload-cover-button" ]
                         [ text "Upload" ]
-                , div
-                    [ onClick (PublishYoutubeTrack track) ]
+                    ]
+                , if track.artwork_url == "" then div [] [] else img [ src track.artwork_url ] []
+                , button
+                    [ type_ "submit", class "submit-button" ]
                     [ text "Publish" ]
                 ]
-            ]
