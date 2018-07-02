@@ -50,7 +50,7 @@
     "build:elm:radio": "cd elm-client && elm make src/Radio/Main.elm --output ../public/radio.js",
     "build:elm:feed": "cd elm-client && elm make src/Feed/Main.elm --output ../public/feed.js",
     "build:uglifyjs": "uglifyjs public/soundcloud.js public/youtube.js public/initializePlayer.js public/radio.js --compress --mangle --output public/build.js",
-    "build:postcss": "postcss --use postcss-nested --use autoprefixer -o public/style.css styles/main.css"
+    "build:postcss": "postcss --use postcss-nested --use autoprefixer --map true -o public/style.css styles/main.css"
   },
   "author": "kimlai",
   "license": "ISC"
