@@ -40,7 +40,7 @@
   },
   "scripts": {
     "test": "npm run test:client && npm run test:server",
-    "test:client": "elm test elm-client/tests/Main.elm",
+    "test:client": "cd elm-client && elm test",
     "test:server": "NODE_ENV=test mocha --harmony server/tests/end-to-end/",
     "start": "node --harmony server.js",
     "setup": "knex migrate:latest",
